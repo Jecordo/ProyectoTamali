@@ -1,0 +1,42 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'main.css' %}">
+</head>
+<body>
+    
+    <h1>Facturas</h1>
+
+    <form action="{% url 'Create_factura' %}" method="POST">
+        {% csrf_token %}
+
+        <input type="text" name="title" placeholder="Escribe algo">
+
+        <textarea name="description" rows="3" placeholder="Escribe algo"></textarea>
+
+        <button>Guardar</button>
+    
+    </form> 
+
+    {% for persona in personas %}
+        <div>
+            <H6>{{persona.title}}</H6>
+            <P>{{persona.title}}</P>
+            <form action="{% url 'Delete_factura' persona.id %}" method="post">
+                {% csrf_token %}
+                <button>Eliminar</button>
+            </form>
+        </div>
+
+    {% empty %}
+        <h1>No hay tarea</h1>
+    {% endfor %}
+
+</body>
+</html>
