@@ -15,3 +15,7 @@ def delete_factura(request, factu_id):
     factu = persona.objects.get(id=factu_id)
     factu.delete()
     return redirect('/gestor/')
+
+def ver_facturas(request):
+    factu = persona.objects.all()
+    return render(request, 'listar_facturas.html', {"personas": factu })
