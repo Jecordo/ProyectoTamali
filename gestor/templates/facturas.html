@@ -10,35 +10,43 @@
     <link rel="stylesheet" href="{% static 'main.css' %}">
 </head>
 <body>
-    
-    <h1>Facturas</h1>
 
-    <form action="{% url 'Create_factura' %}" method="POST">
-        {% csrf_token %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 offset-md-4">
 
-        <input type="text" name="title" placeholder="Escribe algo">
+                <h1 class="display-6">Facturas</h1>
 
-        <textarea name="description" rows="3" placeholder="Escribe algo"></textarea>
+                <form action="{% url 'Create_factura' %}" method="POST" class="card card-body bg-secondary">
+                    {% csrf_token %}
+            
+                    <label for="Titulo">Titulo:</label>
+                    <input type="text" name="title" placeholder="Escribe algo" class="form-control mb-2">
+            
+                    <label for="Descripcion">Descripcion:</label>
+                    <textarea name="description" rows="3" placeholder="Escribe algo" class="form-control mb-2"></textarea>
+            
+                    <button class="btn btn-success">Guardar</button>
+                
+                </form> 
+            
+                {% for persona in personas %}
+                    <div>
+                        <H6>{{persona.title}}</H6>
+                        <P>{{persona.title}}</P>
+                        <form action="{% url 'Delete_factura' persona.id %}" method="post">
+                            {% csrf_token %}
+                            <button>Eliminar</button>
+                        </form>
+                    </div>
+            
+                {% empty %}
+                    <h1 class="display-6 text-center">No hay tarea</h1>
+                {% endfor %}            
 
-        <button>Guardar</button>
-
-        <a href="{% url 'Ver_facturas' %}" target="_blank">Ver lo egenerado</a>
-    
-    </form> 
-
-    {% for persona in personas %}
-        <div>
-            <H6>{{persona.title}}</H6>
-            <P>{{persona.title}}</P>
-            <form action="{% url 'Delete_factura' persona.id %}" method="post">
-                {% csrf_token %}
-                <button>Eliminar</button>
-            </form>
+            </div>
         </div>
-
-    {% empty %}
-        <h1>No hay tarea</h1>
-    {% endfor %}
+    </div>
 
 </body>
 </html>
