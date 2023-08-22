@@ -31,12 +31,14 @@
                 </form> 
             
                 {% for persona in personas %}
-                    <div>
-                        <H6>{{persona.title}}</H6>
-                        <P>{{persona.title}}</P>
+                    <div class="card card-body text-black mt-2 flex-row d-flex justify-content-between" >
+                        <div>
+                            <H6>{{persona.title}}</H6>
+                            <P>{{persona.title}}</P>
+                        </div>
                         <form action="{% url 'Delete_factura' persona.id %}" method="post">
                             {% csrf_token %}
-                            <button>Eliminar</button>
+                            <button class="btn btn-danger">Eliminar</button>
                         </form>
                     </div>
             
