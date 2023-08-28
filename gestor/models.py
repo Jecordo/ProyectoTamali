@@ -108,7 +108,7 @@ class factura(models.Model):
     def __str__(self):
         return self.num_factura
     
-class factura(models.Model):
+class factura_detalle(models.Model):
     num_factura = models.CharField(max_length=50, null=False)
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
     precio_unitario = models.IntegerField(max_length=250)
