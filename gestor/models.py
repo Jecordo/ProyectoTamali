@@ -75,7 +75,38 @@ class producto(models.Model):
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.num_factura
+        return self.cod_producto
+    
+class entrada(models.Model):
+    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
+    descripcion = models.IntegerField(max_length=500)
+    precio = models.IntegerField(max_length=250)    
+    cantidad_entrante = models.IntegerField(max_length=50)
+
+    def __str__(self):
+        return self.cantidad_entrante
+    
+class salida(models.Model):
+    fecha_salida = models.DateTimeField()
+    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
+    descripcion = models.IntegerField(max_length=500)
+    precio = models.IntegerField(max_length=250)    
+    cantidad_saliente = models.IntegerField(max_length=50)
+    total_venta = models.IntegerField(max_length=250) 
+
+    def __str__(self):
+        return self.total_venta
+    
+class inventario(models.Model):
+    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
+    descripcion = models.IntegerField(max_length=500)
+    precio = models.IntegerField(max_length=250)    
+    entrada = models.IntegerField(max_length=50)
+    salida = models.IntegerField(max_length=50)
+    existencia = models.IntegerField(max_length=50)
+
+    def __str__(self):
+        return self.existencia
 
 #------------------------------------------------------------------------------------------------
 
