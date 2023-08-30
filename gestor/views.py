@@ -4,7 +4,7 @@ from .models import persona
 # Create your views here.
 def facturas(request):
     factu = persona.objects.all()
-    return render(request, 'facturas.html', {"personas": factu })
+    return render(request, 'create_factura.html', {"personas": factu })
 
 def create_factura(request):
     factu = persona(title=request.POST['title'], description=request.POST['description'])
