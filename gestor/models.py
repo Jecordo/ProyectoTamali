@@ -68,7 +68,7 @@ class producto(models.Model):
     cod_marca = models.ForeignKey(marca, on_delete=models.CASCADE)    
     precio_costo = models.IntegerField()
     precio_venta = models.IntegerField()
-    descripcion = models.IntegerField()
+    descripcion = models.CharField()
     color = models.CharField()
     medida = models.CharField()
     descuento = models.IntegerField()

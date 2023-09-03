@@ -58,12 +58,12 @@
                         {% csrf_token %}
 
                         <div class="col-md-4">
-                        <label for="inputEmail4" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="inputEmail4">
+                        <label for="ruc_cliente" class="form-label">RUC</label>
+                        <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente">
                         </div>
                         <div class="col-md-4">
-                        <label for="inputPassword4" class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" id="inputPassword4">
+                        <label for="razon_social" class="form-label">Razon social</label>
+                        <input type="password" class="form-control" id="razon_social" name="razon_social">
                         </div>
                         <div class="col-md-4">
                         <label for="inputPassword4" class="form-label">helou</label>
@@ -93,12 +93,11 @@
                         <input type="text" class="form-control" id="inputZip">
                         </div>
                         <div class="col-12">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="gridCheck">
-                            <label class="form-check-label" for="gridCheck">
-                            Verifícame
-                            </label>
-                        </div>
+                          <div class="input-group">
+                            <input type="text" class="form-control" placeholder="codigo producto" name="cod_producto">
+                            <a href="" class="btn btn-outline-primary">Agregar</a>
+                            <a href="#" class="btn btn-outline-success bg-light" type="button">Botón</a>
+                          </div>
                         </div>
 
                         <table class="table">
@@ -111,23 +110,15 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <tr>
-                                <th scope="row">1</th>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                              </tr>
-                              <tr>
-                                <th scope="row">2</th>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                              </tr>
-                              <tr>
-                                <th scope="row">3</th>
-                                <td colspan="2">Larry the Bird</td>
-                                <td>@twitter</td>
-                              </tr>
+                              <form method="post" action="{% url 'buscar_roducto' 1 %}">
+                                {% csrf_token %}
+                                <tr>
+                                    <td><input type="text" name="nombre" class="form-control" placeholder="Nombre"></td>
+                                    <td><input type="text" name="apellido" class="form-control" placeholder="Apellido"></td>
+                                    <td><input type="email" name="correo" class="form-control" placeholder="Correo Electrónico"></td>
+                                    <td><button type="submit" class="btn btn-primary">Guardar</button></td>
+                                </tr>
+                            </form>
                             </tbody>
                           </table>
 

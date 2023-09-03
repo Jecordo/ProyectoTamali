@@ -10,8 +10,8 @@ def menu_principal(request):
 
 
 def facturar(request):
-    factu = persona.objects.all()
-    return render(request, 'create_factura.html', {"personas": factu })
+    prod = producto.objects.all()
+    return render(request, 'create_factura.html', {"productos": prod })
 
 
 
@@ -66,9 +66,16 @@ def create_product(request):
     marc = get_object_or_404(marca, pk=request.POST['marca_producto'])
     est = get_object_or_404(Estados, pk=request.POST['estado_producto'])
 
-    produc = producto(cod_categoria=cat, cod_proveedor=prov, cod_marca=marc, estado=est)
+    produc = producto(cod_producto=request.POST['cod_producto'], precio_venta=request.POST['Precio']
+                      , cod_categoria=cat, cod_proveedor=prov, cod_marca=marc, estado=est, descripcion=request.POST['desc_producto']
+                      , color=request.POST['color_producto'])
     produc.save()
     return redirect('/gestor/')
+
+def busca_producto(id_produc):
+    prod = get_object_or_404(producto, pk=id_produc)
+    return prod
+    
 
 
 
