@@ -63,35 +63,35 @@
                         </div>
                         <div class="col-md-4">
                         <label for="razon_social" class="form-label">Razon social</label>
-                        <input type="password" class="form-control" id="razon_social" name="razon_social">
+                        <input type="text" class="form-control" id="razon_social" name="razon_social">
                         </div>
                         <div class="col-md-4">
-                        <label for="inputPassword4" class="form-label">helou</label>
-                        <input type="password" class="form-control" id="inputPassword4">
+                        <label for="num_factura" class="form-label">N° Factura</label>
+                        <input type="text" class="form-control" id="num_factura" name="num_factura">
                         </div>
                         <div class="col-12">
-                        <label for="inputAddress" class="form-label">Dirección</label>
-                        <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="direccion" placeholder="1234 Main St" name="direccion">
                         </div>
-                        <div class="col-12">
-                        <label for="inputAddress2" class="form-label">Dirección 2</label>
-                        <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
-                        </div>
-                        <div class="col-md-6">
-                        <label for="inputCity" class="form-label">Ciudad</label>
-                        <input type="text" class="form-control" id="inputCity">
-                        </div>
+
                         <div class="col-md-4">
-                        <label for="inputState" class="form-label">Estado</label>
-                        <select id="inputState" class="form-select">
-                            <option selected>Elige...</option>
-                            <option>...</option>
+                        <label for="tipo_factura" class="form-label">Tipo de factura</label>
+                        <select id="tipo_factura" class="form-select" name="tipo_factura">
+                            <option selected>Tipo de Factura</option>
+                            <option value=1>Contado</option>
                         </select>
                         </div>
-                        <div class="col-md-2">
-                        <label for="inputZip" class="form-label">Código postal</label>
-                        <input type="text" class="form-control" id="inputZip">
+                        <div class="col-md-5">
+
                         </div>
+                        <div class="col-md-3">
+                          <label for="num_factura" class="form-label">N° Factura</label>
+                          <div class="input-group mb-3">
+                              <span class="input-group-text">009-0085- </span>
+                              <input type="text" class="form-control" id="num_factura" placeholder="0000840000" name="num_factura">
+                          </div>
+                        </div>
+                        <!-- 
                         <div class="col-12">
                           <div class="input-group">
                             <input type="text" class="form-control" placeholder="codigo producto" name="cod_producto">
@@ -99,31 +99,31 @@
                             <a href="#" class="btn btn-outline-success bg-light" type="button">Botón</a>
                           </div>
                         </div>
-
+                        -->
                         <table class="table">
                             <thead>
                               <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Primero</th>
-                                <th scope="col">Último</th>
-                                <th scope="col">Handle</th>
+                                <th scope="col">Cod. Producto</th>
+                                <th scope="col">Descripcion</th>
+                                <th scope="col">Cantidad</th>
+                                <th scope="col">Precio. unit.</th>
                               </tr>
                             </thead>
                             <tbody>
                               <form method="post" action="{% url 'buscar_roducto' 1 %}">
                                 {% csrf_token %}
                                 <tr>
-                                    <td><input type="text" name="nombre" class="form-control" placeholder="Nombre"></td>
-                                    <td><input type="text" name="apellido" class="form-control" placeholder="Apellido"></td>
-                                    <td><input type="email" name="correo" class="form-control" placeholder="Correo Electrónico"></td>
-                                    <td><button type="submit" class="btn btn-primary">Guardar</button></td>
+                                    <td><input type="text" name="cod_producto" class="form-control" placeholder="Cod"></td>
+                                    <td><input type="text" name="desc_producto" class="form-control" placeholder="Descrip."></td>
+                                    <td><input type="text" name="cantidad_producto" class="form-control" placeholder="Cant."></td>
+                                    <td><input type="text" name="precio" class="form-control" placeholder="Precio del producto"></td>
                                 </tr>
                             </form>
                             </tbody>
                           </table>
 
                         <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Ingresar</button>
+                        <button type="submit" class="btn btn-primary">Facturar</button>
                         </div>
                     </form>
                 </div>

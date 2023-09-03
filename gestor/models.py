@@ -68,7 +68,7 @@ class producto(models.Model):
     cod_marca = models.ForeignKey(marca, on_delete=models.CASCADE)    
     precio_costo = models.IntegerField()
     precio_venta = models.IntegerField()
-    descripcion = models.CharField()
+    descripcion = models.IntegerField()
     color = models.CharField()
     medida = models.CharField()
     descuento = models.IntegerField()
@@ -140,7 +140,7 @@ class factura(models.Model):
         return self.num_factura
     
 class factura_detalle(models.Model):
-    num_factura = models.CharField(max_length=50, null=False)
+    num_factura = models.ForeignKey(factura, on_delete=models.CASCADE)
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
     precio_unitario = models.IntegerField()
     total_precio = models.IntegerField()

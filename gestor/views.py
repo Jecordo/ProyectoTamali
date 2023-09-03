@@ -1,5 +1,5 @@
 from django.shortcuts import render,  redirect
-from .models import persona, factura, factura_detalle, clientes, producto, categoria,marca,Estados,proveedor
+from .models import persona, factura, factura_detalle, clientes, producto, categoria,marca,Estados,proveedor, tipo_factura, metodo_pago
 from django.shortcuts import get_object_or_404
 
 
@@ -19,26 +19,20 @@ def create_factura(request):
     #factu = persona(title=request.POST['title'], description=request.POST['description'])
     #factu.save()
     #return redirect('/gestor/')
-    template = 'create_factura.html'
+    #client = get_object_or_404(clientes, pk=request.POST['cod_cateoria'])
+    client = clientes.objects.filter(RUC=request.POST['ruc_cliente'])
+    tip_factu = get_object_or_404(tipo_factura, pk=request.POST['tipo_factura'])
+    product = get_object_or_404(producto, pk=request.POST['cod_producto'])
+    est = get_object_or_404(Estados, pk=1)
+    pago = get_object_or_404(metodo_pago, pk=1)
 
-    def get(self, request):
-        client = clientes.objects.all()
-        product = producto.objects.all()
-        return render(request, self.template, {'clients': client, 'products': product})
 
-    def post(self, request):
-        proyecto_form = ProyectoForm(request.POST)
-        usu_proy_rol_formset = UsuProyRolFormset(request.POST)
-        if proyecto_form.is_valid() and usu_proy_rol_formset.is_valid():
-            proyecto = proyecto_form.save()
-            for usu_proy_rol_form in usu_proy_rol_formset:
-                usu_proy_rol = usu_proy_rol_form.save(commit=False)
-                usu_proy_rol.proyecto = proyecto
-                usu_proy_rol.save()
-            return redirect('gestor:dashboard')
-        else:
-            return render(request, self.template, {'clients': client, 'products': product})
-
+    fact = factura(cliente=client, tip_factu=tip_factu, estado=est, metodo_de_pago=pago)
+    fact.save()
+    
+    fact_deta = factura_detalle(cod_producto=product, num_factura=fact)
+    fact_deta.save()
+    return redirect('/gestor/')
 
 def delete_factura(request, factu_id):
     factu = persona.objects.get(id=factu_id)
@@ -58,8 +52,6 @@ def menu_producto(request):
     return render(request, 'create_product.html')
 
 def create_product(request):
-
-    print(request.POST)
 
     cat = get_object_or_404(categoria, pk=request.POST['cod_cateoria'])
     prov = get_object_or_404(proveedor, pk=request.POST['prov_producto'])
