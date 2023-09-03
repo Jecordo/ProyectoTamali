@@ -11,58 +11,133 @@
 </head>
 <body>
 
-    <div class="container">
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 offset-md-3 d-flex p-2 justify-content-center">
-                <a href="{% url 'facturas' %}" class="btn btn-primary disabled">Factura</a>
-                <a href="{% url 'Productos' %}" class="btn btn-primary">Clientes</a>
-                <a href="{% url 'Clientes' %}" class="btn btn-primary">Proveedores</a>
-                <a href="{% url 'Provedores' %}" class="btn btn-primary">Productos</a>
-                <a href="{% url 'Asistencia_contable' %}" class="btn btn-primary">Asistencia contable</a>
-            </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Tamali tienda</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'Menu_principal' %}">Inicio</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled">Factura</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'Clientes' %}">Cliente</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'Provedores' %}">Proveedor</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'menu_producto' %}">Producto</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'Asistencia_contable' %}">Asistencia contable</a>
+              </li>
+            </ul>
+            <form class="d-flex" role="search">
+              <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar">
+              <button class="btn btn-outline-success" type="submit">Buscar</button>
+            </form>
+          </div>
         </div>
-    </div>
+      </nav>
 
     <div class="container">
-        <div class="row">
-            <div class="col-md-4 offset-md-4">
 
-                
-                
-                <h1 class="display-6">Facturas</h1>
+            <div class="col-md-10">
 
-                <form action="{% url 'Create_factura' %}" method="POST" class="card card-body bg-secondary">
-                    {% csrf_token %}
-            
-                    <label for="Titulo">Titulo:</label>
-                    <input type="text" name="title" placeholder="Escribe algo" class="form-control mb-2">
-            
-                    <label for="Descripcion">Descripcion:</label>
-                    <textarea name="description" rows="3" placeholder="Escribe algo" class="form-control mb-2"></textarea>
-            
-                    <button class="btn btn-success">Guardar</button>
-                
-                </form> 
-            
-                {% for persona in personas %}
-                    <div class="card card-body text-black mt-2 flex-row d-flex justify-content-between" >
-                        <div>
-                            <H6>{{persona.title}}</H6>
-                            <P>{{persona.title}}</P>
+                <h1 class="display-6">Modulo factura</h1> 
+
+                <div class="card card-body bg-secondary">
+                    <form action="{% url 'Create_factura' %}" class="row g-3" method="POST">
+
+                        {% csrf_token %}
+
+                        <div class="col-md-4">
+                        <label for="inputEmail4" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="inputEmail4">
                         </div>
-                        <form action="{% url 'Delete_factura' persona.id %}" method="post">
-                            {% csrf_token %}
-                            <button class="btn btn-danger">Eliminar</button>
-                        </form>
-                    </div>
-            
-                {% empty %}
-                    <h1 class="display-6 text-center">No hay tarea</h1>
-                {% endfor %}            
+                        <div class="col-md-4">
+                        <label for="inputPassword4" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="inputPassword4">
+                        </div>
+                        <div class="col-md-4">
+                        <label for="inputPassword4" class="form-label">helou</label>
+                        <input type="password" class="form-control" id="inputPassword4">
+                        </div>
+                        <div class="col-12">
+                        <label for="inputAddress" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+                        </div>
+                        <div class="col-12">
+                        <label for="inputAddress2" class="form-label">Dirección 2</label>
+                        <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
+                        </div>
+                        <div class="col-md-6">
+                        <label for="inputCity" class="form-label">Ciudad</label>
+                        <input type="text" class="form-control" id="inputCity">
+                        </div>
+                        <div class="col-md-4">
+                        <label for="inputState" class="form-label">Estado</label>
+                        <select id="inputState" class="form-select">
+                            <option selected>Elige...</option>
+                            <option>...</option>
+                        </select>
+                        </div>
+                        <div class="col-md-2">
+                        <label for="inputZip" class="form-label">Código postal</label>
+                        <input type="text" class="form-control" id="inputZip">
+                        </div>
+                        <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="gridCheck">
+                            <label class="form-check-label" for="gridCheck">
+                            Verifícame
+                            </label>
+                        </div>
+                        </div>
 
-            </div>
+                        <table class="table">
+                            <thead>
+                              <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Primero</th>
+                                <th scope="col">Último</th>
+                                <th scope="col">Handle</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <th scope="row">1</th>
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>@mdo</td>
+                              </tr>
+                              <tr>
+                                <th scope="row">2</th>
+                                <td>Jacob</td>
+                                <td>Thornton</td>
+                                <td>@fat</td>
+                              </tr>
+                              <tr>
+                                <th scope="row">3</th>
+                                <td colspan="2">Larry the Bird</td>
+                                <td>@twitter</td>
+                              </tr>
+                            </tbody>
+                          </table>
+
+                        <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Ingresar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>    
+            
         </div>
     </div>
 

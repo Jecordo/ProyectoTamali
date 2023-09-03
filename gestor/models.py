@@ -66,12 +66,12 @@ class producto(models.Model):
     cod_proveedor = models.ForeignKey(proveedor, on_delete=models.CASCADE)
     cod_categoria = models.ForeignKey(categoria, on_delete=models.CASCADE)
     cod_marca = models.ForeignKey(marca, on_delete=models.CASCADE)    
-    precio_costo = models.IntegerField(max_length=250)
-    precio_venta = models.IntegerField(max_length=250)
-    descripcion = models.IntegerField(max_length=500)
-    color = models.IntegerField(max_length=20)
-    medida = models.IntegerField(max_length=20)
-    descuento = models.IntegerField(max_length=2)
+    precio_costo = models.IntegerField()
+    precio_venta = models.IntegerField()
+    descripcion = models.IntegerField()
+    color = models.CharField()
+    medida = models.CharField()
+    descuento = models.IntegerField()
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -79,9 +79,9 @@ class producto(models.Model):
     
 class entrada(models.Model):
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
-    descripcion = models.IntegerField(max_length=500)
-    precio = models.IntegerField(max_length=250)    
-    cantidad_entrante = models.IntegerField(max_length=50)
+    descripcion = models.IntegerField()
+    precio = models.IntegerField()    
+    cantidad_entrante = models.IntegerField()
 
     def __str__(self):
         return self.cantidad_entrante
@@ -89,21 +89,21 @@ class entrada(models.Model):
 class salida(models.Model):
     fecha_salida = models.DateTimeField()
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
-    descripcion = models.IntegerField(max_length=500)
-    precio = models.IntegerField(max_length=250)    
-    cantidad_saliente = models.IntegerField(max_length=50)
-    total_venta = models.IntegerField(max_length=250) 
+    descripcion = models.IntegerField()
+    precio = models.IntegerField()    
+    cantidad_saliente = models.IntegerField()
+    total_venta = models.IntegerField() 
 
     def __str__(self):
         return self.total_venta
     
 class inventario(models.Model):
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
-    descripcion = models.IntegerField(max_length=500)
-    precio = models.IntegerField(max_length=250)    
-    entrada = models.IntegerField(max_length=50)
-    salida = models.IntegerField(max_length=50)
-    existencia = models.IntegerField(max_length=50)
+    descripcion = models.IntegerField()
+    precio = models.IntegerField()  
+    entrada = models.IntegerField()
+    salida = models.IntegerField()
+    existencia = models.IntegerField()
 
     def __str__(self):
         return self.existencia
@@ -131,9 +131,9 @@ class factura(models.Model):
     cliente = models.ForeignKey(clientes, on_delete=models.CASCADE)
     tipo_factura = models.ForeignKey(tipo_factura, on_delete=models.CASCADE)
     metodo_de_pago = models.ForeignKey(metodo_pago, on_delete=models.CASCADE)
-    total_venta = models.IntegerField(max_length=250)
-    impuesto_total = models.IntegerField(max_length=2)
-    descuento_total = models.IntegerField(max_length=2)
+    total_venta = models.IntegerField()
+    impuesto_total = models.IntegerField()
+    descuento_total = models.IntegerField()
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -142,11 +142,11 @@ class factura(models.Model):
 class factura_detalle(models.Model):
     num_factura = models.CharField(max_length=50, null=False)
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
-    precio_unitario = models.IntegerField(max_length=250)
-    total_precio = models.IntegerField(max_length=250)
-    impuesto = models.IntegerField(max_length=2)
-    descuento = models.IntegerField(max_length=2)
-    total_precio = models.IntegerField(max_length=250)
+    precio_unitario = models.IntegerField()
+    total_precio = models.IntegerField()
+    impuesto = models.IntegerField()
+    descuento = models.IntegerField()
+    total_precio = models.IntegerField()
 
     def __str__(self):
         return self.num_factura
