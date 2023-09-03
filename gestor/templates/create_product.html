@@ -1,0 +1,138 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'main.css' %}">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Tamali tienda</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'Menu_principal' %}">Inicio</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="{% url 'facturas' %}">Factura</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'Clientes' %}">Cliente</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'Provedores' %}">Proveedor</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled">Producto</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'Asistencia_contable' %}">Asistencia contable</a>
+              </li>
+            </ul>
+            <form class="d-flex" role="search">
+              <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar">
+              <button class="btn btn-outline-success" type="submit">Buscar</button>
+            </form>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+            <div class="col-md-6 offset-md-3">
+
+                <h1 class="display-6">Modulo producto</h1> 
+
+                <div class="card card-body bg-secondary">
+                    <form action="{% url 'cargar_roducto' %}" class="row g-3" method="POST">
+
+                        {% csrf_token %}
+
+                        <div class="col-md-6">
+                        <label for="codigoproduct" class="form-label">Cod. Producto</label>
+                        <input type="text" class="form-control" id="codigoproduct" placeholder="123456ABC" name="cod_producto">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="estado_producto" class="form-label">Estado</label>
+                            <select id="estado_producto" class="form-select" name="estado_producto">
+                                <option selected>Estado</option>
+                                <option value="1">Agotado</option>
+                                <option value="2">Disponible</option>
+                                <option value="3">Dado de baja</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <select id="marca_producto" class="form-select" name="marca_producto">
+                                <option selected>Seleciona la marca</option>
+                                <option value="1">adida</option>
+                                <option value="2">nike</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <select id="categoria_producto" class="form-select" name="cod_cateoria">
+                                <option selected>Seleccione la categoria</option>
+                                <option value="1">Remera</option>
+                                <option value="2">Short</option>
+                                <option value="3">Calzado</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                        <label for="desc_producto" class="form-label">Detalle del producto</label>
+                        <input type="text" class="form-control" id="desc_producto" placeholder="Describir el producto" name="desc_producto">
+                        </div>
+                        <div class="col-6">
+                        <label for="color_producto" class="form-label">color</label>
+                        <input type="text" class="form-control" id="color_producto" placeholder="ingrese un color" name="color_producto">
+                        </div>
+
+                        <div class="col-5">
+                            <label for="precio" class="form-label">Precio unitario</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">G</span>
+                                <input type="text" class="form-control" id="precio" placeholder="99999999" name="Precio">
+                                <span class="input-group-text">.00</span>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+                        <label for="cant_product" class="form-label">Catidad</label>
+                        <input type="text" class="form-control" id="cant_product" name="cantidad_producto">
+                        </div>
+                        <div class="col-md-6">
+                        <label for="prov_producto" class="form-label">Proveedor</label>
+                        <select id="prov_producto" class="form-select" name="prov_producto">
+                            <option selected>Elige...</option>
+                            <option value=6>Jorge</option>
+                        </select>
+                        </div>
+
+                        <div class="col-12">
+                        <div class="form-check">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>    
+            
+        </div>
+    </div>
+
+    </div>
+
+</body>
+</html>

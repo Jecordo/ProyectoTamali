@@ -1,14 +1,16 @@
 from django.urls import path
-from .views import create_factura, facturas, delete_factura, ver_facturas
+from .views import create_factura, facturar, delete_factura, ver_facturas, menu_principal, create_product, create_proveedor, create_client, asistencia_contable, menu_producto
 
 
 urlpatterns = [
-    path('', facturas, name='facturas'),
-    path('facturar/', create_factura, name='Create_factura'),
+    path('', menu_principal, name='Menu_principal'),
+    path('facturar/', facturar, name='facturas'),
+    path('generar_factura/', create_factura, name='Create_factura'),
     path('ver_factura/', ver_facturas, name='Ver_facturas'),
-    path('productos/', ver_facturas, name='Productos'),
-    path('cleinte/', ver_facturas, name='Clientes'),
-    path('proveedor/', ver_facturas, name='Provedores'),
-    path('asistencia_contable/', ver_facturas, name='Asistencia_contable'),
+    path('client/', create_client, name='Clientes'),
+    path('proveedor/', create_proveedor, name='Provedores'),
+    path('menproduc/', menu_producto, name='menu_producto'),
+    path('producto/', create_product, name='cargar_roducto'),
+    path('asistencia_contable/', asistencia_contable, name='Asistencia_contable'),
     path('delete_factura/<int:factu_id>/', delete_factura, name='Delete_factura'),
 ]
