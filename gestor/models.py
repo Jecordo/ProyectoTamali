@@ -32,7 +32,7 @@ class clientes(models.Model):
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.nombre
+        return self.RUC
     
 class proveedor(models.Model):
     nombre = models.CharField(max_length=50, null=True)
