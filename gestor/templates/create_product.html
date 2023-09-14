@@ -57,54 +57,56 @@
 
                         {% csrf_token %}
 
-                        <div class="col-md-6">
+                        <div class="col-6">
                         <label for="codigoproduct" class="form-label">Cod. Producto</label>
                         <input type="text" class="form-control" id="codigoproduct" placeholder="123456ABC" name="cod_producto">
+                        <button class="btn btn-primary" id="buscarProducto">Buscar</button>
                         </div>
-                        <div class="col-md-6">
-                            <label for="estado_producto" class="form-label">Estado</label>
-                            <select id="estado_producto" class="form-select" name="estado_producto">
-                                <option selected>Estado</option>
-                                <option value="1">Agotado</option>
-                                <option value="2">Disponible</option>
-                                <option value="3">Dado de baja</option>
-                            </select>
+                        <div class="col-4">
                         </div>
                         
                         <div class="col-md-6">
                             <select id="marca_producto" class="form-select" name="marca_producto">
                                 <option selected>Seleciona la marca</option>
-                                <option value="1">adida</option>
-                                <option value="2">nike</option>
+                                {% for marca in marcas %}
+                                  <option value=marca.id>{{marca.descripcion}}</option>
+                                {% empty %}
+                                  <h4 class="text-center">No hay marcas</h4>
+                                {% endfor %} 
                             </select>
                         </div>
 
                         <div class="col-md-6">
                             <select id="categoria_producto" class="form-select" name="cod_cateoria">
                                 <option selected>Seleccione la categoria</option>
-                                <option value="1">Remera</option>
-                                <option value="2">Short</option>
-                                <option value="3">Calzado</option>
+                                {% for categoria in categorias %}
+                                  <option value=categoria.id>{{categoria.descripcion}}</option>
+                                {% empty %}
+                                  <h4 class="text-center">No hay categoria</h4>
+                                {% endfor %} 
                             </select>
                         </div>
 
-                        <div class="col-12">
+                        <div class="col-md-12">
                         <label for="desc_producto" class="form-label">Detalle del producto</label>
                         <input type="text" class="form-control" id="desc_producto" placeholder="Describir el producto" name="desc_producto">
                         </div>
                         <div class="col-6">
-                        <label for="color_producto" class="form-label">color</label>
-                        <input type="text" class="form-control" id="color_producto" placeholder="ingrese un color" name="color_producto">
+                          <label for="precio_compra" class="form-label">Precio compra</label>
+                            <div class="input-group mb-3">
+                              <span class="input-group-text">G</span>
+                              <input type="text" class="form-control" id="precio_compra" placeholder="99999999" name="precio_compra">
+                              <span class="input-group-text">.00</span>
+                          </div>
                         </div>
 
-                        <div class="col-5">
-                            <label for="precio" class="form-label">Precio unitario</label>
+                        <div class="col-6">
+                            <label for="precio_venta" class="form-label">Precio venta</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text">G</span>
-                                <input type="text" class="form-control" id="precio" placeholder="99999999" name="Precio">
+                                <input type="text" class="form-control" id="precio_venta" placeholder="99999999" name="precio_venta">
                                 <span class="input-group-text">.00</span>
                             </div>
-
                         </div>
 
                         <div class="col-md-6">
@@ -114,9 +116,12 @@
                         <div class="col-md-6">
                         <label for="prov_producto" class="form-label">Proveedor</label>
                         <select id="prov_producto" class="form-select" name="prov_producto">
-                            <option selected>Elige...</option>
-                            <option value=1>Jorge</option>
-                            <option value=6>Jorge</option>
+                          <option selected>Elige...</option>
+                          {% for proveedor in proveedores %}
+                            <option value=proveedor.id>{{proveedor.razon_social}}</option>
+                          {% empty %}
+                            <h4 class="text-center">No hay proveedor</h4>
+                          {% endfor %}  
                         </select>
                         </div>
 

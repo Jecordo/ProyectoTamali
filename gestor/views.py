@@ -1,5 +1,5 @@
 from django.shortcuts import render,  redirect
-from .models import persona, factura, factura_detalle, clientes, producto, categoria,marca,Estados,proveedor, tipo_factura, metodo_pago
+from .models import persona, factura, factura_detalle, clientes, producto, categoria,marca,Estados,proveedor, tipo_factura, metodo_pago, marca
 from django.shortcuts import get_object_or_404
 
 
@@ -63,7 +63,12 @@ def ver_facturas(request):
 #---------------------------------------------------------------------------------------------------------------------
 
 def menu_producto(request):
-    return render(request, 'create_product.html')
+    marc = marca.objects.all()
+    catg = categoria.objects.all()
+    prov = proveedor.objects.all()
+    est = Estados.objects.all()
+
+    return render(request, 'create_product.html', {"marcas": marc, "categorias": catg, "proveedores": prov, "estados": est})
 
 def create_product(request):
 
@@ -83,7 +88,7 @@ def busca_producto(id_produc):
     return prod
     
 
-
+#-------------------------------------------------------------------------------------------------------------------------
 
 def create_proveedor(request):
     return render('/gestor/')

@@ -91,15 +91,19 @@
                               <input type="text" class="form-control" id="num_factura" placeholder="0000840000" name="num_factura">
                           </div>
                         </div>
-                        <!-- 
                         <div class="col-12">
-                          <div class="input-group">
-                            <input type="text" class="form-control" placeholder="codigo producto" name="cod_producto">
-                            <a href="" class="btn btn-outline-primary">Agregar</a>
-                            <a href="#" class="btn btn-outline-success bg-light" type="button">Botón</a>
-                          </div>
+                          <form action="{% url 'buscar_producto' buscar %}" class="navbar-search" method="POST">
+                            {% csrf_token %}
+                            <div class="input-group">
+                              <input type="text" class="form-control bg-light" placeholder="Buscar..." name="buscar" value="{{ request.POST.buscar }}">
+                              <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                  <i class="fas fa-search fa-sm"></i>
+                                </button>
+                              </div>
+                            </div>
+                          </form>
                         </div>
-                        -->
                         <table class="table">
                             <thead>
                               <tr>
@@ -110,7 +114,7 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <form method="post" action="{% url 'buscar_roducto' 1 %}">
+                              <form method="post" action="{% url 'buscar_producto' 1 %}">
                                 {% csrf_token %}
                                 <tr>
                                     <td><input type="text" name="cod_producto" class="form-control" placeholder="Cod"></td>

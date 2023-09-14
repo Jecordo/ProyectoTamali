@@ -8,13 +8,7 @@ class persona(models.Model):
 #----------------------------------------------------------------------------------------------------------------------------
     
 class Estados(models.Model):
-    ESTADOS = (
-        ('activo', 'Activo'),
-        ('inactivo', 'Dado de baja'),
-        ('anulado', 'Factura anulada'),
-        ('vigent', 'Factura vigente'),
-    )
-    estado = models.CharField(max_length=10, choices=ESTADOS)
+    estado = models.CharField(max_length=10)
 
     def __str__(self):
         return self.estado
@@ -69,7 +63,6 @@ class producto(models.Model):
     precio_costo = models.IntegerField()
     precio_venta = models.IntegerField()
     descripcion = models.IntegerField()
-    color = models.CharField()
     medida = models.CharField()
     descuento = models.IntegerField()
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
