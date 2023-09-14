@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render,  redirect
 from .models import persona, factura, factura_detalle, clientes, producto, categoria,marca,Estados,proveedor, tipo_factura, metodo_pago, marca
 from django.shortcuts import get_object_or_404
@@ -66,9 +67,9 @@ def menu_producto(request):
     marc = marca.objects.all()
     catg = categoria.objects.all()
     prov = proveedor.objects.all()
-    est = Estados.objects.all()
 
-    return render(request, 'create_product.html', {"marcas": marc, "categorias": catg, "proveedores": prov, "estados": est})
+    return render(request, 'create_product.html', {"marcas": marc, "categorias": catg, 
+                                                   "proveedores": prov})
 
 def create_product(request):
 
@@ -83,10 +84,26 @@ def create_product(request):
     produc.save()
     return redirect('/gestor/')
 
-def busca_producto(id_produc):
-    prod = get_object_or_404(producto, pk=id_produc)
-    return prod
+#def busca_producto(id_produc):
+#    prod = get_object_or_404(producto, pk=id_produc)
+#    return prod
     
+def buscar_producto(request):
+    codigo_producto = request.GET.get('codigo', '')
+    try:
+        produc = producto.objects.get(cod_producto=codigo_producto)
+        # Si se encuentra el producto, puedes devolver sus detalles en la respuesta JSON
+        response_data = {
+            'success': True,
+            'produc': {
+                'descripcion': produc.descripcion,
+                # Agrega otros campos del producto que desees enviar
+            }
+        }
+    except produc.DoesNotExist:
+        response_data = {'success': False}
+
+    return JsonResponse(response_data)
 
 #-------------------------------------------------------------------------------------------------------------------------
 

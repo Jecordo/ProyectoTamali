@@ -92,10 +92,10 @@
                           </div>
                         </div>
                         <div class="col-12">
-                          <form action="{% url 'buscar_producto' buscar %}" class="navbar-search" method="POST">
+                          <form action="{% url 'buscar_producto' %}" class="navbar-search" method="GET">
                             {% csrf_token %}
                             <div class="input-group">
-                              <input type="text" class="form-control bg-light" placeholder="Buscar..." name="buscar" value="{{ request.POST.buscar }}">
+                              <input type="text" class="form-control bg-light" placeholder="Buscar..." name="buscar" value="{{ request.GET.buscar }}">
                               <div class="input-group-append">
                                 <button class="btn btn-primary" type="submit">
                                   <i class="fas fa-search fa-sm"></i>
@@ -114,7 +114,7 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <form method="post" action="{% url 'buscar_producto' 1 %}">
+                              <form method="GET" action="{% url 'buscar_producto' %}">
                                 {% csrf_token %}
                                 <tr>
                                     <td><input type="text" name="cod_producto" class="form-control" placeholder="Cod"></td>

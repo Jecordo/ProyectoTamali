@@ -53,6 +53,14 @@
                 <h1 class="display-6">Modulo producto</h1> 
 
                 <div class="card card-body bg-secondary">
+                    
+                  <div class="col-6">
+                    <input type="text" class="form-control" id="codigoproduct" placeholder="Buscar producto" name="cod_producto">
+                    <button class="btn btn-primary col-md-6" id="buscarProducto">Buscar</button>
+                  </div>
+                  <div class="col-4">
+                  </div>
+
                     <form action="{% url 'cargar_roducto' %}" class="row g-3" method="POST">
 
                         {% csrf_token %}
@@ -60,7 +68,6 @@
                         <div class="col-6">
                         <label for="codigoproduct" class="form-label">Cod. Producto</label>
                         <input type="text" class="form-control" id="codigoproduct" placeholder="123456ABC" name="cod_producto">
-                        <button class="btn btn-primary" id="buscarProducto">Buscar</button>
                         </div>
                         <div class="col-4">
                         </div>
@@ -139,6 +146,38 @@
     </div>
 
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $("#buscarProducto").click(function() {
+            var codigoProducto = $("#codigoproduct").val();
+    
+            // Realizar una solicitud AJAX al servidor para buscar el producto por su código
+            $.ajax({
+                type: "GET",
+                url: "{% url 'buscar_producto' %}",
+                data: {
+                    codigo: codigoProducto
+                },
+                success: function(response) {
+                    // Manejar la respuesta del servidor aquí
+                    if (response.success) {
+                        // Producto encontrado, puedes mostrar los detalles del producto en la página
+                        alert("Producto encontrado: " + response.producto.descripcion);
+                    } else {
+                        // Producto no encontrado, muestra un mensaje de error o haz lo que consideres necesario
+                        alert("Producto no encontrado.");
+                    }
+                },
+                error: function() {
+                    alert("Error al buscar el producto.");
+                }
+            });
+        });
+    });
+    </script>
+    
 
 </body>
 </html>
