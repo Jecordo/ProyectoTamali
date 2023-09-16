@@ -80,7 +80,7 @@
                             <select id="categoria_producto" class="form-select" name="cod_cateoria">
                                 <option selected>Seleccione la categoria</option>
                                 {% for categoria in categorias %}
-                                  <option value=categoria.id>{{categoria.descripcion}}</option>
+                                  <option value={{ categoria.id }}>{{categoria.descripcion}}</option>
                                 {% empty %}
                                   <h4 class="text-center">No hay categoria</h4>
                                 {% endfor %} 

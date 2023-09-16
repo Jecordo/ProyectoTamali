@@ -63,8 +63,6 @@ class producto(models.Model):
     precio_costo = models.IntegerField()
     precio_venta = models.IntegerField()
     descripcion = models.IntegerField()
-    medida = models.CharField()
-    descuento = models.IntegerField()
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
 
     def __str__(self):
