@@ -11,6 +11,11 @@ def menu_principal(request):
 
 def facturar(request):
     prod = producto.objects.all()
+
+    ultimoa_factura = factura.objects.order_by('num_factura').first()
+    num_factura = ultimoa_factura.num_factura() + 1
+    print(num_factura)
+
     return render(request, 'create_factura.html', {"productos": prod })
 
 
@@ -71,21 +76,35 @@ def menu_producto(request):
     return render(request, 'create_product.html', {"marcas": marc, "categorias": catg, "proveedores": prov, "estados": est})
 
 def create_product(request):
+    marcas = marca.objects.all()
+    catgedorias = categoria.objects.all()
+    proveedores = proveedor.objects.all()
+    estados = Estados.objects.all()    
 
-    cat = get_object_or_404(categoria, pk=request.POST['cod_cateoria'])
-    prov = get_object_or_404(proveedor, pk=request.POST['prov_producto'])
-    marc = get_object_or_404(marca, pk=request.POST['marca_producto'])
-    est = get_object_or_404(Estados, pk=request.POST['estado_producto'])
+    existe = producto.objects.filter(cod_producto=request.POST['cod_producto']).exists()
 
-    produc = producto(cod_producto=request.POST['cod_producto'], precio_venta=request.POST['Precio']
-                      , cod_categoria=cat, cod_proveedor=prov, cod_marca=marc, estado=est, descripcion=3
-                      , color=request.POST['color_producto'])
-    produc.save()
-    return redirect('/gestor/')
+    if existe:
+        mensaje_error = "Producto ya existe."
+        return render(request, 'create_product.html', {'mensaje_error': mensaje_error, "marcas": marcas, "categorias": catgedorias, "proveedores": proveedores, "estados": estados})
+
+    else:
+        cat = get_object_or_404(categoria, pk=request.POST['cod_cateoria'])
+        prov = get_object_or_404(proveedor, pk=request.POST['prov_producto'])
+        marc = get_object_or_404(marca, pk=request.POST['marca_producto'])
+        est = get_object_or_404(Estados, pk=1)
+
+        produc = producto(cod_producto=request.POST['cod_producto'], precio_costo=request.POST['precio_compra']
+                          ,precio_venta=request.POST['precio_venta'], cod_categoria=cat, cod_proveedor=prov, cod_marca=marc, estado=est
+                          ,descripcion=request.POST['desc_producto'])
+        produc.save()
+
+        mensaje_error = "Producto guardado!!"
+        return render(request, 'create_product.html', {'mensaje_error': mensaje_error, "marcas": marcas, "categorias": catgedorias, "proveedores": proveedores, "estados": estados})
 
 def busca_producto(id_produc):
     prod = get_object_or_404(producto, pk=id_produc)
     return prod
+
     
 
 #-------------------------------------------------------------------------------------------------------------------------

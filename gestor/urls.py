@@ -15,7 +15,7 @@ urlpatterns = [
 
     path('menproduc/', menu_producto, name='menu_producto'),
     path('producto/', create_product, name='cargar_roducto'),
-    path('busc_produc/<str:cod_producto>/', busca_producto, name='buscar_producto'),
+    path('busc_produc/', busca_producto, name='buscar_producto'),
 
     path('asistencia_contable/', asistencia_contable, name='Asistencia_contable'),
     path('delete_factura/<int:factu_id>/', delete_factura, name='Delete_factura'),

@@ -92,7 +92,7 @@
                           </div>
                         </div>
                         <div class="col-12">
-                          <form action="{% url 'buscar_producto' %}" class="navbar-search" method="GET">
+                          <form action="{% url 'buscar_producto' %}" class="navbar-search" method="POST">
                             {% csrf_token %}
                             <div class="input-group">
                               <input type="text" class="form-control bg-light" placeholder="Buscar..." name="buscar" value="{{ request.POST.buscar }}">
