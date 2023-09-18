@@ -1,3 +1,5 @@
+import json
+from django.http import JsonResponse
 from django.shortcuts import render,  redirect
 from .models import persona, factura, factura_detalle, clientes, producto, categoria,marca,Estados,proveedor, tipo_factura, metodo_pago, marca
 from django.shortcuts import get_object_or_404
@@ -11,12 +13,20 @@ def menu_principal(request):
 
 def facturar(request):
     prod = producto.objects.all()
+    factu_prduc = []
 
-    ultimoa_factura = factura.objects.order_by('num_factura').first()
-    num_factura = ultimoa_factura.num_factura() + 1
+    ultimoa_factura = factura.objects.order_by('-num_factura').first()
+    
+    if ultimoa_factura is not None and ultimoa_factura.num_factura:
+        num_factura = int(ultimoa_factura.num_factura) + 1
+        num_factura = f"{num_factura:07d}" 
+
+    else:
+        num_factura = 1  # Si no hay facturas o la última factura no tiene un número válido, comenzamos desde 1
+
     print(num_factura)
 
-    return render(request, 'create_factura.html', {"productos": prod })
+    return render(request, 'create_factura.html', {"productos": prod, "ultima_factura": num_factura, "factu_prduc":factu_prduc})
 
 
 
@@ -52,6 +62,26 @@ def create_factura(request):
     fact_deta = factura_detalle(cod_producto=product, num_factura=fact, precio_unitario=request.POST['precio'])
     fact_deta.save()
     return redirect('/gestor/facturar/')
+
+#def busca_producto(request):
+ #   objeto_lista = request.POST.getlist('factu[]')
+  #  return
+
+
+def busca_producto(request):
+    if request.method == 'POST':
+        objetos_json = request.POST.get('objetos')
+        objetos = json.loads(objetos_json)
+
+        # Realiza alguna operación con la lista de objetos
+        for objeto in objetos:
+            # Hacer algo con cada objeto, como guardarlo en una base de datos
+            pass
+
+        return JsonResponse({'message': 'Lista de objetos procesada con éxito'})
+    else:
+        return JsonResponse({'message': 'Solicitud no válida'}, status=400)
+
 
 def delete_factura(request, factu_id):
     factu = persona.objects.get(id=factu_id)
@@ -101,9 +131,6 @@ def create_product(request):
         mensaje_error = "Producto guardado!!"
         return render(request, 'create_product.html', {'mensaje_error': mensaje_error, "marcas": marcas, "categorias": catgedorias, "proveedores": proveedores, "estados": estados})
 
-def busca_producto(id_produc):
-    prod = get_object_or_404(producto, pk=id_produc)
-    return prod
 
     
 

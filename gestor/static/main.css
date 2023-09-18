@@ -2,4 +2,8 @@ body {
     background-color: #202020;
     color:white;
   }
-  
+
+.bg-mi-grisito {
+  background-color: #e6d9d98a; /* Reemplaza esto con tu código de color personalizado */
+  color: #1e2525c4; /* Color de texto si es necesario */
+}
