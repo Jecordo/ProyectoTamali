@@ -52,12 +52,18 @@
 
                 <h1 class="display-6">Modulo producto</h1> 
 
-                <div class="card card-body bg-secondary">
-                    
+                <div class="card card-body bg-secondary form-control">
                   <div class="col-6">
                     <input type="text" class="form-control" id="codigoproduct" placeholder="Buscar producto" name="cod_producto">
+                  </div>
+                  <div class="col-4">
                     <button class="btn btn-primary col-md-6" id="buscarProducto">Buscar</button>
                   </div>
+                </div>
+
+                <div class="card card-body bg-secondary">
+                    
+                  
                   <div class="col-4">
                   </div>
 
@@ -76,7 +82,7 @@
                             <select id="marca_producto" class="form-select" name="marca_producto">
                                 <option selected>Seleciona la marca</option>
                                 {% for marca in marcas %}
-                                  <option value=marca.id>{{marca.descripcion}}</option>
+                                  <option value=1>{{marca.descripcion}}</option>
                                 {% empty %}
                                   <h4 class="text-center">No hay marcas</h4>
                                 {% endfor %} 
@@ -87,7 +93,7 @@
                             <select id="categoria_producto" class="form-select" name="cod_cateoria">
                                 <option selected>Seleccione la categoria</option>
                                 {% for categoria in categorias %}
-                                  <option value=categoria.id>{{categoria.descripcion}}</option>
+                                  <option value=1>{{categoria.descripcion}}</option>
                                 {% empty %}
                                   <h4 class="text-center">No hay categoria</h4>
                                 {% endfor %} 
@@ -125,7 +131,7 @@
                         <select id="prov_producto" class="form-select" name="prov_producto">
                           <option selected>Elige...</option>
                           {% for proveedor in proveedores %}
-                            <option value=proveedor.id>{{proveedor.razon_social}}</option>
+                            <option value=1>{{proveedor.razon_social}}</option>
                           {% empty %}
                             <h4 class="text-center">No hay proveedor</h4>
                           {% endfor %}  

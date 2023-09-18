@@ -73,14 +73,15 @@ def menu_producto(request):
 
 def create_product(request):
 
+    print(request.POST['cod_cateoria'])
     cat = get_object_or_404(categoria, pk=request.POST['cod_cateoria'])
     prov = get_object_or_404(proveedor, pk=request.POST['prov_producto'])
     marc = get_object_or_404(marca, pk=request.POST['marca_producto'])
-    est = get_object_or_404(Estados, pk=request.POST['estado_producto'])
+    est = get_object_or_404(Estados, pk=request.POST['1'])
 
-    produc = producto(cod_producto=request.POST['cod_producto'], precio_venta=request.POST['Precio']
-                      , cod_categoria=cat, cod_proveedor=prov, cod_marca=marc, estado=est, descripcion=3
-                      , color=request.POST['color_producto'])
+    produc = producto(cod_producto=request.POST['cod_producto'], precio_venta=request.POST['precio_venta']
+                      , precio_costo=request.POST['precio_compra'], cod_categoria=cat, cod_proveedor=prov
+                      , cod_marca=marc, estado=est, descripcion=request.POST['desc_producto'])
     produc.save()
     return redirect('/gestor/')
 
