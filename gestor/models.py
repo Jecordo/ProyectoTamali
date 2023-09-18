@@ -62,7 +62,7 @@ class producto(models.Model):
     cod_marca = models.ForeignKey(marca, on_delete=models.CASCADE)    
     precio_costo = models.IntegerField()
     precio_venta = models.IntegerField()
-    descripcion = models.IntegerField()
+    descripcion = models.CharField(max_length=200, null=False)
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
 
     def __str__(self):

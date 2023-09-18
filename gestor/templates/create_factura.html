@@ -53,90 +53,142 @@
                 <h1 class="display-6">Modulo factura</h1> 
 
                 <div class="card card-body bg-secondary">
-                    <form action="{% url 'Create_factura' %}" class="row g-3" method="POST">
 
-                        {% csrf_token %}
+                    <form action="{% url 'Create_factura' %}" method="POST">
 
-                        <div class="col-md-4">
-                        <label for="ruc_cliente" class="form-label">RUC</label>
-                        <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente">
-                        </div>
-                        <div class="col-md-4">
-                        <label for="razon_social" class="form-label">Razon social</label>
-                        <input type="text" class="form-control" id="razon_social" name="razon_social">
-                        </div>
-                        <div class="col-md-4">
-                        <label for="fecha_emision" class="form-label">Fecha:</label>
-                        <input type="date" class="form-control" id="fecha_emision" name="fecha_emision">
-                        </div>
-                        <div class="col-12">
-                        <label for="direccion" class="form-label">Dirección</label>
-                        <input type="text" class="form-control" id="direccion" placeholder="1234 Main St" name="direccion">
-                        </div>
+                      {% csrf_token %}
 
-                        <div class="col-md-4">
-                        <label for="tipo_factura" class="form-label">Tipo de factura</label>
-                        <select id="tipo_factura" class="form-select" name="tipo_factura">
-                            <option selected>Tipo de Factura</option>
-                            <option value='1'>Contado</option>
-                        </select>
-                        </div>
-                        <div class="col-md-5">
+                      <div class="card card-body bg-dark mb-2">
 
-                        </div>
-                        <div class="col-md-3">
-                          <label for="num_factura" class="form-label">N° Factura</label>
-                          <div class="input-group mb-3">
-                              <span class="input-group-text">009-0085- </span>
-                              <input type="text" class="form-control" id="num_factura" placeholder="0000840000" name="num_factura">
+                        <div class="row g-3">
+
+                          <div class="col-md-4">
+                          <label for="ruc_cliente" class="form-label">RUC</label>
+                          <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente">
+                          </div>
+                          <div class="col-md-4">
+                          <label for="razon_social" class="form-label">Razon social</label>
+                          <input type="text" class="form-control" id="razon_social" name="razon_social">
+                          </div>
+                          <div class="col-md-4">
+                          <label for="fecha_emision" class="form-label">Fecha:</label>
+                          <input type="date" class="form-control" id="fecha_emision" name="fecha_emision">
+                          </div>
+                          <div class="col-12">
+                          <label for="direccion" class="form-label">Dirección</label>
+                          <input type="text" class="form-control" id="direccion" placeholder="1234 Main St" name="direccion">
+                          </div>
+
+                          <div class="col-md-4">
+                          <label for="tipo_factura" class="form-label">Tipo de factura</label>
+                          <select id="tipo_factura" class="form-select" name="tipo_factura">
+                              <option selected>Tipo de Factura</option>
+                              <option value='1'>Contado</option>
+                          </select>
+                          </div>
+                          <div class="col-md-5">
+
+                          </div>
+                          <div class="col-md-3">
+                            <label for="num_factura" class="form-label">N° Factura</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">009-0085- </span>
+                                <input type="text" class="form-control" id="num_factura" value="{{ultima_factura}}" name="num_factura">
+                            </div>
                           </div>
                         </div>
-                        <div class="col-12">
-                          <form action="{% url 'buscar_producto' %}" class="navbar-search" method="GET">
-                            {% csrf_token %}
-                            <div class="input-group">
-                              <input type="text" class="form-control bg-light" placeholder="Buscar..." name="buscar" value="{{ request.GET.buscar }}">
-                              <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit">
-                                  <i class="fas fa-search fa-sm"></i>
-                                </button>
-                              </div>
-                            </div>
-                          </form>
-                        </div>
-                        <table class="table">
-                            <thead>
-                              <tr>
-                                <th scope="col">Cod. Producto</th>
-                                <th scope="col">Descripcion</th>
-                                <th scope="col">Cantidad</th>
-                                <th scope="col">Precio. unit.</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <form method="GET" action="{% url 'buscar_producto' %}">
-                                {% csrf_token %}
+                      </div>
+
+                      <div class="card card-body bg-dark mb-2">
+
+                        <form id="objeto-form">
+                          {% csrf_token %}
+                          <input type="text" id="objeto-input" placeholder="Agregar objeto">
+                          <button type="button" id="agregar-objeto">Agregar</button>
+                          <ul id="lista-objetos">
+                            <table class="table">
+                              <thead>
                                 <tr>
+                                  <th scope="col">Cod. Producto</th>
+                                  <th scope="col">Descripcion</th>
+                                  <th scope="col">Cantidad</th>
+                                  <th scope="col">Precio. unit.</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+    
+                                  <tr>
                                     <td><input type="text" name="cod_producto" class="form-control" placeholder="Cod"></td>
                                     <td><input type="text" name="desc_producto" class="form-control" placeholder="Descrip."></td>
                                     <td><input type="text" name="cantidad_producto" class="form-control" placeholder="Cant."></td>
                                     <td><input type="text" name="precio" class="form-control" placeholder="Precio del producto"></td>
-                                </tr>
-                            </form>
-                            </tbody>
-                          </table>
+                                  </tr>
+    
+                              </tbody>
+                            </table>
+                          </ul>
+                        </form>
 
-                        <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Facturar</button>
+                        <!--
+                        <div class="row g-3">
+                          <div class="col-12">
+                            <input type="text" class="form-control bg-light" placeholder="Buscar..." name="factu_prduc[]">
+                            <a class="btn btn-primary" href="{% url 'buscar_producto' %}">Buscar</a>
+                          </div>
                         </div>
+                        -->
+                        
+                      </div>
+                      
+                      <div class="col-12">
+                      <button type="submit" class="btn btn-primary">Facturar</button>
+                      </div>
+                      
                     </form>
                 </div>
             </div>    
             
         </div>
-    </div>
+      </div>
 
     </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+  $(document).ready(function() {
+      var objetos = [];
+
+      // Agregar objeto a la lista en la página sin recargar
+      $("#agregar-objeto").click(function() {
+          var nuevoObjeto = $("#objeto-input").val();
+          objetos.push(nuevoObjeto);
+          $("#lista-objetos").append("<li>" + nuevoObjeto + "</li>");
+          $("#objeto-input").val("");
+      });
+
+      // Enviar la lista de objetos al servidor sin recargar la página
+      $("#enviar-objetos").click(function() {
+          $.ajax({
+              url: "{% url 'buscar_producto' %}",
+              method: "POST",
+              data: {
+                  csrfmiddlewaretoken: "{{ csrf_token }}",
+                  objetos: objetos
+              },
+              success: function(response) {
+                  // Manejar la respuesta del servidor si es necesario
+                  alert("Lista de objetos enviada con éxito.");
+                  objetos = []; // Limpiar la lista de objetos
+                  $("#lista-objetos").empty(); // Limpiar la lista en la página
+              },
+              error: function(xhr, errmsg, err) {
+                  // Manejar errores si es necesario
+                  alert("Error al enviar la lista de objetos.");
+              }
+          });
+      });
+  });
+  </script>
 
 </body>
 </html>
