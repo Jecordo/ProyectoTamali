@@ -1,7 +1,10 @@
 import json
 from django.http import JsonResponse
 from django.shortcuts import render,  redirect
-from .models import persona, factura, factura_detalle, clientes, producto, categoria,marca,Estados,proveedor, tipo_factura, metodo_pago, marca
+from .models import (
+    persona, factura, factura_detalle, clientes, producto,
+    categoria,marca,Estados,proveedor, tipo_factura, 
+    metodo_pago, marca, cuenta, libro_diario, libro_mayor)
 from django.shortcuts import get_object_or_404
 
 
@@ -133,6 +136,23 @@ def create_product(request):
 
 
     
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+def menu_libro_diario(request):
+    libros_diarios = libro_diario.objects.all()
+    cuentas = cuenta.objects.all()
+
+    return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
+
+def cargar_libro_diario(request):
+    libros_diarios = libro_diario.objects.all()
+    cuentas = cuenta.objects.all()
+
+    return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
+
+
+
 
 #-------------------------------------------------------------------------------------------------------------------------
 
