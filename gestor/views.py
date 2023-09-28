@@ -161,11 +161,41 @@ def menu_libro_diario(request):
 
     return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
 
+
 def cargar_libro_diario(request):
     libros_diarios = libro_diario.objects.all()
     cuentas = cuenta.objects.all()
 
-    return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
+    existe = libro_diario.objects.filter(num_asiento=request.POST['num_asiento']).exists()
+
+    if existe:
+        mensaje_error = "Asiento ya existe."
+
+        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
+
+    else:
+        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
+        tipo_mov = request.POST['tipo_movimiento']
+        print(tipo_mov)
+        print("(----------------------------------------------------------------------------------------------)")
+
+
+        if tipo_mov == "1":
+
+            libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
+                            ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=request.POST['id_monto'], haber=0)
+            print("hellooooooooooooooo-------------------------------------------")
+            libro.save()
+            
+        elif tipo_mov == "2":
+
+            libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
+                            ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=0, haber=request.POST['id_monto'])
+            print("byeeeeeeeeeeeeeeeeeeeeeeeeeeee------------------------------------------")
+            libro.save()
+
+        mensaje_error = "Producto guardado!!"
+        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
 
 
 

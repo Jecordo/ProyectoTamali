@@ -81,7 +81,7 @@
                             </div>
                             <div class="col-md-4">
                             <label for="num_asiento" class="form-label">Num. asiento</label>
-                            <input type="text" class="form-control" id="num_asiento" name="num_asiento">
+                            <input type="int" class="form-control" id="num_asiento" name="num_asiento">
                             </div>
                             <div class="col-md-4">
                             <label for="id_concepto" class="form-label">Concepto</label>
@@ -91,18 +91,18 @@
                                 <select id="num_cuenta" class="form-select" name="num_cuenta">
                                     <option selected>Seleccione la cuenta</option>
                                     {% for cuenta in cuentas %}
-                                    <option value={{cuenta.id}}>{{cuenta.concepto}}</option>
+                                    <option value={{cuenta.id}}>{{cuenta.descripcion}}</option>
                                     {% empty %}
                                     <h4 class="text-center">No hay cuenta</h4>
                                     {% endfor %} 
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <select id="tipo_movimiento" class="form-select" name="num_cuenta">
-                                    <option selected>Tipo movimiento</option>
-                                    <option value="1">Debito</option>
-                                    <option value="2">Credito</option>
-                                    </select>
+                                <select id="tipo_movimiento" class="form-select" name="tipo_movimiento">
+                                  <option selected>Tipo movimiento</option>
+                                  <option value=1>Debe</option>
+                                  <option value=2>Haber</option>
+                                </select>
                             </div>
                             <div class="col-md-4">
                                 <label for="id_monto" class="form-label">Monto</label>
@@ -115,6 +115,16 @@
                             <div class="col-12">
                                 <button type="submit" class="btn btn-warning">Modificar asiento</button>
                             </div>
+
+                            {% if mensaje_error == 'Producto ya existe.' %}
+                              <div class="alert alert-danger" role="alert">
+                                {{mensaje_error}}                  
+                              </div>
+                            {% elif mensaje_error == 'Producto guardado!!' %}
+                              <div class="alert alert-success" role="alert">
+                                {{mensaje_error}}                  
+                              </div>
+                            {% endif %}
 
                         </div>
                       </div>
@@ -136,12 +146,12 @@
 
                                 {% for libro in libros_diarios %}
                                     <tr>
-                                    <td><input type="text" class="form-control">{{libro.fecha}}</td>
-                                    <td><input type="text" class="form-control">{{libro.num_asiento}}</td>
-                                    <td><input type="text" class="form-control">{{libro.num_cuenta}}</td>
-                                    <td><input type="text" class="form-control">{{libro.concepto}}</td>
-                                    <td><input type="text" class="form-control">{{libro.debe}}</td>
-                                    <td><input type="text" class="form-control">{{libro.haber}}</td>
+                                    <td><input class="form-control" value="{{ libro.fecha|date:'d-m-Y' }}"></td>
+                                    <td><input class="form-control" value="{{libro.num_asiento}}"></td>
+                                    <td><input class="form-control" value="{{libro.num_cuenta}}"></td>
+                                    <td><input class="form-control" value="{{libro.concepto}}"></td>
+                                    <td><input class="form-control" value="{{libro.debe}}"></td>
+                                    <td><input class="form-control" value="{{libro.haber}}"></td>
                                     </tr>
                                 {% empty %}
                                     <h4 class="text-center">No hay movimeinto</h4>
