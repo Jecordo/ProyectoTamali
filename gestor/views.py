@@ -1,3 +1,4 @@
+from datetime import date
 import json
 from django.http import JsonResponse
 from django.shortcuts import render,  redirect
@@ -156,14 +157,16 @@ def buscar_producto(request):
 #-------------------------------------------------------------------------------------------------------------------------
 
 def menu_libro_diario(request):
-    libros_diarios = libro_diario.objects.all()
+    fecha_actual = date.today()
+    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual)
     cuentas = cuenta.objects.all()
 
     return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
 
 
 def cargar_libro_diario(request):
-    libros_diarios = libro_diario.objects.all()
+    fecha_actual = date.today()
+    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual)
     cuentas = cuenta.objects.all()
 
     existe = libro_diario.objects.filter(num_asiento=request.POST['num_asiento']).exists()
@@ -171,31 +174,65 @@ def cargar_libro_diario(request):
     if existe:
         mensaje_error = "Asiento ya existe."
 
-        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
+        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error":mensaje_error})
 
     else:
         cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
         tipo_mov = request.POST['tipo_movimiento']
-        print(tipo_mov)
-        print("(----------------------------------------------------------------------------------------------)")
-
 
         if tipo_mov == "1":
 
             libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
                             ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=request.POST['id_monto'], haber=0)
-            print("hellooooooooooooooo-------------------------------------------")
+
             libro.save()
             
         elif tipo_mov == "2":
 
             libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
                             ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=0, haber=request.POST['id_monto'])
-            print("byeeeeeeeeeeeeeeeeeeeeeeeeeeee------------------------------------------")
+
             libro.save()
 
-        mensaje_error = "Producto guardado!!"
-        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
+        mensaje_error = "Asiento guardado!!"
+        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error": mensaje_error})
+
+
+
+def modificar_libro_diario(request):
+    fecha_actual = date.today()
+    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual)
+    cuentas = cuenta.objects.all()
+
+    existe = libro_diario.objects.filter(num_asiento=request.POST['num_asiento']).exists()
+
+    if existe:
+        aux_libro = libro_diario.objects.get( num_asiento=request.POST['num_asiento'])
+        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
+        tipo_mov = request.POST['tipo_movimiento']
+
+        if tipo_mov == "1":
+            aux_libro.fecha = request.POST['fecha_emision']
+            aux_libro.concepto = request.POST['id_concepto']
+            aux_libro.num_cuenta = cta
+            aux_libro.debe = request.POST['id_monto']
+
+            aux_libro.save()
+            
+        elif tipo_mov == "2":             
+            aux_libro.fecha = request.POST['fecha_emision']
+            aux_libro.concepto = request.POST['id_concepto']
+            aux_libro.num_cuenta = cta
+            aux_libro.haber = request.POST['id_monto']
+            
+            aux_libro.save()
+
+        mensaje_error = "Asiento actualizado!!"
+        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error": mensaje_error})
+    else:
+        mensaje_error = "Asiento no esta cargado."
+
+        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error": mensaje_error})
 
 
 
