@@ -130,17 +130,20 @@
                           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>                       
                         {% elif mensaje_error == 'Asiento guardado!!' %}
-                        <div class="alert alert-success" role="alert">
-                          {{mensaje_error}}                  
-                        </div>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                          {{mensaje_error}}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>   
                         {% elif mensaje_error == 'Asiento actualizado!!' %}
-                        <div class="alert alert-success" role="alert">
-                          {{mensaje_error}}                  
-                        </div>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                          {{mensaje_error}}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>   
                         {% elif mensaje_error == 'Asiento no esta cargado.' %}
-                        <div class="alert alert-success" role="alert">
-                          {{mensaje_error}}                  
-                        </div>
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                          {{mensaje_error}}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>   
                         {% endif %}
 
                       </div>
@@ -167,13 +170,13 @@
                             <tr>
                             <td>{{ libro.fecha|date:'d-m-Y' }}</td>
                             <td>{{libro.num_asiento}}</td>
-                            <td>{{libro.id}}</td>
+                            <td>{{libro.num_cuenta_id}}</td>
                             <td>{{libro.concepto}}</td>
                             <td>{{libro.debe}}</td>
                             <td>{{libro.haber}}</td>
                             </tr>
                           {% empty %}
-                            <h4 class="text-center">No hay movimeinto</h4>
+                            <h3 class="text-center">No hay asienos cargados <strong>HOY</strong> </h3>
                           {% endfor %} 
 
                         </tbody>
@@ -187,6 +190,8 @@
                         </div>
                       </div>
                       -->
+
+                      <a href="{% url 'descargar_libro' %}" class="btn btn-primary">Exportar a CSV</a>
                       
                     </div>
                                           

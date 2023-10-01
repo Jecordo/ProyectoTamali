@@ -3,7 +3,7 @@ from .views import (
     create_factura, facturar, delete_factura, ver_facturas, menu_principal, 
     create_product, create_proveedor, create_client, asistencia_contable, 
     menu_producto, buscar_producto, menu_libro_diario, cargar_libro_diario,
-    modificar_libro_diario
+    modificar_libro_diario, descargar_libro
 )
 
 urlpatterns = [
@@ -23,6 +23,7 @@ urlpatterns = [
     path('asistencia_contable/', menu_libro_diario, name='Asistencia_contable'),
     path('cargar_libro_diario/', cargar_libro_diario, name='cargar_libro_diario'),
     path('modif_libro_diario/', modificar_libro_diario, name='modificar_libro_diario'),
+    path('descagar_libro/', descargar_libro, name='descargar_libro'),
 
     path('delete_factura/<int:factu_id>/', delete_factura, name='Delete_factura'),
 ]

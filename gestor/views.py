@@ -1,12 +1,19 @@
 from datetime import date
+from io import BytesIO
 import json
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,  redirect
 from .models import (
     persona, factura, factura_detalle, clientes, producto,
     categoria,marca,Estados,proveedor, tipo_factura, 
     metodo_pago, marca, cuenta, libro_diario, libro_mayor)
 from django.shortcuts import get_object_or_404
+import pandas as pd
+from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl import Workbook
+from django.db.models import F, ExpressionWrapper, fields
+from django.db.models.functions import Cast
+from django.db.models import CharField
 
 
 # Create your views here.
@@ -158,7 +165,7 @@ def buscar_producto(request):
 
 def menu_libro_diario(request):
     fecha_actual = date.today()
-    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual)
+    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual).order_by('num_asiento')
     cuentas = cuenta.objects.all()
 
     return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
@@ -166,12 +173,12 @@ def menu_libro_diario(request):
 
 def cargar_libro_diario(request):
     fecha_actual = date.today()
-    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual)
+    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual).order_by('num_asiento')
     cuentas = cuenta.objects.all()
 
-    existe = libro_diario.objects.filter(num_asiento=request.POST['num_asiento']).exists()
+    existe = libro_diario.objects.filter(num_asiento=request.POST['num_asiento'], fecha=request.POST['fecha_emision']).exists()
 
-    if existe:
+    if existe :
         mensaje_error = "Asiento ya existe."
 
         return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error":mensaje_error})
@@ -196,17 +203,19 @@ def cargar_libro_diario(request):
 
         mensaje_error = "Asiento guardado!!"
         return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error": mensaje_error})
+    
+    return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
 
 
 
 def modificar_libro_diario(request):
     fecha_actual = date.today()
-    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual)
+    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual).order_by('num_asiento')
     cuentas = cuenta.objects.all()
 
     existe = libro_diario.objects.filter(num_asiento=request.POST['num_asiento']).exists()
 
-    if existe:
+    if existe and fecha_actual == request.POST['fecha_emision']:
         aux_libro = libro_diario.objects.get( num_asiento=request.POST['num_asiento'])
         cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
         tipo_mov = request.POST['tipo_movimiento']
@@ -235,6 +244,26 @@ def modificar_libro_diario(request):
         return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error": mensaje_error})
 
 
+
+def descargar_libro(request):
+    # Consulta los datos que deseas exportar, por ejemplo, todos los registros de libro_diario
+    datos = libro_diario.objects.all().order_by('num_asiento', 'fecha')
+
+    df = pd.DataFrame(list(datos.values('fecha', 'num_asiento', 'concepto', 'num_cuenta', 'debe', 'haber')))
+
+    libro_excel = Workbook()
+
+    hoja = libro_excel.active
+
+    for fila in dataframe_to_rows(df, index=False, header=True):
+        hoja.append(fila)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=Libro diario.xlsx'
+
+    libro_excel.save(response)
+
+    return response
 
 
 #-------------------------------------------------------------------------------------------------------------------------
