@@ -1,6 +1,7 @@
 from datetime import date
 from io import BytesIO
 import json
+import re
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,  redirect
 from .models import (
@@ -14,6 +15,10 @@ from openpyxl import Workbook
 from django.db.models import F, ExpressionWrapper, fields
 from django.db.models.functions import Cast
 from django.db.models import CharField
+from django.db.models import Q
+from django.core.paginator import Paginator, Page
+from django.views.decorators.cache import never_cache
+
 
 
 # Create your views here.
@@ -162,92 +167,101 @@ def buscar_producto(request):
     return JsonResponse(response_data)
 
 #-------------------------------------------------------------------------------------------------------------------------
-
+#  ---------------------------------Libro diario----------------------------------------------------------------------
+@never_cache
 def menu_libro_diario(request):
-    fecha_actual = date.today()
-    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual).order_by('num_asiento')
+    fecha_hoy = date.today()
+
+    libros_diarios = libro_diario.objects.filter(fecha__year=fecha_hoy.year).order_by('fecha', 'num_asiento','id')
     cuentas = cuenta.objects.all()
 
-    return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
+    paginator = Paginator(libros_diarios, 10)
 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
+    return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas})
+
+@never_cache
 def cargar_libro_diario(request):
-    fecha_actual = date.today()
-    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual).order_by('num_asiento')
+    fecha_hoy = date.today()
+
+    libros_diarios = libro_diario.objects.filter(fecha__year=fecha_hoy.year).order_by('fecha', 'num_asiento')
     cuentas = cuenta.objects.all()
 
-    existe = libro_diario.objects.filter(num_asiento=request.POST['num_asiento'], fecha=request.POST['fecha_emision']).exists()
+    paginator = Paginator(libros_diarios, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-    if existe :
-        mensaje_error = "Asiento ya existe."
+    cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
+    tipo_mov = request.POST['tipo_movimiento']
 
-        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error":mensaje_error})
+    if tipo_mov == "1":
 
-    else:
-        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
-        tipo_mov = request.POST['tipo_movimiento']
+        libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
+                        ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=request.POST['id_monto'], haber=0)
 
-        if tipo_mov == "1":
+        libro.save()
+        
+    elif tipo_mov == "2":
 
-            libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
-                            ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=request.POST['id_monto'], haber=0)
+        libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
+                        ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=0, haber=request.POST['id_monto'])
 
-            libro.save()
-            
-        elif tipo_mov == "2":
+        libro.save()
 
-            libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
-                            ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=0, haber=request.POST['id_monto'])
+    mensaje_error = "Asiento guardado!!"
+    return redirect(menu_libro_diario)
 
-            libro.save()
-
-        mensaje_error = "Asiento guardado!!"
-        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error": mensaje_error})
-    
-    return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas})
-
-
-
+@never_cache
 def modificar_libro_diario(request):
     fecha_actual = date.today()
-    libros_diarios = libro_diario.objects.filter(fecha=fecha_actual).order_by('num_asiento')
+
+    libros_diarios = libro_diario.objects.filter(fecha__year=fecha_actual.year).order_by('fecha', 'num_asiento')
     cuentas = cuenta.objects.all()
 
-    existe = libro_diario.objects.filter(num_asiento=request.POST['num_asiento']).exists()
+    paginator = Paginator(libros_diarios, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-    if existe and fecha_actual == request.POST['fecha_emision']:
-        aux_libro = libro_diario.objects.get( num_asiento=request.POST['num_asiento'])
-        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
-        tipo_mov = request.POST['tipo_movimiento']
+    existe = libro_diario.objects.filter(id=request.POST['id_libro']).exists()
 
-        if tipo_mov == "1":
-            aux_libro.fecha = request.POST['fecha_emision']
-            aux_libro.concepto = request.POST['id_concepto']
-            aux_libro.num_cuenta = cta
-            aux_libro.debe = request.POST['id_monto']
+    if existe:
+        aux = request.POST['id_libro']
+        aux_libro = get_object_or_404(libro_diario, pk=request.POST['id_libro'])
+        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'+aux])
 
-            aux_libro.save()
-            
-        elif tipo_mov == "2":             
-            aux_libro.fecha = request.POST['fecha_emision']
-            aux_libro.concepto = request.POST['id_concepto']
-            aux_libro.num_cuenta = cta
-            aux_libro.haber = request.POST['id_monto']
-            
-            aux_libro.save()
+        aux_libro.fecha = request.POST['fecha_emision'+aux]
+        aux_libro.num_asiento = request.POST['num_asiento'+aux]
+        aux_libro.concepto = request.POST['id_concepto'+aux]
+        aux_libro.num_cuenta = cta
+        aux_libro.haber = request.POST['monto_haber'+aux]
+        aux_libro.debe = request.POST['monto_debe'+aux]
+        
+        aux_libro.save()
 
         mensaje_error = "Asiento actualizado!!"
-        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error": mensaje_error})
+        return redirect(menu_libro_diario)
     else:
         mensaje_error = "Asiento no esta cargado."
 
-        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": libros_diarios, "cuentas": cuentas, "mensaje_error": mensaje_error})
+        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas, "mensaje_error": mensaje_error})
 
 
-
+@never_cache
 def descargar_libro(request):
-    # Consulta los datos que deseas exportar, por ejemplo, todos los registros de libro_diario
-    datos = libro_diario.objects.all().order_by('num_asiento', 'fecha')
+    fecha_libro = request.POST['fecha_deseada']
+
+    if re.match(r'^\d{4}-(0[1-9]|1[0-2])$', fecha_libro):
+        year, month = map(int, fecha_libro.split('-'))
+
+        datos = libro_diario.objects.filter(Q(fecha__year=year) & Q(fecha__month=month)).order_by('fecha', 'num_asiento')
+
+    else:
+        year = int(fecha_libro)
+        print(year)
+
+        datos = libro_diario.objects.filter(fecha__year=year).order_by('fecha', 'num_asiento')
 
     df = pd.DataFrame(list(datos.values('fecha', 'num_asiento', 'concepto', 'num_cuenta', 'debe', 'haber')))
 
@@ -267,6 +281,138 @@ def descargar_libro(request):
 
 
 #-------------------------------------------------------------------------------------------------------------------------
+#  ---------------------------------Libro mayor----------------------------------------------------------------------
+
+@never_cache
+def menu_libro_mayor(request):
+    fecha_hoy = date.today()
+
+    libros_mayores = libro_mayor.objects.filter(fecha__year=fecha_hoy.year).order_by('fecha', 'num_asiento','id')
+    cuentas = cuenta.objects.all()
+
+    paginator = Paginator(libros_mayores, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'cargar_asiento_mayor.html', {"libros_mayores": page_obj, "cuentas": cuentas})
+
+@never_cache
+def cargar_libro_mayor(request):
+    fecha_hoy = date.today()
+
+    libros_mayores = libro_mayor.objects.filter(fecha__year=fecha_hoy.year).order_by('fecha', 'num_asiento')
+    cuentas = cuenta.objects.all()
+
+    paginator = Paginator(libros_mayores, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    existe = libro_mayor.objects.filter(num_asiento=request.POST['num_asiento'], fecha__year=fecha_hoy.year).exists()
+
+    if existe:
+        return redirect(menu_libro_mayor)
+    
+    else:
+        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
+        libro_mayor_mas_reciente = libro_mayor.objects.order_by('-fecha').first()
+        tipo_mov = request.POST['tipo_movimiento']
+
+        if libro_mayor_mas_reciente:
+            saldo = libro_mayor_mas_reciente.saldo + int(request.POST['id_monto'])
+        else:
+            saldo = int(request.POST['id_monto'])
+
+        if tipo_mov == "1":
+
+            libro = libro_mayor(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
+                            ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=request.POST['id_monto'], haber=0, saldo=saldo)
+
+            libro.save()
+            
+        elif tipo_mov == "2":
+
+            libro = libro_mayor(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
+                            ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=0, haber=request.POST['id_monto'], saldo=saldo)
+
+            libro.save()
+
+        mensaje_error = "Asiento guardado!!"
+        return redirect(menu_libro_mayor)
+
+
+
+@never_cache
+def modificar_libro_mayor(request):
+    fecha_actual = date.today()
+
+    libros_diarios = libro_diario.objects.filter(fecha__year=fecha_actual.year).order_by('fecha', 'num_asiento')
+    cuentas = cuenta.objects.all()
+
+    paginator = Paginator(libros_diarios, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    existe = libro_diario.objects.filter(id=request.POST['id_libro']).exists()
+
+    if existe:
+        aux = request.POST['id_libro']
+        aux_libro = get_object_or_404(libro_diario, pk=request.POST['id_libro'])
+        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'+aux])
+
+        aux_libro.fecha = request.POST['fecha_emision'+aux]
+        aux_libro.num_asiento = request.POST['num_asiento'+aux]
+        aux_libro.concepto = request.POST['id_concepto'+aux]
+        aux_libro.num_cuenta = cta
+        aux_libro.haber = request.POST['monto_haber'+aux]
+        aux_libro.debe = request.POST['monto_debe'+aux]
+        
+        aux_libro.save()
+
+        mensaje_error = "Asiento actualizado!!"
+        return redirect(menu_libro_diario)
+    else:
+        mensaje_error = "Asiento no esta cargado."
+
+        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas, "mensaje_error": mensaje_error})
+
+
+@never_cache
+def descargar_libro_mayor(request):
+    fecha_libro = request.POST['fecha_libro']
+
+    if re.match(r'^\d{4}-(0[1-9]|1[0-2])$', fecha_libro):
+        year, month = map(int, fecha_libro.split('-'))
+
+        datos = libro_diario.objects.filter(Q(fecha__year=year) & Q(fecha__month=month)).order_by('fecha', 'num_asiento')
+
+    else:
+        year = int(fecha_libro)
+        month = 1
+
+        datos = libro_diario.objects.all().order_by('fecha', 'num_asiento')
+
+
+
+    df = pd.DataFrame(list(datos.values('fecha', 'num_asiento', 'concepto', 'num_cuenta', 'debe', 'haber')))
+
+    libro_excel = Workbook()
+
+    hoja = libro_excel.active
+
+    for fila in dataframe_to_rows(df, index=False, header=True):
+        hoja.append(fila)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=Libro diario.xlsx'
+
+    libro_excel.save(response)
+
+    return response
+
+
+#-------------------------------------------------------------------------------------------------------------------------
+#  ---------------------------------Proveedor----------------------------------------------------------------------
 
 def create_proveedor(request):
     return render('/gestor/')

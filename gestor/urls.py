@@ -3,7 +3,8 @@ from .views import (
     create_factura, facturar, delete_factura, ver_facturas, menu_principal, 
     create_product, create_proveedor, create_client, asistencia_contable, 
     menu_producto, buscar_producto, menu_libro_diario, cargar_libro_diario,
-    modificar_libro_diario, descargar_libro
+    modificar_libro_diario, descargar_libro, menu_libro_mayor, cargar_libro_mayor,
+    modificar_libro_mayor
 )
 
 urlpatterns = [
@@ -20,9 +21,14 @@ urlpatterns = [
     path('producto/', create_product, name='cargar_roducto'),
     path('busc_produc/', buscar_producto, name='buscar_producto'),
 
-    path('asistencia_contable/', menu_libro_diario, name='Asistencia_contable'),
+    path('menu_libro_diario/', menu_libro_diario, name='Asistencia_contable'),
     path('cargar_libro_diario/', cargar_libro_diario, name='cargar_libro_diario'),
     path('modif_libro_diario/', modificar_libro_diario, name='modificar_libro_diario'),
+
+    path('menu_libro_mayor/', menu_libro_mayor, name='menu_libro_mayor'),
+    path('cargar_libro_mayor/', cargar_libro_mayor, name='cargar_libro_mayor'),
+    path('modif_libro_mayor/', modificar_libro_mayor, name='modificar_libro_mayor'),
+
     path('descagar_libro/', descargar_libro, name='descargar_libro'),
 
     path('delete_factura/<int:factu_id>/', delete_factura, name='Delete_factura'),

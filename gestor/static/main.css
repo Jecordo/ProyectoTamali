@@ -7,3 +7,53 @@ body {
   background-color: #e6d9d98a; /* Reemplaza esto con tu código de color personalizado */
   color: #1e2525c4; /* Color de texto si es necesario */
 }
+
+
+td.centro {
+  text-align: center !important;
+}
+
+
+
+/* Estilos para la paginación */
+.pagination {
+  margin-top: 20px !important; /* Ajusta el espaciado superior según sea necesario */
+}
+
+.pagination ul.pagination {
+  list-style-type: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 0 !important;
+}
+
+.pagination ul.pagination li.page-item {
+  margin: 0 5px !important; /* Espaciado entre los elementos de la paginación */
+}
+
+.pagination ul.pagination li.page-item.disabled span.page-link {
+  background-color: #ccc !important;
+  border-color: #ccc !important;
+  color: #fff !important;
+}
+
+.pagination ul.pagination li.page-item.active a.page-link {
+  background-color: #007bff !important;
+  border-color: #007bff !important;
+  color: #fff !important;
+}
+
+/* Estilos para los enlaces de paginación */
+.pagination ul.pagination li.page-item a.page-link {
+  text-decoration: none !important;
+  color: #007bff !important;
+  border: 1px solid #007bff !important;
+  padding: 5px 10px !important;
+  border-radius: 3px !important;
+}
+
+.pagination ul.pagination li.page-item a.page-link:hover {
+  background-color: #007bff !important;
+  color: #fff !important;
+}

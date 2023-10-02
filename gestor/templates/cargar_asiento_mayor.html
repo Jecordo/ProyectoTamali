@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Libro diario</title>
+    <title>Libro mayor</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet"/>
@@ -52,10 +52,10 @@
 
       <ul class="nav nav-tabs navbar-light bg-light justify-content-center">
         <li class="nav-item">
-          <a class="nav-link disabled" aria-current="page">Libro diario</a>
+          <a class="nav-link" href="{% url 'Asistencia_contable' %}">Libro diario</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'menu_libro_mayor' %}">Libro mayor</a>
+          <a class="nav-link active"  aria-current="page" href="#">Libro mayor</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">Modificar producto</a>
@@ -67,11 +67,11 @@
 
             <div class="col-md-10">
 
-                <h1 class="display-6">Libro diario</h1> 
+                <h1 class="display-6">Libro mayor</h1> 
 
                 <div class="card card-body bg-secondary">
 
-                    <form action="{% url 'cargar_libro_diario' %}" method="POST" autocomplete="off">
+                    <form action="{% url 'cargar_libro_mayor' %}" method="POST" autocomplete="off">
 
                       {% csrf_token %}
 
@@ -80,7 +80,7 @@
                         <div class="row g-3 mb-2">
 
                           <div class="col-md-12">
-                            <h2 class="form-label">Ingrese datos del asiento</h2>
+                            <h2 class="form-label">Ingrese datos del movimiento</h2>
                           </div>
                           <div class="col-md-4">
                             <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" required>
@@ -117,7 +117,7 @@
                           </div>
 
                           <div class="col-6">
-                            <button type="submit" class="btn btn-success">Agregar asiento</button>
+                            <button type="submit" class="btn btn-success">Agregar movimiento</button>
                           </div>
                           
                         </div>
@@ -151,7 +151,7 @@
 
                     <div class="card card-body bg-dark mb-2">
 
-                      <form action="{% url 'modificar_libro_diario' %}" method="POST" autocomplete="off">
+                      <form action="{% url 'modificar_libro_mayor' %}" method="POST" autocomplete="off">
 
                         {% csrf_token %}
 
@@ -160,16 +160,17 @@
                           <tr>
                             <th scope="col" style="width: 14%;">fecha</th>
                             <th scope="col" style="width: 0%;">Asiento</th>
-                            <th scope="col" style="width: 55%;">Concepto.</th>
+                            <th scope="col" style="width: 45%;">Concepto.</th>
                             <th scope="col" style="width: 6%;">Cta.</th>
                             <th scope="col" style="width: 12%;">Debe</th>
                             <th scope="col" style="width: 12%;">Haber</th>
-                            <th scope="col" style="width: 12%;">Option</th>
+                            <th scope="col" style="width: 12%;">Saldo</th>
+                            <th scope="col" style="width: 12%;">Opt.</th>
                           </tr>
                           </thead>
                           <tbody>
 
-                            {% for libro in libros_diarios %}
+                            {% for libro in libros_mayores %}
                               <tr>
                               <td><input type="text" name="fecha_emision{{libro.id}}" class="form-control" value="{{ libro.fecha|date:'Y-m-d' }}"></td>
                               <td><input type="int" name="num_asiento{{libro.id}}" class="form-control" value="{{libro.num_asiento}}"></td>
@@ -177,13 +178,14 @@
                               <td><input type="int" name="num_cuenta{{libro.id}}" class="form-control" value="{{libro.num_cuenta_id}}"></td>
                               <td><input type="int" name="monto_debe{{libro.id}}" class="form-control" value="{{libro.debe}}"></td>
                               <td><input type="int" name="monto_haber{{libro.id}}" class="form-control" value="{{libro.haber}}"></td>
+                              <td><input type="int" name="saldo_cuenta{{libro.id}}" class="form-control" value="{{libro.saldo}}"></td>
                               <td>
                                 <button class="btn btn-sm btn-primary" name="id_libro" value="{{libro.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
                               </td>
                               </tr>
                             {% empty %}
-                              <td colspan="7">
-                                <h3 class="text-center">No hay asientos cargados</h3>
+                              <td colspan="8">
+                                <h3 class="text-center">No hay movimientos cargados</h3>
                               </td>
                             {% endfor %} 
 
@@ -194,25 +196,25 @@
 
                       <nav aria-label="Page navigation example">
                         <ul class="pagination justify-content-center">
-                          {% if libros_diarios.has_previous %}
+                          {% if libros_mayores.has_previous %}
                             <li class="page-item">
                               <a class="page-link" href="?page=1">&laquo; first</a>
                             </li>
                             <li class="page-item">
-                              <a class="page-link" href="?page={{ libros_diarios.previous_page_number }}">previous</a>
+                              <a class="page-link" href="?page={{ libros_mayores.previous_page_number }}">previous</a>
                             </li>
                           {% endif %}
                       
                           <li class="page-item disabled">
-                            <span class="page-link">Page {{ libros_diarios.number }} of {{ libros_diarios.paginator.num_pages }}</span>
+                            <span class="page-link">Page {{ libros_mayores.number }} of {{ libros_mayores.paginator.num_pages }}</span>
                           </li>
                       
-                          {% if libros_diarios.has_next %}
+                          {% if libros_mayores.has_next %}
                             <li class="page-item">
-                              <a class="page-link" href="?page={{ libros_diarios.next_page_number }}">next</a>
+                              <a class="page-link" href="?page={{ libros_mayores.next_page_number }}">next</a>
                             </li>
                             <li class="page-item">
-                              <a class="page-link" href="?page={{ libros_diarios.paginator.num_pages }}">last &raquo;</a>
+                              <a class="page-link" href="?page={{ libros_mayores.paginator.num_pages }}">last &raquo;</a>
                             </li>
                           {% endif %}
                         </ul>
@@ -227,10 +229,10 @@
                         </div>
                       </div>
                       -->
-                      <form action="{% url 'descargar_libro' %}" method="POST">
+                      <form action="{% url 'descargar_libro' %}" method="post">
                         {% csrf_token %}
                         <div class="col-2">
-                          <input type="text" class="form-control" id="fecha_deseada" name="fecha_deseada" placeholder="AAAA-MM o AAAA" required>
+                          <input type="text" class="form-control" id="fecha_libro" name="fecha_libro" placeholder="AAAA-MM o AAAA" required>
                         </div>
 
                         <div class="col-4">
