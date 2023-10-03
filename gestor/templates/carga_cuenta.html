@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Libro mayor</title>
+    <title>Cuentas</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet"/>
@@ -55,10 +55,10 @@
           <a class="nav-link" href="{% url 'Asistencia_contable' %}">Libro diario</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active"  aria-current="page" href="#">Libro mayor</a>
+          <a class="nav-link" href="{% url 'menu_libro_mayor' %}">Libro mayor</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'menu_cuenta' %}">Cuentas</a>
+          <a class="nav-link active"  aria-current="page" >Cuentas</a>
         </li>
       </ul>
 
@@ -67,11 +67,11 @@
 
             <div class="col-md-10">
 
-                <h1 class="display-6">Libro mayor</h1> 
+                <h1 class="display-6">Cuentas</h1> 
 
                 <div class="card card-body bg-secondary">
 
-                    <form action="{% url 'cargar_libro_mayor' %}" method="POST" autocomplete="off">
+                    <form action="{% url 'registrar_cuenta' %}" method="POST" autocomplete="off">
 
                       {% csrf_token %}
 
@@ -80,44 +80,24 @@
                         <div class="row g-3 mb-2">
 
                           <div class="col-md-12">
-                            <h2 class="form-label">Ingrese datos del movimiento</h2>
+                            <h2 class="form-label">Ingrese datos de la cuenta</h2>
                           </div>
                           <div class="col-md-4">
-                            <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" required>
-                          </div>
-                          <div class="col-md-4">
-                            <input type="int" class="form-control" id="num_asiento" name="num_asiento" placeholder="Num. de asiento" required>
-                          </div>
-                          <div class="col-md-4">
-                            <select id="num_cuenta" class="form-select" name="num_cuenta" required>
-                              <option selected disabled value>Seleccione la cuenta</option>
-                              {% for cuenta in cuentas %}
-                              <option value={{cuenta.id}}>{{cuenta.descripcion}}</option>
-                              {% empty %}
-                              <h4 class="text-center">No hay cuenta</h4>
-                              {% endfor %} 
-                            </select>
+                            <input type="int" class="form-control" id="num_cuenta" name="num_cuenta" placeholder="Num. de cuenta" required>
                           </div>
                           <div class="col-md-6">
-                            <input type="text" class="form-control" id="id_concepto" name="id_concepto" placeholder="Concepto" required>
-                          </div>
-                          <div class="col-md-2">
-                            <select id="tipo_movimiento" class="form-select" name="tipo_movimiento" required>
-                              <option selected disabled value>Tipo movimiento</option>
-                              <option value=1>Debe</option>
-                              <option value=2>Haber</option>
-                            </select>
+                            <input type="text" class="form-control" id="nom_cuenta" name="nom_cuenta" placeholder="Nombre de la cuenta" required>
                           </div>
                           <div class="col-md-4">
                             <div class="input-group">
                               <span class="input-group-text">G</span>
-                              <input type="int" class="form-control" id="id_monto" name="id_monto" placeholder="Ingrese monto del movimiento" required>
+                              <input type="int" class="form-control" id="id_monto" value="0" name="id_monto" placeholder="Ingrese saldo de la cuenta" required>
                               <span class="input-group-text">.00</span>
                             </div>
                           </div>
 
                           <div class="col-6">
-                            <button type="submit" class="btn btn-success">Agregar movimiento</button>
+                            <button type="submit" class="btn btn-success">Agregar cuenta</button>
                           </div>
                           
                         </div>
@@ -151,41 +131,35 @@
 
                     <div class="card card-body bg-dark mb-2">
 
-                      <form action="{% url 'modificar_libro_mayor' %}" method="POST" autocomplete="off">
+                      <form action="{% url 'modificar_cuenta' %}" method="POST" autocomplete="off">
 
                         {% csrf_token %}
 
                         <table class="table table-info table-striped table-bordered border-dark">
                           <thead>
                           <tr>
-                            <th scope="col" style="width: 14%;">fecha</th>
-                            <th scope="col" style="width: 0%;">Asiento</th>
-                            <th scope="col" style="width: 45%;">Concepto.</th>
-                            <th scope="col" style="width: 6%;">Cta.</th>
-                            <th scope="col" style="width: 12%;">Debe</th>
-                            <th scope="col" style="width: 12%;">Haber</th>
+                            <th scope="col" style="width: 14%;">ID Cta.</th>
+                            <th scope="col" style="width: 0%;">Num. Cuenta</th>
+                            <th scope="col" style="width: 45%;">Descripcion</th>
                             <th scope="col" style="width: 12%;">Saldo</th>
                             <th scope="col" style="width: 12%;">Opt.</th>
                           </tr>
                           </thead>
                           <tbody>
 
-                            {% for libro in libros_mayores %}
+                            {% for cuenta in cuentas %}
                               <tr>
-                              <td><input type="text" name="fecha_emision{{libro.id}}" class="form-control" value="{{ libro.fecha|date:'Y-m-d' }}"></td>
-                              <td><input type="int" name="num_asiento{{libro.id}}" class="form-control" value="{{libro.num_asiento}}"></td>
-                              <td><input type="text" name="id_concepto{{libro.id}}" class="form-control" value="{{libro.concepto}}"></td>
-                              <td><input type="int" name="num_cuenta{{libro.id}}" class="form-control" value="{{libro.num_cuenta_id}}"></td>
-                              <td><input type="int" name="monto_debe{{libro.id}}" class="form-control" value="{{libro.debe}}"></td>
-                              <td><input type="int" name="monto_haber{{libro.id}}" class="form-control" value="{{libro.haber}}"></td>
-                              <td><input type="int" name="saldo_cuenta{{libro.id}}" class="form-control" value="{{libro.saldo}}" readonly></td>
+                              <td><input type="text" name="id_cuenta{{cuenta.id}}" class="form-control" value="{{ cuenta.id }}" readonly></td>
+                              <td><input type="int" name="num_cuenta{{cuenta.id}}" class="form-control" value="{{cuenta.num_cuenta}}"></td>
+                              <td><input type="text" name="nom_cuenta{{cuenta.id}}" class="form-control" value="{{cuenta.descripcion}}"></td>
+                              <td><input type="int" name="id_monto{{cuenta.id}}" class="form-control" value="{{cuenta.saldo}}"></td>
                               <td>
-                                <button class="btn btn-sm btn-primary" name="id_libro" value="{{libro.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
+                                <button class="btn btn-sm btn-primary" name="id_cuenta" value="{{cuenta.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
                               </td>
                               </tr>
                             {% empty %}
-                              <td colspan="8">
-                                <h3 class="text-center">No hay movimientos cargados</h3>
+                              <td colspan="5">
+                                <h3 class="text-center">No hay cuentas cargadas</h3>
                               </td>
                             {% endfor %} 
 
