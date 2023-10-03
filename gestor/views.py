@@ -186,13 +186,6 @@ def menu_libro_diario(request):
 def cargar_libro_diario(request):
     fecha_hoy = date.today()
 
-    libros_diarios = libro_diario.objects.filter(fecha__year=fecha_hoy.year).order_by('fecha', 'num_asiento')
-    cuentas = cuenta.objects.all()
-
-    paginator = Paginator(libros_diarios, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
     cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
     tipo_mov = request.POST['tipo_movimiento']
 
@@ -279,6 +272,35 @@ def descargar_libro(request):
 
     return response
 
+def migrar_asientos(request):
+    asientos_migrar = libro_diario.objects.all().order_by('num_asiento')
+    libros_mayores = libro_mayor.objects.all().order_by('num_asiento')
+
+    if asientos_migrar.count()==libros_mayores.count():
+        return redirect(menu_libro_mayor)
+
+    else:
+        for asiento in asientos_migrar[libros_mayores.count():]:
+            libro_mayor_mas_reciente = libro_mayor.objects.order_by('-id').first()
+
+            if libro_mayor_mas_reciente:
+                saldo = libro_mayor_mas_reciente.saldo + asiento.debe
+                saldo = saldo - asiento.haber
+                num_asiento = int(libro_mayor_mas_reciente.num_asiento)+1
+            else:
+                saldo = asiento.debe
+                saldo = saldo - asiento.haber
+                num_asiento = 1
+
+            libro = libro_mayor(fecha=asiento.fecha, num_asiento=num_asiento,concepto=asiento.concepto, 
+                                num_cuenta=asiento.num_cuenta, debe=asiento.debe, haber=asiento.haber, saldo=saldo)
+
+            libro.save()
+
+
+        mensaje_error = "Asiento guardado!!"
+        return redirect(menu_libro_mayor)
+
 
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro mayor----------------------------------------------------------------------
@@ -287,7 +309,7 @@ def descargar_libro(request):
 def menu_libro_mayor(request):
     fecha_hoy = date.today()
 
-    libros_mayores = libro_mayor.objects.filter(fecha__year=fecha_hoy.year).order_by('fecha', 'num_asiento','id')
+    libros_mayores = libro_mayor.objects.filter(fecha__year=fecha_hoy.year).order_by('num_asiento')
     cuentas = cuenta.objects.all()
 
     paginator = Paginator(libros_mayores, 10)
@@ -344,38 +366,66 @@ def cargar_libro_mayor(request):
 
 @never_cache
 def modificar_libro_mayor(request):
-    fecha_actual = date.today()
+    id_libro = request.POST['id_libro']
+    cont=0
 
-    libros_diarios = libro_diario.objects.filter(fecha__year=fecha_actual.year).order_by('fecha', 'num_asiento')
-    cuentas = cuenta.objects.all()
+    libros_mayores = libro_mayor.objects.filter(pk__gte=id_libro).order_by('num_asiento')
 
-    paginator = Paginator(libros_diarios, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    existe = libro_diario.objects.filter(id=request.POST['id_libro']).exists()
+    existe = libro_mayor.objects.filter(id=id_libro).exists()
 
     if existe:
-        aux = request.POST['id_libro']
-        aux_libro = get_object_or_404(libro_diario, pk=request.POST['id_libro'])
-        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'+aux])
+        aux_libro = get_object_or_404(libro_mayor, pk=id_libro)
+        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'+id_libro])
 
-        aux_libro.fecha = request.POST['fecha_emision'+aux]
-        aux_libro.num_asiento = request.POST['num_asiento'+aux]
-        aux_libro.concepto = request.POST['id_concepto'+aux]
-        aux_libro.num_cuenta = cta
-        aux_libro.haber = request.POST['monto_haber'+aux]
-        aux_libro.debe = request.POST['monto_debe'+aux]
+        if aux_libro.debe == int(request.POST['monto_debe'+id_libro]) and aux_libro.haber == int(request.POST['monto_haber'+id_libro]):
+
+            aux_libro.fecha = request.POST['fecha_emision'+id_libro]
+            aux_libro.num_asiento = request.POST['num_asiento'+id_libro]
+            aux_libro.concepto = request.POST['id_concepto'+id_libro]
+            aux_libro.num_cuenta = cta
+
+            aux_libro.save()
+
+        else:
+            libro_mayor_mas_reciente = obtener_libro_mayor_anterior(id_libro)
+            saldo_agregado = int(request.POST['monto_debe'+id_libro])
+            saldo_agregado = saldo_agregado - int(request.POST['monto_haber'+id_libro])
+
+            if libro_mayor_mas_reciente:
+                aux_libro.saldo = libro_mayor_mas_reciente.saldo + saldo_agregado
+            else:
+                aux_libro.saldo = saldo_agregado
+
+            aux_libro.fecha = request.POST['fecha_emision'+id_libro]
+            aux_libro.num_asiento = request.POST['num_asiento'+id_libro]
+            aux_libro.concepto = request.POST['id_concepto'+id_libro]
+            aux_libro.debe = request.POST['monto_debe'+id_libro]
+            aux_libro.haber = request.POST['monto_haber'+id_libro]
+            aux_libro.num_cuenta = cta
+
+            aux_libro.save()
+
+            for libro in libros_mayores[1:]:
+                saldo_agregado = libro.debe
+                saldo_agregado = saldo_agregado - libro.haber
+                libro.saldo = libros_mayores[cont].saldo + saldo_agregado
+
+                libro.save()
+                cont+=1
         
-        aux_libro.save()
-
         mensaje_error = "Asiento actualizado!!"
-        return redirect(menu_libro_diario)
+        return redirect(menu_libro_mayor)
     else:
         mensaje_error = "Asiento no esta cargado."
 
-        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas, "mensaje_error": mensaje_error})
-
+        return redirect(menu_libro_mayor)
+    
+def obtener_libro_mayor_anterior(id_libro):
+    try:
+        libro_mayor_anterior = libro_mayor.objects.filter(pk__lt=id_libro).latest('pk')
+        return libro_mayor_anterior
+    except libro_mayor.DoesNotExist:
+        return None
 
 @never_cache
 def descargar_libro_mayor(request):

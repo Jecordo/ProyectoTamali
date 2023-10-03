@@ -151,73 +151,75 @@
 
                     <div class="card card-body bg-dark mb-2">
 
-                      <form action="{% url 'modificar_libro_diario' %}" method="POST" autocomplete="off">
+                      <div class="col-12">
+                        <form action="{% url 'modificar_libro_diario' %}" method="POST" autocomplete="off">
 
-                        {% csrf_token %}
+                          {% csrf_token %}
 
-                        <table class="table table-info table-striped table-bordered border-dark">
-                          <thead>
-                          <tr>
-                            <th scope="col" style="width: 14%;">fecha</th>
-                            <th scope="col" style="width: 0%;">Asiento</th>
-                            <th scope="col" style="width: 55%;">Concepto.</th>
-                            <th scope="col" style="width: 6%;">Cta.</th>
-                            <th scope="col" style="width: 12%;">Debe</th>
-                            <th scope="col" style="width: 12%;">Haber</th>
-                            <th scope="col" style="width: 12%;">Option</th>
-                          </tr>
-                          </thead>
-                          <tbody>
+                          <table class="table table-info table-striped table-bordered border-dark">
+                            <thead>
+                            <tr>
+                              <th scope="col" style="width: 14%;">fecha</th>
+                              <th scope="col" style="width: 0%;">Asiento</th>
+                              <th scope="col" style="width: 55%;">Concepto.</th>
+                              <th scope="col" style="width: 6%;">Cta.</th>
+                              <th scope="col" style="width: 12%;">Debe</th>
+                              <th scope="col" style="width: 12%;">Haber</th>
+                              <th scope="col" style="width: 12%;">Option</th>
+                            </tr>
+                            </thead>
+                            <tbody>
 
-                            {% for libro in libros_diarios %}
-                              <tr>
-                              <td><input type="text" name="fecha_emision{{libro.id}}" class="form-control" value="{{ libro.fecha|date:'Y-m-d' }}"></td>
-                              <td><input type="int" name="num_asiento{{libro.id}}" class="form-control" value="{{libro.num_asiento}}"></td>
-                              <td><input type="text" name="id_concepto{{libro.id}}" class="form-control" value="{{libro.concepto}}"></td>
-                              <td><input type="int" name="num_cuenta{{libro.id}}" class="form-control" value="{{libro.num_cuenta_id}}"></td>
-                              <td><input type="int" name="monto_debe{{libro.id}}" class="form-control" value="{{libro.debe}}"></td>
-                              <td><input type="int" name="monto_haber{{libro.id}}" class="form-control" value="{{libro.haber}}"></td>
-                              <td>
-                                <button class="btn btn-sm btn-primary" name="id_libro" value="{{libro.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
-                              </td>
-                              </tr>
-                            {% empty %}
-                              <td colspan="7">
-                                <h3 class="text-center">No hay asientos cargados</h3>
-                              </td>
-                            {% endfor %} 
+                              {% for libro in libros_diarios %}
+                                <tr>
+                                <td><input type="text" name="fecha_emision{{libro.id}}" class="form-control" value="{{ libro.fecha|date:'Y-m-d' }}"></td>
+                                <td><input type="int" name="num_asiento{{libro.id}}" class="form-control" value="{{libro.num_asiento}}"></td>
+                                <td><input type="text" name="id_concepto{{libro.id}}" class="form-control" value="{{libro.concepto}}"></td>
+                                <td><input type="int" name="num_cuenta{{libro.id}}" class="form-control" value="{{libro.num_cuenta_id}}"></td>
+                                <td><input type="int" name="monto_debe{{libro.id}}" class="form-control" value="{{libro.debe}}"></td>
+                                <td><input type="int" name="monto_haber{{libro.id}}" class="form-control" value="{{libro.haber}}"></td>
+                                <td>
+                                  <button class="btn btn-sm btn-primary" name="id_libro" value="{{libro.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
+                                </td>
+                                </tr>
+                              {% empty %}
+                                <td colspan="7">
+                                  <h3 class="text-center">No hay asientos cargados</h3>
+                                </td>
+                              {% endfor %} 
 
-                          </tbody>
-                        </table>
+                            </tbody>
+                          </table>
+                          
+                        </form>
+
+                        <nav aria-label="Page navigation example">
+                          <ul class="pagination justify-content-center">
+                            {% if libros_diarios.has_previous %}
+                              <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; first</a>
+                              </li>
+                              <li class="page-item">
+                                <a class="page-link" href="?page={{ libros_diarios.previous_page_number }}">previous</a>
+                              </li>
+                            {% endif %}
                         
-                      </form>
+                            <li class="page-item disabled">
+                              <span class="page-link">Page {{ libros_diarios.number }} of {{ libros_diarios.paginator.num_pages }}</span>
+                            </li>
+                        
+                            {% if libros_diarios.has_next %}
+                              <li class="page-item">
+                                <a class="page-link" href="?page={{ libros_diarios.next_page_number }}">next</a>
+                              </li>
+                              <li class="page-item">
+                                <a class="page-link" href="?page={{ libros_diarios.paginator.num_pages }}">last &raquo;</a>
+                              </li>
+                            {% endif %}
+                          </ul>
+                        </nav>
 
-                      <nav aria-label="Page navigation example">
-                        <ul class="pagination justify-content-center">
-                          {% if libros_diarios.has_previous %}
-                            <li class="page-item">
-                              <a class="page-link" href="?page=1">&laquo; first</a>
-                            </li>
-                            <li class="page-item">
-                              <a class="page-link" href="?page={{ libros_diarios.previous_page_number }}">previous</a>
-                            </li>
-                          {% endif %}
-                      
-                          <li class="page-item disabled">
-                            <span class="page-link">Page {{ libros_diarios.number }} of {{ libros_diarios.paginator.num_pages }}</span>
-                          </li>
-                      
-                          {% if libros_diarios.has_next %}
-                            <li class="page-item">
-                              <a class="page-link" href="?page={{ libros_diarios.next_page_number }}">next</a>
-                            </li>
-                            <li class="page-item">
-                              <a class="page-link" href="?page={{ libros_diarios.paginator.num_pages }}">last &raquo;</a>
-                            </li>
-                          {% endif %}
-                        </ul>
-                      </nav>
-                      
+                      </div>
 
                       <!--
                       <div class="row g-3">
@@ -227,16 +229,25 @@
                         </div>
                       </div>
                       -->
-                      <form action="{% url 'descargar_libro' %}" method="POST">
-                        {% csrf_token %}
-                        <div class="col-2">
-                          <input type="text" class="form-control" id="fecha_deseada" name="fecha_deseada" placeholder="AAAA-MM o AAAA" required>
-                        </div>
+                      <div class="col-12">
 
-                        <div class="col-4">
-                          <button class="btn btn-primary">Descargar libro</a>
-                        </div>
-                      </form>
+                        <form action="{% url 'descargar_libro' %}" method="POST">
+                          {% csrf_token %}
+                          <div class="col-2">
+                            <input type="text" class="form-control" id="fecha_deseada" name="fecha_deseada" placeholder="AAAA-MM o AAAA" required>
+                          </div>
+
+                          <div class="col-4">
+                            <button class="btn btn-primary">Descargar libro</a>
+                          </div>
+
+                          <div class="col-4">
+                            <a class="btn btn-primary" href="{% url 'migrar_asientos' %}">Migrar</a>
+                          </div>
+
+                        </form>
+
+                      </div>
                     
                     </div>
                                           
