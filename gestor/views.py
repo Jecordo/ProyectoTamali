@@ -112,6 +112,7 @@ def ver_facturas(request):
 
 
 #---------------------------------------------------------------------------------------------------------------------
+#  ---------------------------------Producto----------------------------------------------------------------------
 
 def menu_producto(request):
     marc = marca.objects.all()
@@ -459,7 +460,58 @@ def descargar_libro_mayor(request):
     libro_excel.save(response)
 
     return response
+#----------------------------------------------------------------------------------------------------------------------
+#  ---------------------------------Cuentas----------------------------------------------------------------------
 
+@never_cache
+def menu_cuenta(request):
+    cuentas = cuenta.objects.all().order_by('id')
+
+    paginator = Paginator(cuentas, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'carga_cuenta.html', {"cuentas": page_obj})
+
+@never_cache
+def registrar_cuenta(request):
+
+    existe = cuenta.objects.filter(num_cuenta=request.POST['num_cuenta']).exists()
+
+    if existe:
+        mensaje_error = "Producto ya existe."
+        return redirect(menu_cuenta)
+
+    else:
+
+        cta = cuenta(num_cuenta=request.POST['num_cuenta'], descripcion=request.POST['nom_cuenta'], saldo=request.POST['id_monto'])
+        cta.save()
+
+        mensaje_error = "Producto guardado!!"
+        return redirect(menu_cuenta)
+
+@never_cache
+def modificar_cuenta(request):
+    id_cuenta = request.POST['id_cuenta']
+
+    existe = cuenta.objects.filter(id=request.POST['id_cuenta']).exists()
+
+    if existe:
+        aux_cuenta= get_object_or_404(cuenta, pk=request.POST['id_cuenta'])
+
+        aux_cuenta.num_cuenta = request.POST['num_cuenta'+id_cuenta]
+        aux_cuenta.descripcion = request.POST['nom_cuenta'+id_cuenta]
+        aux_cuenta.saldo = request.POST['id_monto'+id_cuenta]
+
+        aux_cuenta.save()
+
+        mensaje_error = "Asiento actualizado!!"
+        return redirect(menu_cuenta)
+    else:
+        mensaje_error = "Asiento no esta cargado."
+
+        return redirect(menu_cuenta)
 
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Proveedor----------------------------------------------------------------------
