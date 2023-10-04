@@ -18,6 +18,7 @@ from django.db.models import CharField
 from django.db.models import Q
 from django.core.paginator import Paginator, Page
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -84,19 +85,19 @@ def create_factura(request):
   #  return
 
 
-def busca_producto(request):
-    if request.method == 'POST':
-        objetos_json = request.POST.get('objetos')
-        objetos = json.loads(objetos_json)
+@csrf_exempt
+def buscar_producto(request):
+    # Obtiene la consulta de búsqueda del cuerpo de la solicitud POST
+    query = request.POST.get('query', '')
 
-        # Realiza alguna operación con la lista de objetos
-        for objeto in objetos:
-            # Hacer algo con cada objeto, como guardarlo en una base de datos
-            pass
+    # Realiza la búsqueda de productos basada en la consulta
+    productos = producto.objects.filter(descripcion__icontains=query)
 
-        return JsonResponse({'message': 'Lista de objetos procesada con éxito'})
-    else:
-        return JsonResponse({'message': 'Solicitud no válida'}, status=400)
+    # Crea una lista de resultados de productos
+    resultados = [{'nombre': prod.descripcion} for prod in productos]
+
+    # Devuelve los resultados como una respuesta JSON
+    return JsonResponse({'productos': resultados})
 
 
 def delete_factura(request, factu_id):
@@ -150,22 +151,6 @@ def create_product(request):
 
 
     
-def buscar_producto(request):
-    codigo_producto = request.GET.get('codigo', '')
-    try:
-        produc = producto.objects.get(cod_producto=codigo_producto)
-        # Si se encuentra el producto, puedes devolver sus detalles en la respuesta JSON
-        response_data = {
-            'success': True,
-            'produc': {
-                'descripcion': produc.descripcion,
-                # Agrega otros campos del producto que desees enviar
-            }
-        }
-    except produc.DoesNotExist:
-        response_data = {'success': False}
-
-    return JsonResponse(response_data)
 
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro diario----------------------------------------------------------------------

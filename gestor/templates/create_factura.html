@@ -101,33 +101,13 @@
 
                       <div class="card card-body bg-dark mb-2">
 
-                        <form id="objeto-form">
-                          {% csrf_token %}
-                          <input type="text" id="objeto-input" placeholder="Agregar objeto">
-                          <button type="button" id="agregar-objeto">Agregar</button>
-                          <ul id="lista-objetos">
-                            <table class="table">
-                              <thead>
-                                <tr>
-                                  <th scope="col">Cod. Producto</th>
-                                  <th scope="col">Descripcion</th>
-                                  <th scope="col">Cantidad</th>
-                                  <th scope="col">Precio. unit.</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-    
-                                  <tr>
-                                    <td><input type="text" name="cod_producto" class="form-control" placeholder="Cod"></td>
-                                    <td><input type="text" name="desc_producto" class="form-control" placeholder="Descrip."></td>
-                                    <td><input type="text" name="cantidad_producto" class="form-control" placeholder="Cant."></td>
-                                    <td><input type="text" name="precio" class="form-control" placeholder="Precio del producto"></td>
-                                  </tr>
-    
-                              </tbody>
-                            </table>
-                          </ul>
-                        </form>
+                        <div class="col-12">
+                          <label for="buscar_producto" class="form-label">Buscar Producto</label>
+                          <input type="text" class="form-control" id="buscar_producto" placeholder="Buscar producto...">
+                        </div>
+                        <div class="col-12">
+                          <ul id="lista-productos"></ul>
+                        </div>
 
                         <!--
                         <div class="row g-3">
@@ -153,42 +133,48 @@
 
     </div>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-  $(document).ready(function() {
-      var objetos = [];
+<!-- Agrega este código dentro del formulario HTML -->
 
-      // Agregar objeto a la lista en la página sin recargar
-      $("#agregar-objeto").click(function() {
-          var nuevoObjeto = $("#objeto-input").val();
-          objetos.push(nuevoObjeto);
-          $("#lista-objetos").append("<li>" + nuevoObjeto + "</li>");
-          $("#objeto-input").val("");
-      });
-
-      // Enviar la lista de objetos al servidor sin recargar la página
-      $("#enviar-objetos").click(function() {
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+  // Escucha el evento de entrada en el campo de búsqueda
+  $("#buscar_producto").on("input", function() {
+      var query = $(this).val(); // Obtén el valor de búsqueda
+      if (query.length >= 3) {
+          // Realiza una solicitud AJAX para buscar productos
           $.ajax({
               url: "{% url 'buscar_producto' %}",
               method: "POST",
               data: {
                   csrfmiddlewaretoken: "{{ csrf_token }}",
-                  objetos: objetos
+                  query: query
               },
               success: function(response) {
-                  // Manejar la respuesta del servidor si es necesario
-                  alert("Lista de objetos enviada con éxito.");
-                  objetos = []; // Limpiar la lista de objetos
-                  $("#lista-objetos").empty(); // Limpiar la lista en la página
+                  // Actualiza la lista de productos con los resultados
+                  $("#lista-productos").empty(); // Limpia la lista
+                  $.each(response.productos, function(index, producto) {
+                      // Agrega cada producto a la lista
+                      var listItem = $("<li>").text(producto.nombre);
+                      listItem.click(function() {
+                          // Maneja el clic en el producto
+                          // Aquí puedes agregar el producto seleccionado a tu lista de objetos
+                      });
+                      $("#lista-productos").append(listItem);
+                  });
               },
               error: function(xhr, errmsg, err) {
-                  // Manejar errores si es necesario
-                  alert("Error al enviar la lista de objetos.");
+                  // Maneja errores si es necesario
+                  alert("Error al buscar productos.");
               }
           });
-      });
+      } else {
+          $("#lista-productos").empty(); // Limpia la lista si la búsqueda es corta
+      }
   });
-  </script>
+});
+</script>
+
 
 </body>
 </html>
