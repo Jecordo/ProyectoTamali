@@ -310,15 +310,25 @@ def migrar_asientos(request):
 def menu_libro_mayor(request):
     fecha_hoy = date.today()
 
-    libros_mayores = libro_mayor.objects.filter(fecha__year=fecha_hoy.year).order_by('num_asiento','num_cuenta')
+    # Obtén el valor del filtro de número de cuenta del request GET
+    num_cuenta_filter = request.GET.get('num_cuenta_filter')
+
+    # Filtro por año y, si se proporciona, por número de cuenta
+    libros_mayores = libro_mayor.objects.filter(fecha__year=fecha_hoy.year)
+
+    if num_cuenta_filter:
+        libros_mayores = libros_mayores.filter(num_cuenta=num_cuenta_filter)
+
+    libros_mayores = libros_mayores.order_by('num_asiento')
+
     cuentas = cuenta.objects.all()
 
+    # Aplica el Paginator a la consulta filtrada
     paginator = Paginator(libros_mayores, 10)
-
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'cargar_asiento_mayor.html', {"libros_mayores": page_obj, "cuentas": cuentas})
+    return render(request, 'cargar_asiento_mayor.html', {"libros_mayores": page_obj, "cuentas": cuentas, "num_cuenta_filter": num_cuenta_filter})
 
 @never_cache
 def cargar_libro_mayor(request):
