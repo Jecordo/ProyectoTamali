@@ -1,6 +1,7 @@
 from datetime import date
 from io import BytesIO
 import json
+from pyexpat.errors import messages
 import re
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,  redirect
@@ -18,6 +19,8 @@ from django.db.models import CharField
 from django.db.models import Q
 from django.core.paginator import Paginator, Page
 from django.views.decorators.cache import never_cache
+from django.contrib import messages
+
 
 
 
@@ -39,8 +42,6 @@ def facturar(request):
 
     else:
         num_factura = 1  # Si no hay facturas o la última factura no tiene un número válido, comenzamos desde 1
-
-    print(num_factura)
 
     return render(request, 'create_factura.html', {"productos": prod, "ultima_factura": num_factura, "factu_prduc":factu_prduc})
 
@@ -151,21 +152,8 @@ def create_product(request):
 
     
 def buscar_producto(request):
-    codigo_producto = request.GET.get('codigo', '')
-    try:
-        produc = producto.objects.get(cod_producto=codigo_producto)
-        # Si se encuentra el producto, puedes devolver sus detalles en la respuesta JSON
-        response_data = {
-            'success': True,
-            'produc': {
-                'descripcion': produc.descripcion,
-                # Agrega otros campos del producto que desees enviar
-            }
-        }
-    except produc.DoesNotExist:
-        response_data = {'success': False}
-
-    return JsonResponse(response_data)
+    objetos = producto.objects.all().values_list('cod_producto', flat=True)
+    return JsonResponse(list(objetos), safe=False)
 
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro diario----------------------------------------------------------------------
@@ -185,10 +173,21 @@ def menu_libro_diario(request):
 
 @never_cache
 def cargar_libro_diario(request):
-    fecha_hoy = date.today()
-
+    aux_lib = libro_diario.objects.order_by('-id').first()
     cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
     tipo_mov = request.POST['tipo_movimiento']
+
+    if aux_lib and aux_lib.num_asiento != int(request.POST['num_asiento']):
+        corroboration = libro_diario.objects.filter(num_asiento=aux_lib.num_asiento)
+        suma=0
+
+        for lib in corroboration:
+            suma = suma + lib.debe
+            suma = suma - lib.haber
+
+        if suma != 0:
+            messages.error(request, 'El asiento no está equilibrado.')
+            return redirect(menu_libro_diario)
 
     if tipo_mov == "1":
 
@@ -204,7 +203,7 @@ def cargar_libro_diario(request):
 
         libro.save()
 
-    mensaje_error = "Asiento guardado!!"
+    messages.success(request, 'Asiento guardado!!')
     return redirect(menu_libro_diario)
 
 @never_cache
@@ -299,7 +298,7 @@ def migrar_asientos(request):
             libro.save()
 
 
-        mensaje_error = "Asiento guardado!!"
+        messages.success(request, 'Asiento guardado!!')
         return redirect(menu_libro_mayor)
 
 
@@ -310,25 +309,22 @@ def migrar_asientos(request):
 def menu_libro_mayor(request):
     fecha_hoy = date.today()
 
-    # Obtén el valor del filtro de número de cuenta del request GET
-    num_cuenta_filter = request.GET.get('num_cuenta_filter')
-
-    # Filtro por año y, si se proporciona, por número de cuenta
-    libros_mayores = libro_mayor.objects.filter(fecha__year=fecha_hoy.year)
-
-    if num_cuenta_filter:
-        libros_mayores = libros_mayores.filter(num_cuenta=num_cuenta_filter)
-
-    libros_mayores = libros_mayores.order_by('num_asiento')
+    if 'num_cuenta' in request.POST:
+        libros_mayores = libro_mayor.objects.filter(num_cuenta=request.POST['num_cuenta'], fecha__year=fecha_hoy.year).order_by('num_asiento', 'num_cuenta')
+    else:
+        lib = libro_mayor.objects.order_by('-fecha').first()
+        libros_mayores = libro_mayor.objects.filter(num_cuenta=lib.num_cuenta).order_by('num_asiento', 'num_cuenta')
 
     cuentas = cuenta.objects.all()
 
-    # Aplica el Paginator a la consulta filtrada
     paginator = Paginator(libros_mayores, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'cargar_asiento_mayor.html', {"libros_mayores": page_obj, "cuentas": cuentas, "num_cuenta_filter": num_cuenta_filter})
+    return render(request, 'cargar_asiento_mayor.html', {
+        "libros_mayores": page_obj,
+        "cuentas": cuentas,
+    })
 
 @never_cache
 def cargar_libro_mayor(request):
@@ -370,7 +366,7 @@ def cargar_libro_mayor(request):
 
             libro.save()
 
-        mensaje_error = "Asiento guardado!!"
+        messages.success(request, 'Asiento guardado!!')
         return redirect(menu_libro_mayor)
 
 
@@ -424,10 +420,10 @@ def modificar_libro_mayor(request):
                 libro.save()
                 cont+=1
         
-        mensaje_error = "Asiento actualizado!!"
+        messages.success(request, 'Asiento actualizado!!')
         return redirect(menu_libro_mayor)
     else:
-        mensaje_error = "Asiento no esta cargado."
+        messages.success(request, 'Asiento no esta cargado.')
 
         return redirect(menu_libro_mayor)
     

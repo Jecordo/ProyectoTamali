@@ -57,3 +57,14 @@ td.centro {
   background-color: #007bff !important;
   color: #fff !important;
 }
+
+.error-message {
+  color: red !important;
+  font-weight: bold !important;
+}
+
+/* Estilo para mensajes de éxito */
+.success-message {
+  color: green !important;
+  font-weight: bold !important;
+}

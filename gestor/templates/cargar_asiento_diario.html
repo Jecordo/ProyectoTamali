@@ -120,30 +120,21 @@
                             <button type="submit" class="btn btn-success">Agregar asiento</button>
                           </div>
                           
+                          <div class="col-12">
+                            {% if messages %}
+                                <ul class="messages">
+                                    {% for message in messages %}
+                                        <li class="{% if message.tags == 'error' %}alert alert-danger
+                                        {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
+                                            {{ message }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                          </div>
+
                         </div>
-
-                        {% if mensaje_error == 'Asiento ya existe.' %}
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                          {{mensaje_error}}
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>                       
-                        {% elif mensaje_error == 'Asiento guardado!!' %}
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                          {{mensaje_error}}
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>   
-                        {% elif mensaje_error == 'Asiento actualizado!!' %}
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                          {{mensaje_error}}
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>   
-                        {% elif mensaje_error == 'Asiento no esta cargado.' %}
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                          {{mensaje_error}}
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>   
-                        {% endif %}
-
+                        
                       </div>
 
                     </form>
@@ -261,6 +252,28 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@docsearch/js@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/@stackblitz/sdk@1/bundles/sdk.umd.js"></script>
+
+    <script>
+      $(document).ready(function() {
+          $.ajax({
+              url: '/gestor/cargar_libro_diario/',  // Cambia la URL a la de tu vista
+              type: 'POST',
+              data: { /* tus datos de solicitud aquí */ },
+              success: function(response) {
+                  if (response.error) {
+                      alert(response.error);
+                  } else {
+                      // Procesa la respuesta normalmente si no hay error
+                  }
+              },
+              error: function(xhr, errmsg, err) {
+                  // Manejar errores de la solicitud AJAX si es necesario
+                  alert('Ocurrió un error en la solicitud AJAX.');
+              }
+          });
+      });
+    </script>
+      
 
   </body>
 </html>
