@@ -31,7 +31,7 @@ def menu_principal(request):
 
 
 def facturar(request):
-    prod = producto.objects.all()
+    client = clientes.objects.all()
     factu_prduc = []
 
     ultimoa_factura = factura.objects.order_by('-num_factura').first()
@@ -43,42 +43,18 @@ def facturar(request):
     else:
         num_factura = 1  # Si no hay facturas o la última factura no tiene un número válido, comenzamos desde 1
 
-    return render(request, 'create_factura.html', {"productos": prod, "ultima_factura": num_factura, "factu_prduc":factu_prduc})
+    return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura, "factu_prduc":factu_prduc})
 
 
 
 def create_factura(request):
-    #factu = persona(title=request.POST['title'], description=request.POST['description'])
     #factu.save()
     #return redirect('/gestor/')
     #client = get_object_or_404(clientes, pk=request.POST['cod_cateoria'])
+    print(request.POST.get('ruc_cliente', '') ) # Obtener el RUC del formulario)
+    print(request.POST.get('razon_social', '') ) # Obtener el RUC del formulario)
 
-    if request.method == 'POST':
-        ruc_cliente = request.POST.get('ruc_cliente', '')  # Obtener el RUC del formulario
-
-        # Intentar obtener el cliente por su RUC
-        try:
-            client = clientes.objects.get(RUC=ruc_cliente)
-        except clientes.DoesNotExist:
-            # El cliente no existe en la base de datos, puedes manejar esto como desees,
-            # por ejemplo, mostrar un mensaje de error.
-            return redirect('/gestor/')
-
-
-    #client = clientes.objects.get(RUC=request.POST['ruc_cliente'])
-    print(client)
-    tip_factu = get_object_or_404(tipo_factura, pk=request.POST['tipo_factura'])
-    product = get_object_or_404(producto, pk=request.POST['cod_producto'])
-    est = get_object_or_404(Estados, pk=1)
-    pago = get_object_or_404(metodo_pago, pk=1)
-
-
-    fact = factura(cliente=client, tipo_factura=tip_factu, estado=est, metodo_de_pago=pago, total_venta=request.POST['precio'])
-    fact.save()
-    
-    fact_deta = factura_detalle(cod_producto=product, num_factura=fact, precio_unitario=request.POST['precio'])
-    fact_deta.save()
-    return redirect('/gestor/facturar/')
+    return redirect(facturar)
 
 #def busca_producto(request):
  #   objeto_lista = request.POST.getlist('factu[]')
@@ -98,6 +74,18 @@ def busca_producto(request):
         return JsonResponse({'message': 'Lista de objetos procesada con éxito'})
     else:
         return JsonResponse({'message': 'Solicitud no válida'}, status=400)
+
+
+def obtener_productos(request, cod_producto):
+    productos = producto.objects.filter(num_producto=cod_producto)
+    productos_data = []
+    for prod in productos:
+        productos_data.append({
+            'cod_producto': prod.cod_producto,
+            'descripcion': prod.descripcion,
+            # Agrega más campos según tus necesidades
+        })
+    return JsonResponse({'productos': productos})
 
 
 def delete_factura(request, factu_id):

@@ -68,3 +68,13 @@ td.centro {
   color: green !important;
   font-weight: bold !important;
 }
+
+.select2-container {
+  background-color: #007bff !important;
+  color: #fff !important;
+  width: 100% !important; /* Ajusta el ancho según tus necesidades */
+}
+
+#id_label_multiple {
+  height: 80px !important; /* Establecer la altura deseada en píxeles o la unidad que prefieras */
+}

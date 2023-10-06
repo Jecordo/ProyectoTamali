@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUD</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel="stylesheet" href="{% static 'main.css' %}">
 </head>
 <body>
@@ -48,145 +51,119 @@
 
     <div class="container">
 
-            <div class="col-md-10">
+      <div class="col-md-10">
 
-                <h1 class="display-6">Modulo factura</h1> 
+        <h1 class="display-6">Modulo factura</h1> 
 
-                <div class="card card-body bg-secondary">
+          <div class="card card-body bg-secondary">
 
-                  <form action="{% url 'Create_factura' %}" method="POST">
+            <form action="{% url 'Create_factura' %}" method="POST">
 
-                    {% csrf_token %}
+              {% csrf_token %}
 
-                    <div class="card card-body bg-dark mb-2">
+              <div class="card card-body bg-dark mb-2">
 
-                      <div class="row g-3">
+                <div class="row g-3">
 
-                        <div class="col-md-4">
-                        <label for="ruc_cliente" class="form-label">RUC</label>
-                        <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente">
-                        </div>
-                        <div class="col-md-4">
-                        <label for="razon_social" class="form-label">Razon social</label>
-                        <input type="text" class="form-control" id="razon_social" name="razon_social">
-                        </div>
-                        <div class="col-md-4">
-                        <label for="fecha_emision" class="form-label">Fecha:</label>
-                        <input type="date" class="form-control" id="fecha_emision" name="fecha_emision">
-                        </div>
-                        <div class="col-12">
-                        <label for="direccion" class="form-label">Dirección</label>
-                        <input type="text" class="form-control" id="direccion" placeholder="1234 Main St" name="direccion">
-                        </div>
+                  <div class="col-md-8">
+                  </div>
+                  <div class="col-md-2">
+                    <label for="fecha_emision" class="form-label">Fecha:</label>
+                    <input type="date" class="form-control" id="fecha_emision" name="fecha_emision">
+                  </div>
+                  <div class="col-md-2">
+                    <label for="tipo_factura" class="form-label">Tipo de factura</label>
+                    <select id="tipo_factura" class="form-select" name="tipo_factura" disabled>
+                        <option value='1'>Contado</option>
+                    </select>
+                  </div>
+                  
 
-                        <div class="col-md-4">
-                        <label for="tipo_factura" class="form-label">Tipo de factura</label>
-                        <select id="tipo_factura" class="form-select" name="tipo_factura">
-                            <option selected>Tipo de Factura</option>
-                            <option value='1'>Contado</option>
-                        </select>
-                        </div>
-                        <div class="col-md-5">
-
-                        </div>
-                        <div class="col-md-3">
-                          <label for="num_factura" class="form-label">N° Factura</label>
-                          <div class="input-group mb-3">
-                              <span class="input-group-text">009-0085- </span>
-                              <input type="text" class="form-control" id="num_factura" value="{{ultima_factura}}" name="num_factura">
-                          </div>
-                        </div>
-                      </div>
+                  <div class="col-2">
+                  <label for="id_label_multiple" class="form-label">RUC</label>
+                  <select id="id_label_multiple" aria-label="Default select example" name="ruc_cliente">
+                    <option selected disabled value>Ingrese el RUC</option>
+                    {% for cliente in clientes %}
+                    <option value={{cliente.id}} data-descripcion="{{ cliente.razon_social }}, {{cliente.direccion}}, {{cliente.correo}}, 
+                    {{cliente.num_telefono}}, {{cliente.razon_social}}">{{cliente.RUC}}</option>
+                    {% endfor %} 
+                  </select>
+                  </div>
+                  <div class="col-md-3">
+                  <label for="razon_social" class="form-label">Razon social</label>
+                  <input type="text" class="form-control" id="razon_social" name="razon_social">
+                  </div>
+                  <div class="col-2">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="num_factura" class="form-label">N° Factura</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">009-0085- </span>
+                        <input type="text" class="form-control" id="num_factura" value="{{ultima_factura}}" name="num_factura">
                     </div>
+                  </div>
+                  <div class="col-md-2">
+                    <label for="timbrado_factura" class="form-label ">Timbrado:</label>
+                    <input type="text" class="form-control" id="timbrado_factura" name="timbrado_factura">
+                  </div>
+                  
+                  <div class="col-6">
+                  <label for="direccion_cliente" class="form-label">Dirección</label>
+                  <input type="text" class="form-control" id="direccion_cliente" placeholder="1234 Main St" name="direccion_cliente">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="correo_cliente" class="form-label">Correo:</label>
+                    <input type="email" class="form-control" id="correo_cliente" name="correo_cliente" aria-describedby="emailHelp">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="num_telefono" class="form-label">Telefono:</label>
+                    <input type="text" class="form-control" id="num_telefono" name="num_telefono">
+                  </div>
 
-                    <form action="#">
-                      <div class="card card-body bg-dark mb-2">
-  
-                        <div>
-                          <input type="text" id="codProducto" placeholder="Cod">
-                          <button class="btn btn-sm btn-primary" id="agregarProducto">Añadir</button>
-                      </div>
-                    </form>
-                    
-                    <table name="tabla_id" class="table table-info table-striped table-bordered border-dark">
-                        <thead>
-                            <tr>
-                                <th scope="col">Cod. Producto</th>
-                                <th scope="col">Descripción</th>
-                                <th scope="col">Cantidad</th>
-                                <th scope="col">Precio. unit.</th>
-                                <th scope="col">Obs.</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pro in productos_compra %}
-                            <tr>
-                                <td><input type="hidden" name="cod_producto" value="{{ libro.cod_producto }}">{{ libro.cod_producto }}</td>
-                                <td><input type="text" name="desc_producto" class="form-control" placeholder="Descrip." value="{{ libro.descripcion }}"></td>
-                                <td><input type="text" name="cantidad_producto" class="form-control" placeholder="Cant."></td>
-                                <td><input type="text" name="precio" class="form-control" placeholder="Precio del producto"></td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary" name="id_libro" value="{{ libro.id }}"><i class="fa fa-solid fa-pencil"></i></button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>                    
-                    
-                    <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Facturar</button>
-                    </div>
-                    
-                  </form>
-
+                  <div class="col-md-5">
+                  </div>
+      
                 </div>
-            </div>    
-            
-        </div>
-      </div>
+              </div>
 
+              
+              <table name="tabla_id" class="table table-info table-striped table-bordered border-dark">
+                <thead>
+                  <tr>
+                    <th scope="col">Cod. Producto</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Cantidad</th>
+                    <th scope="col">Precio. unit.</th>
+                    <th scope="col">Obs.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for pro in productos_compra %}
+                  <tr>
+                    <td><input type="hidden" name="cod_producto" value="{{ libro.cod_producto }}">{{ libro.cod_producto }}</td>
+                    <td><input type="text" name="desc_producto" class="form-control" placeholder="Descrip." value="{{ libro.descripcion }}"></td>
+                    <td><input type="text" name="cantidad_producto" class="form-control" placeholder="Cant."></td>
+                    <td><input type="text" name="precio" class="form-control" placeholder="Precio del producto"></td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" name="id_libro" value="{{ libro.id }}"><i class="fa fa-solid fa-pencil"></i></button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>                    
+              
+              <div class="col-12">
+              <button type="submit" class="btn btn-primary">Facturar</button>
+              </div>
+              
+            </form>
+
+          </div>
+        </div>    
+      </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const tablaProductos = document.getElementsByName("tabla_id")[0];
-      const codProducto = document.getElementById("codProducto");
-      const agregarProductoBtn = document.getElementById("agregarProducto");
-  
-      agregarProductoBtn.addEventListener("click", function () {
-          // Obtén el valor del campo "Cod"
-          const cod = codProducto.value;
-  
-          // Verifica si el código de producto no está vacío
-          if (cod.trim() !== "") {
-              // Crea una nueva fila
-              const newRow = document.createElement("tr");
-              newRow.innerHTML = `
-                  <td><input type="hidden" name="cod_producto" value="${cod}">${cod}</td>
-                  <td><input type="text" name="desc_producto" class="form-control" placeholder="Descrip."></td>
-                  <td><input type="text" name="cantidad_producto" class="form-control" placeholder="Cant."></td>
-                  <td><input type="text" name="precio" class="form-control" placeholder="Precio del producto"></td>
-                  <td>
-                      <button class="btn btn-sm btn-danger" onclick="eliminarFila(this)">Eliminar</button>
-                  </td>
-              `;
-  
-              // Agrega la fila a la tabla
-              tablaProductos.appendChild(newRow);
-  
-              // Limpia el campo de entrada del código del producto
-              codProducto.value = "";
-          }
-      });
-  
-      // Función para eliminar una fila
-      function eliminarFila(button) {
-          const row = button.parentElement.parentElement;
-          tablaProductos.removeChild(row);
-      }
-    });
-    </script>
+    <script src="{% static 'js/select2-custom.js' %}"></script>
   
   </body>
 </html>
