@@ -84,7 +84,7 @@
                   <select id="id_label_multiple" aria-label="Default select example" name="ruc_cliente">
                     <option selected disabled value>Ingrese el RUC</option>
                     {% for cliente in clientes %}
-                    <option value={{cliente.id}} data-descripcion="{{ cliente.razon_social }}, {{cliente.direccion}}, {{cliente.correo}}, 
+                    <option value={{cliente.RUC}} data-descripcion="{{ cliente.razon_social }}, {{cliente.direccion}}, {{cliente.correo}}, 
                     {{cliente.num_telefono}}, {{cliente.razon_social}}">{{cliente.RUC}}</option>
                     {% endfor %} 
                   </select>
@@ -120,8 +120,16 @@
                     <input type="text" class="form-control" id="num_telefono" name="num_telefono">
                   </div>
 
-                  <div class="col-md-5">
-                  </div>
+                  {% if messages %}
+                    <ul class="messages">
+                      {% for message in messages %}
+                        <li class="{% if message.tags == 'error' %}alert alert-danger
+                        {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
+                          {{ message }}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
       
 
                 </div>

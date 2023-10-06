@@ -41,24 +41,40 @@ def facturar(request):
         num_factura = f"{num_factura:07d}" 
 
     else:
-        num_factura = 1  # Si no hay facturas o la última factura no tiene un número válido, comenzamos desde 1
+        num_factura = 1
+        num_factura = f"{num_factura:07d}" 
 
     return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura, "factu_prduc":factu_prduc})
 
 
 
 def create_factura(request):
-    #factu.save()
-    #return redirect('/gestor/')
-    #client = get_object_or_404(clientes, pk=request.POST['cod_cateoria'])
-    print(request.POST.get('ruc_cliente', '') ) # Obtener el RUC del formulario)
-    print(request.POST.get('razon_social', '') ) # Obtener el RUC del formulario)
+    existe = clientes.objects.filter(RUC=request.POST['ruc_cliente']).exists()
 
-    return redirect(facturar)
+    if existe:
+        #aux = request.POST['id_libro']
+        aux_cliente = get_object_or_404(clientes, RUC=request.POST['ruc_cliente'])
 
-#def busca_producto(request):
- #   objeto_lista = request.POST.getlist('factu[]')
-  #  return
+        aux_cliente.razon_social = request.POST['razon_social']
+        aux_cliente.direccion = request.POST['direccion_cliente']
+        aux_cliente.correo = request.POST['correo_cliente']
+        aux_cliente.num_telefono = request.POST['num_telefono']
+        
+        aux_cliente.save()
+
+        messages.error(request, 'actualizado')
+        return redirect(facturar)
+    else:
+        est = get_object_or_404(Estados, pk=1)
+        
+        aux_cliente = clientes(RUC=request.POST['ruc_cliente'], razon_social=request.POST['razon_social'], direccion=(request.POST['direccion_cliente'],''),
+                               correo=(request.POST['correo_cliente'],''), num_telefono=(request.POST['num_telefono'],''), estado=est)
+
+        aux_cliente.save()
+        messages.success(request, 'Cargado.')
+
+        return redirect(facturar)
+    
 
 
 @csrf_exempt
