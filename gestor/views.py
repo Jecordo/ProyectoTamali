@@ -67,8 +67,8 @@ def create_factura(request):
     else:
         est = get_object_or_404(Estados, pk=1)
         
-        aux_cliente = clientes(RUC=request.POST['ruc_cliente'], razon_social=request.POST['razon_social'], direccion=(request.POST['direccion_cliente'],''),
-                               correo=(request.POST['correo_cliente'],''), num_telefono=(request.POST['num_telefono'],''), estado=est)
+        aux_cliente = clientes(RUC=request.POST['ruc_cliente'], razon_social=request.POST['razon_social'], direccion=request.POST['direccion_cliente'],
+                               correo=request.POST['correo_cliente'], num_telefono=request.POST['num_telefono'], estado=est)
 
         aux_cliente.save()
         messages.success(request, 'Cargado.')

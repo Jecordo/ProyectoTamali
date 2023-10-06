@@ -1,178 +1,134 @@
+{% extends "Base.html" %}
+
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <link rel="stylesheet" href="{% static 'main.css' %}">
-</head>
 <body>
+  {% block content %}
+  <div class="container">
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">Tamali tienda</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'Menu_principal' %}">Inicio</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link disabled">Factura</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'Clientes' %}">Cliente</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'Provedores' %}">Proveedor</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'menu_producto' %}">Producto</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'Asistencia_contable' %}">Asistencia contable</a>
-              </li>
-            </ul>
-            <form class="d-flex" role="search">
-              <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar">
-              <button class="btn btn-outline-success" type="submit">Buscar</button>
-            </form>
-          </div>
-        </div>
-      </nav>
+    <div class="col-md-10">
 
-    <div class="container">
+      <h1 class="display-6">Modulo factura</h1> 
 
-      <div class="col-md-10">
+        <div class="card card-body bg-secondary">
 
-        <h1 class="display-6">Modulo factura</h1> 
+          <form action="{% url 'Create_factura' %}" method="POST">
 
-          <div class="card card-body bg-secondary">
+            {% csrf_token %}
 
-            <form action="{% url 'Create_factura' %}" method="POST">
+            <div class="card card-body bg-dark mb-2">
 
-              {% csrf_token %}
+              <div class="row g-3">
 
-              <div class="card card-body bg-dark mb-2">
-
-                <div class="row g-3">
-
-                  <div class="col-md-8">
-                  </div>
-                  <div class="col-md-2">
-                    <label for="fecha_emision" class="form-label">Fecha:</label>
-                    <input type="date" class="form-control" id="fecha_emision" name="fecha_emision">
-                  </div>
-                  <div class="col-md-2">
-                    <label for="tipo_factura" class="form-label">Tipo de factura</label>
-                    <select id="tipo_factura" class="form-select" name="tipo_factura" disabled>
-                        <option value='1'>Contado</option>
-                    </select>
-                  </div>
-                  
-
-                  <div class="col-2">
-                  <label for="id_label_multiple" class="form-label">RUC</label>
-                  <select id="id_label_multiple" aria-label="Default select example" name="ruc_cliente">
-                    <option selected disabled value>Ingrese el RUC</option>
-                    {% for cliente in clientes %}
-                    <option value={{cliente.RUC}} data-descripcion="{{ cliente.razon_social }}, {{cliente.direccion}}, {{cliente.correo}}, 
-                    {{cliente.num_telefono}}, {{cliente.razon_social}}">{{cliente.RUC}}</option>
-                    {% endfor %} 
-                  </select>
-                  </div>
-                  <div class="col-md-3">
-                  <label for="razon_social" class="form-label">Razon social</label>
-                  <input type="text" class="form-control" id="razon_social" name="razon_social">
-                  </div>
-                  <div class="col-2">
-                  </div>
-                  <div class="col-md-3">
-                    <label for="num_factura" class="form-label">N° Factura</label>
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">009-0085- </span>
-                        <input type="text" class="form-control" id="num_factura" value="{{ultima_factura}}" name="num_factura">
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    <label for="timbrado_factura" class="form-label ">Timbrado:</label>
-                    <input type="text" class="form-control" id="timbrado_factura" name="timbrado_factura">
-                  </div>
-                  
-                  <div class="col-6">
-                  <label for="direccion_cliente" class="form-label">Dirección</label>
-                  <input type="text" class="form-control" id="direccion_cliente" placeholder="1234 Main St" name="direccion_cliente">
-                  </div>
-                  <div class="col-md-3">
-                    <label for="correo_cliente" class="form-label">Correo:</label>
-                    <input type="email" class="form-control" id="correo_cliente" name="correo_cliente" aria-describedby="emailHelp">
-                  </div>
-                  <div class="col-md-3">
-                    <label for="num_telefono" class="form-label">Telefono:</label>
-                    <input type="text" class="form-control" id="num_telefono" name="num_telefono">
-                  </div>
-
-                  {% if messages %}
-                    <ul class="messages">
-                      {% for message in messages %}
-                        <li class="{% if message.tags == 'error' %}alert alert-danger
-                        {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
-                          {{ message }}
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  {% endif %}
-      
-
+                <div class="col-md-8">
                 </div>
-              </div>
+                <div class="col-md-2">
+                  <label for="fecha_emision" class="form-label">Fecha:</label>
+                  <input type="date" class="form-control" id="fecha_emision" name="fecha_emision">
+                </div>
+                <div class="col-md-2">
+                  <label for="tipo_factura" class="form-label">Tipo de factura</label>
+                  <select id="tipo_factura" class="form-select" name="tipo_factura" disabled>
+                      <option value='1'>Contado</option>
+                  </select>
+                </div>
+                
 
-              
-              <table name="tabla_id" class="table table-info table-striped table-bordered border-dark">
-                <thead>
-                  <tr>
-                    <th scope="col">Cod. Producto</th>
-                    <th scope="col">Descripción</th>
-                    <th scope="col">Cantidad</th>
-                    <th scope="col">Precio. unit.</th>
-                    <th scope="col">Obs.</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for pro in productos_compra %}
-                  <tr>
-                    <td><input type="hidden" name="cod_producto" value="{{ libro.cod_producto }}">{{ libro.cod_producto }}</td>
-                    <td><input type="text" name="desc_producto" class="form-control" placeholder="Descrip." value="{{ libro.descripcion }}"></td>
-                    <td><input type="text" name="cantidad_producto" class="form-control" placeholder="Cant."></td>
-                    <td><input type="text" name="precio" class="form-control" placeholder="Precio del producto"></td>
-                    <td>
-                      <button class="btn btn-sm btn-primary" name="id_libro" value="{{ libro.id }}"><i class="fa fa-solid fa-pencil"></i></button>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>                    
-              
-              <div class="col-12">
-              <button type="submit" class="btn btn-primary">Facturar</button>
-              </div>
-              
-            </form>
+                <div class="col-2">
+                <label for="id_label_multiple" class="form-label">RUC</label>
+                <select id="id_label_multiple" aria-label="Default select example" name="ruc_cliente">
+                  <option selected disabled value>Ingrese el RUC</option>
+                  {% for cliente in clientes %}
+                  <option value={{cliente.RUC}} data-descripcion="{{ cliente.razon_social }}, {{cliente.direccion}}, {{cliente.correo}}, 
+                  {{cliente.num_telefono}}, {{cliente.razon_social}}">{{cliente.RUC}}</option>
+                  {% endfor %} 
+                </select>
+                </div>
+                <div class="col-md-3">
+                <label for="razon_social" class="form-label">Razon social</label>
+                <input type="text" class="form-control" id="razon_social" name="razon_social">
+                </div>
+                <div class="col-2">
+                </div>
+                <div class="col-md-3">
+                  <label for="num_factura" class="form-label">N° Factura</label>
+                  <div class="input-group mb-3">
+                      <span class="input-group-text">009-0085- </span>
+                      <input type="text" class="form-control" id="num_factura" value="{{ultima_factura}}" name="num_factura">
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <label for="timbrado_factura" class="form-label ">Timbrado:</label>
+                  <input type="text" class="form-control" id="timbrado_factura" name="timbrado_factura">
+                </div>
+                
+                <div class="col-6">
+                <label for="direccion_cliente" class="form-label">Dirección</label>
+                <input type="text" class="form-control" id="direccion_cliente" placeholder="1234 Main St" name="direccion_cliente">
+                </div>
+                <div class="col-md-3">
+                  <label for="correo_cliente" class="form-label">Correo:</label>
+                  <input type="email" class="form-control" id="correo_cliente" name="correo_cliente" aria-describedby="emailHelp">
+                </div>
+                <div class="col-md-3">
+                  <label for="num_telefono" class="form-label">Telefono:</label>
+                  <input type="text" class="form-control" id="num_telefono" name="num_telefono">
+                </div>
 
-          </div>
-        </div>    
-      </div>
-    </div>
+                {% if messages %}
+                  <ul class="messages">
+                    {% for message in messages %}
+                      <li class="{% if message.tags == 'error' %}alert alert-danger
+                      {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
+                        {{ message }}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
     
-    <script src="{% static 'js/select2-custom.js' %}"></script>
+
+              </div>
+            </div>
+
+            
+            <table name="tabla_id" class="table table-info table-striped table-bordered border-dark">
+              <thead>
+                <tr>
+                  <th scope="col">Cod. Producto</th>
+                  <th scope="col">Descripción</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">Precio. unit.</th>
+                  <th scope="col">Obs.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for pro in productos_compra %}
+                <tr>
+                  <td><input type="hidden" name="cod_producto" value="{{ libro.cod_producto }}">{{ libro.cod_producto }}</td>
+                  <td><input type="text" name="desc_producto" class="form-control" placeholder="Descrip." value="{{ libro.descripcion }}"></td>
+                  <td><input type="text" name="cantidad_producto" class="form-control" placeholder="Cant."></td>
+                  <td><input type="text" name="precio" class="form-control" placeholder="Precio del producto"></td>
+                  <td>
+                    <button class="btn btn-sm btn-primary" name="id_libro" value="{{ libro.id }}"><i class="fa fa-solid fa-pencil"></i></button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>                    
+            
+            <div class="col-12">
+            <button type="submit" class="btn btn-primary">Facturar</button>
+            </div>
+            
+          </form>
+
+        </div>
+      </div>    
+    </div>
+  </div>
   
-  </body>
+  <script src="{% static 'js/select2-custom.js' %}"></script>
+  {% endblock %}
+  
+</body>
 </html>
