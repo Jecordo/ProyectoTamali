@@ -3,7 +3,8 @@ from io import BytesIO
 import json
 from pyexpat.errors import messages
 import re
-from django.http import HttpResponse, JsonResponse
+from urllib.parse import urlencode
+from django.http import HttpResponse, JsonResponse, QueryDict
 from django.shortcuts import render,  redirect
 from .models import (
     persona, factura, factura_detalle, cliente, producto,
@@ -89,24 +90,42 @@ def create_factura(request):
                                 metodo_de_pago=ment_pag, estado=est)
     factura_cabecera.save()
 
-    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": prod})
+    return redirect(menu_factura_detalle, factura_cabecera_id=factura_cabecera.id)
+
+#-----------------------------------Detalle de la factura----------------------------------------------
+def menu_factura_detalle(request, factura_cabecera_id):
+    print('---------asdasdadasfefawefwerfwefwewefwe---------------------------')
+
+    productos = producto.objects.all()
+    factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
+
+    factu_detalle = factura_detalle.objects.filter(num_factura=factura_cabecera.id)
+
+    return render(request, 'auxiliar.html', {"factura_cabecera": factura_cabecera, "productos": productos, "facturas_detalles": factu_detalle})
+
 
 def cargar_factura_detalle(request):
-    prod = producto.objects.all()
-    factu = get_object_or_404(factura, num_factura=request.POST['num_factura'])
-    existe = factura_detalle.objects.filter(cod_producto=request.POST['cod_producto_id']).exists()
-   
-    if existe:
 
-        factu_detalle = get_object_or_404(factura_detalle, Q(cod_producto=request.POST['cod_producto_id'])
-                                           & Q(num_factura=request.POST['num_factura']))
+    print('sddddddddfsddfncjencjknaeknvklnvklnsklvnklsdanvkldfavklaklnlkdaklnfdvkladf')
+
+    factu = get_object_or_404(factura, num_factura=request.POST['num_factura'])
+    produc = get_object_or_404(producto, pk=int(request.POST['cod_producto_id']))
+
+    existe = factura_detalle.objects.filter(cod_producto=produc.id, num_factura=factu.id).exists()
+
+    print('sddddddddfsddfncjencjknaeknvklnvklnsklvnklsdanvkldfavklaklnlkdaklnfdvkladf')
+
+    if existe:
+        print('--+entro aca++++++--')
+
+        factu_detalle = get_object_or_404(factura_detalle, Q(cod_producto=produc.id) & Q(num_factura=factu.id))
         factu_detalle.cantidad = factu_detalle.cantidad + 1
         factu_detalle.total_precio = factu_detalle.cantidad * factu_detalle.cod_producto.precio_venta
         factu_detalle.save()
 
         messages.success(request, 'Agregado uno mas')
     else:
-        produc = get_object_or_404(producto, pk=request.POST['cod_producto_id'])
+        print('---------asdasdadasfefawefwerfwefwewefwe---------------------------')
 
         factu_detalle = factura_detalle(cod_producto=produc, num_factura=factu, total_precio=produc.precio_venta,
                                         cantidad=1)
@@ -114,13 +133,14 @@ def cargar_factura_detalle(request):
         factu_detalle.save()
 
         messages.success(request, 'Agregado')
+    
+    print('sddddddddfsddfncjencjknaeknvklnvklnsklvnklsdanvkldfavklaklnlkdaklnfdvkladf')
 
 
     factura_cabecera = get_object_or_404(factura, pk=request.POST['num_factura'])
-    factu_detalles = factura_detalle.objects.filter(num_factura=request.POST['num_factura'])
-    
-    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": prod, "facturas_detalles":factu_detalles}) 
-    
+
+    return redirect(menu_factura_detalle, factura_cabecera_id=factu.id)
+
 
 def delete_factura(request):
     prod = producto.objects.all()
@@ -563,5 +583,4 @@ def create_client(request):
 
 def asistencia_contable(request):
     return render('/gestor/')
-
 
