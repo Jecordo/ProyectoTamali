@@ -15,7 +15,7 @@ class Estados(models.Model):
     
 #----------------------------------------------------------------------------------------------------------------------------
 
-class clientes(models.Model):
+class cliente(models.Model):
     nombre = models.CharField(max_length=50, null=True)
     apellido = models.CharField(max_length=50, null=True)
     razon_social = models.CharField(max_length=100, null=False)
@@ -119,7 +119,8 @@ class metodo_pago(models.Model):
 
 class factura(models.Model):
     num_factura = models.CharField(max_length=50, null=False)
-    cliente = models.ForeignKey(clientes, on_delete=models.CASCADE)
+    timbrado = models.CharField(max_length=50, null=False)
+    cliente = models.ForeignKey(cliente, on_delete=models.CASCADE)
     tipo_factura = models.ForeignKey(tipo_factura, on_delete=models.CASCADE)
     metodo_de_pago = models.ForeignKey(metodo_pago, on_delete=models.CASCADE)
     total_venta = models.IntegerField()
@@ -133,6 +134,7 @@ class factura(models.Model):
 class factura_detalle(models.Model):
     num_factura = models.ForeignKey(factura, on_delete=models.CASCADE)
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()
     precio_unitario = models.IntegerField()
     total_precio = models.IntegerField()
     impuesto = models.IntegerField()

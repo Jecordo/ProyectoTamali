@@ -1,11 +1,13 @@
 {% extends "Base.html" %}
 
 {% load static %}
-
+<head>
+  <title>{% block title %} Factura {% endblock %}</title>
+</head>
 <body>
   {% block content %}
   <div class="container">
-
+  
     <div class="col-md-10">
 
       <h1 class="display-6">Modulo factura</h1> 
@@ -20,7 +22,18 @@
 
               <div class="row g-3">
 
-                <div class="col-md-8">
+                <!---->
+                <div class="col-md-2">
+                  <select id="metodo_pago" class="form-select" name="metodo_pago" required>
+                    <option selected disabled value>Met. Pago</option>
+                    {% for metodo in metodos_pagos %}
+                    <option value={{metodo.id}}>{{metodo.descripcion}}</option>
+                    {% empty %}
+                    <h4 class="text-center">No hay metodo</h4>
+                    {% endfor %} 
+                  </select>
+                </div>
+                <div class="col-md-6">
                 </div>
                 <div class="col-md-2">
                   <label for="fecha_emision" class="form-label">Fecha:</label>
@@ -28,21 +41,25 @@
                 </div>
                 <div class="col-md-2">
                   <label for="tipo_factura" class="form-label">Tipo de factura</label>
-                  <select id="tipo_factura" class="form-select" name="tipo_factura" disabled>
-                      <option value='1'>Contado</option>
+                  <select id="tipo_factura" class="form-select" name="tipo_factura" readonly>
+                    {% for tipo in tipos_facturas %}
+                    <option value="{{ tipo.id }}">{{ tipo.estado }}</option>
+                    {% empty %}
+                    <h4 class="text-center">No hay tipo</h4>
+                    {% endfor %}
                   </select>
                 </div>
                 
 
                 <div class="col-2">
-                <label for="id_label_multiple" class="form-label">RUC</label>
-                <select id="id_label_multiple" aria-label="Default select example" name="ruc_cliente">
-                  <option selected disabled value>Ingrese el RUC</option>
-                  {% for cliente in clientes %}
-                  <option value={{cliente.RUC}} data-descripcion="{{ cliente.razon_social }}, {{cliente.direccion}}, {{cliente.correo}}, 
-                  {{cliente.num_telefono}}, {{cliente.razon_social}}">{{cliente.RUC}}</option>
-                  {% endfor %} 
-                </select>
+                  <label class="form-label">RUC</label>
+                  <select id="id_label_multiple" class="form-control" name="ruc_cliente">
+                    <option selected disabled value>Ingrese el RUC</option>
+                    {% for cliente in clientes %}
+                    <option value={{cliente.RUC}} data-descripcion="{{ cliente.razon_social }}, {{cliente.direccion}}, {{cliente.correo}}, 
+                    {{cliente.num_telefono}}, {{cliente.razon_social}}">{{cliente.RUC}}</option>
+                    {% endfor %} 
+                  </select>
                 </div>
                 <div class="col-md-3">
                 <label for="razon_social" class="form-label">Razon social</label>
@@ -89,32 +106,6 @@
 
               </div>
             </div>
-
-            
-            <table name="tabla_id" class="table table-info table-striped table-bordered border-dark">
-              <thead>
-                <tr>
-                  <th scope="col">Cod. Producto</th>
-                  <th scope="col">Descripción</th>
-                  <th scope="col">Cantidad</th>
-                  <th scope="col">Precio. unit.</th>
-                  <th scope="col">Obs.</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for pro in productos_compra %}
-                <tr>
-                  <td><input type="hidden" name="cod_producto" value="{{ libro.cod_producto }}">{{ libro.cod_producto }}</td>
-                  <td><input type="text" name="desc_producto" class="form-control" placeholder="Descrip." value="{{ libro.descripcion }}"></td>
-                  <td><input type="text" name="cantidad_producto" class="form-control" placeholder="Cant."></td>
-                  <td><input type="text" name="precio" class="form-control" placeholder="Precio del producto"></td>
-                  <td>
-                    <button class="btn btn-sm btn-primary" name="id_libro" value="{{ libro.id }}"><i class="fa fa-solid fa-pencil"></i></button>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>                    
             
             <div class="col-12">
             <button type="submit" class="btn btn-primary">Facturar</button>

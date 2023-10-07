@@ -6,7 +6,7 @@ import re
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,  redirect
 from .models import (
-    persona, factura, factura_detalle, clientes, producto,
+    persona, factura, factura_detalle, cliente, producto,
     categoria,marca,Estados,proveedor, tipo_factura, 
     metodo_pago, marca, cuenta, libro_diario, libro_mayor)
 from django.shortcuts import get_object_or_404
@@ -31,7 +31,9 @@ def menu_principal(request):
 
 
 def facturar(request):
-    client = clientes.objects.all()
+    client = cliente.objects.all()
+    metodo = metodo_pago.objects.all()
+    tipo = tipo_factura.objects.all()
     factu_prduc = []
 
     ultimoa_factura = factura.objects.order_by('-num_factura').first()
@@ -44,16 +46,16 @@ def facturar(request):
         num_factura = 1
         num_factura = f"{num_factura:07d}" 
 
-    return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura, "factu_prduc":factu_prduc})
+    return render(request, 'create_factura.html', {"cliente": client, "ultima_factura": num_factura, "factu_prduc":factu_prduc, "metodos_pagos":metodo, 'tipos_facturas':tipo})
 
 
 
 def create_factura(request):
-    existe = clientes.objects.filter(RUC=request.POST['ruc_cliente']).exists()
+    prod = producto.objects.all()
+    existe = cliente.objects.filter(RUC=request.POST['ruc_cliente']).exists()
 
     if existe:
-        #aux = request.POST['id_libro']
-        aux_cliente = get_object_or_404(clientes, RUC=request.POST['ruc_cliente'])
+        aux_cliente = get_object_or_404(cliente, RUC=request.POST['ruc_cliente'])
 
         aux_cliente.razon_social = request.POST['razon_social']
         aux_cliente.direccion = request.POST['direccion_cliente']
@@ -63,17 +65,58 @@ def create_factura(request):
         aux_cliente.save()
 
         messages.error(request, 'actualizado')
-        return redirect(facturar)
     else:
         est = get_object_or_404(Estados, pk=1)
         
-        aux_cliente = clientes(RUC=request.POST['ruc_cliente'], razon_social=request.POST['razon_social'], direccion=request.POST['direccion_cliente'],
+        aux_cliente = cliente(RUC=request.POST['ruc_cliente'], razon_social=request.POST['razon_social'], direccion=request.POST['direccion_cliente'],
                                correo=request.POST['correo_cliente'], num_telefono=request.POST['num_telefono'], estado=est)
 
         aux_cliente.save()
         messages.success(request, 'Cargado.')
 
-        return redirect(facturar)
+    est = get_object_or_404(Estados, pk=1)
+    ment_pag = get_object_or_404(metodo_pago, pk=request.POST['metodo_pago'])
+    client = get_object_or_404(cliente, RUC=request.POST['ruc_cliente'])
+    factura_tipo = get_object_or_404(tipo_factura, pk=request.POST['tipo_factura'])
+
+    factura_cabecera = factura(num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
+                                metodo_de_pago=ment_pag, estado=est)
+
+    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": prod})
+
+def cargar_factura_detalle(request):
+    prod = producto.objects.all()
+    existe = cliente.objects.filter(RUC=request.POST['ruc_cliente']).exists()
+
+    if existe:
+        aux_cliente = get_object_or_404(cliente, RUC=request.POST['ruc_cliente'])
+
+        aux_cliente.razon_social = request.POST['razon_social']
+        aux_cliente.direccion = request.POST['direccion_cliente']
+        aux_cliente.correo = request.POST['correo_cliente']
+        aux_cliente.num_telefono = request.POST['num_telefono']
+        
+        aux_cliente.save()
+
+        messages.error(request, 'actualizado')
+    else:
+        est = get_object_or_404(Estados, pk=1)
+        
+        aux_cliente = cliente(RUC=request.POST['ruc_cliente'], razon_social=request.POST['razon_social'], direccion=request.POST['direccion_cliente'],
+                               correo=request.POST['correo_cliente'], num_telefono=request.POST['num_telefono'], estado=est)
+
+        aux_cliente.save()
+        messages.success(request, 'Cargado.')
+
+    est = get_object_or_404(Estados, pk=1)
+    ment_pag = get_object_or_404(metodo_pago, pk=request.POST['metodo_pago'])
+    client = get_object_or_404(cliente, RUC=request.POST['ruc_cliente'])
+    factura_tipo = get_object_or_404(tipo_factura, pk=request.POST['tipo_factura'])
+
+    factura_cabecera = factura(num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
+                                metodo_de_pago=ment_pag, estado=est)
+
+    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": prod}) 
     
 
 
