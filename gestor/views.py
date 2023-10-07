@@ -36,43 +36,49 @@ def facturar(request):
     tipo = tipo_factura.objects.all()
     factu_prduc = []
 
-    ultimoa_factura = factura.objects.order_by('-num_factura').first()
+    ultimoa_factura = factura.objects.all().exists()
     
-    if ultimoa_factura is not None and ultimoa_factura.num_factura:
+    if ultimoa_factura:
+        ultimoa_factura = factura.objects.order_by('-num_factura').first()
         num_factura = int(ultimoa_factura.num_factura) + 1
         num_factura = f"{num_factura:07d}" 
-
     else:
         num_factura = 1
         num_factura = f"{num_factura:07d}" 
 
-    return render(request, 'create_factura.html', {"cliente": client, "ultima_factura": num_factura, "factu_prduc":factu_prduc, "metodos_pagos":metodo, 'tipos_facturas':tipo})
+    return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura, "factu_prduc":factu_prduc, "metodos_pagos":metodo, 'tipos_facturas':tipo})
 
 
 
 def create_factura(request):
     prod = producto.objects.all()
-    existe = cliente.objects.filter(RUC=request.POST['ruc_cliente']).exists()
+    existe = factura.objects.filter(num_factura=request.POST['num_factura']).exists()
 
     if existe:
-        aux_cliente = get_object_or_404(cliente, RUC=request.POST['ruc_cliente'])
+        messages.error(request, 'Numero de factura ya registrado')
+        return redirect(facturar)
+    else:    
+        existe = cliente.objects.filter(RUC=request.POST['ruc_cliente']).exists()
 
-        aux_cliente.razon_social = request.POST['razon_social']
-        aux_cliente.direccion = request.POST['direccion_cliente']
-        aux_cliente.correo = request.POST['correo_cliente']
-        aux_cliente.num_telefono = request.POST['num_telefono']
-        
-        aux_cliente.save()
+        if existe:
+            aux_cliente = get_object_or_404(cliente, RUC=request.POST['ruc_cliente'])
 
-        messages.error(request, 'actualizado')
-    else:
-        est = get_object_or_404(Estados, pk=1)
-        
-        aux_cliente = cliente(RUC=request.POST['ruc_cliente'], razon_social=request.POST['razon_social'], direccion=request.POST['direccion_cliente'],
-                               correo=request.POST['correo_cliente'], num_telefono=request.POST['num_telefono'], estado=est)
+            aux_cliente.razon_social = request.POST['razon_social']
+            aux_cliente.direccion = request.POST['direccion_cliente']
+            aux_cliente.correo = request.POST['correo_cliente']
+            aux_cliente.num_telefono = request.POST['num_telefono']
+            
+            aux_cliente.save()
 
-        aux_cliente.save()
-        messages.success(request, 'Cargado.')
+            messages.error(request, 'actualizado')
+        else:
+            est = get_object_or_404(Estados, pk=1)
+            
+            aux_cliente = cliente(RUC=request.POST['ruc_cliente'], razon_social=request.POST['razon_social'], direccion=request.POST['direccion_cliente'],
+                                correo=request.POST['correo_cliente'], num_telefono=request.POST['num_telefono'], estado=est)
+
+            aux_cliente.save()
+            messages.success(request, 'Cargado.')
 
     est = get_object_or_404(Estados, pk=1)
     ment_pag = get_object_or_404(metodo_pago, pk=request.POST['metodo_pago'])
@@ -81,76 +87,52 @@ def create_factura(request):
 
     factura_cabecera = factura(num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
                                 metodo_de_pago=ment_pag, estado=est)
+    factura_cabecera.save()
 
     return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": prod})
 
 def cargar_factura_detalle(request):
     prod = producto.objects.all()
-    existe = cliente.objects.filter(RUC=request.POST['ruc_cliente']).exists()
-
+    factu = get_object_or_404(factura, num_factura=request.POST['num_factura'])
+    existe = factura_detalle.objects.filter(cod_producto=request.POST['cod_producto_id']).exists()
+   
     if existe:
-        aux_cliente = get_object_or_404(cliente, RUC=request.POST['ruc_cliente'])
 
-        aux_cliente.razon_social = request.POST['razon_social']
-        aux_cliente.direccion = request.POST['direccion_cliente']
-        aux_cliente.correo = request.POST['correo_cliente']
-        aux_cliente.num_telefono = request.POST['num_telefono']
-        
-        aux_cliente.save()
+        factu_detalle = get_object_or_404(factura_detalle, Q(cod_producto=request.POST['cod_producto_id'])
+                                           & Q(num_factura=request.POST['num_factura']))
+        factu_detalle.cantidad = factu_detalle.cantidad + 1
+        factu_detalle.total_precio = factu_detalle.cantidad * factu_detalle.cod_producto.precio_venta
+        factu_detalle.save()
 
-        messages.error(request, 'actualizado')
+        messages.success(request, 'Agregado uno mas')
     else:
-        est = get_object_or_404(Estados, pk=1)
-        
-        aux_cliente = cliente(RUC=request.POST['ruc_cliente'], razon_social=request.POST['razon_social'], direccion=request.POST['direccion_cliente'],
-                               correo=request.POST['correo_cliente'], num_telefono=request.POST['num_telefono'], estado=est)
+        produc = get_object_or_404(producto, pk=request.POST['cod_producto_id'])
 
-        aux_cliente.save()
-        messages.success(request, 'Cargado.')
+        factu_detalle = factura_detalle(cod_producto=produc, num_factura=factu, total_precio=produc.precio_venta,
+                                        cantidad=1)
 
-    est = get_object_or_404(Estados, pk=1)
-    ment_pag = get_object_or_404(metodo_pago, pk=request.POST['metodo_pago'])
-    client = get_object_or_404(cliente, RUC=request.POST['ruc_cliente'])
-    factura_tipo = get_object_or_404(tipo_factura, pk=request.POST['tipo_factura'])
+        factu_detalle.save()
 
-    factura_cabecera = factura(num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
-                                metodo_de_pago=ment_pag, estado=est)
+        messages.success(request, 'Agregado')
 
-    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": prod}) 
+
+    factura_cabecera = get_object_or_404(factura, pk=request.POST['num_factura'])
+    factu_detalles = factura_detalle.objects.filter(num_factura=request.POST['num_factura'])
+    
+    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": prod, "facturas_detalles":factu_detalles}) 
     
 
+def delete_factura(request):
+    prod = producto.objects.all()
+    factu_detalle = get_object_or_404(factura_detalle, pk=int(request.POST['id_detalle']))
+    num_factura = factu_detalle.num_factura
+    factu_detalle.delete()
 
-@csrf_exempt
-def buscar_producto(request):
-    # Obtiene la consulta de búsqueda del cuerpo de la solicitud POST
-    query = request.POST.get('query', '')
-
-    # Realiza la búsqueda de productos basada en la consulta
-    productos = producto.objects.filter(descripcion__icontains=query)
-
-    # Crea una lista de resultados de productos
-    resultados = [{'nombre': prod.descripcion} for prod in productos]
-
-    # Devuelve los resultados como una respuesta JSON
-    return JsonResponse({'productos': resultados})
+    factu_detalles = factura_detalle.objects.get(num_factura=num_factura)
+    factu_cabecera = factura.objects.get(id=request.POST['num_factura'])
 
 
-def obtener_productos(request, cod_producto):
-    productos = producto.objects.filter(num_producto=cod_producto)
-    productos_data = []
-    for prod in productos:
-        productos_data.append({
-            'cod_producto': prod.cod_producto,
-            'descripcion': prod.descripcion,
-            # Agrega más campos según tus necesidades
-        })
-    return JsonResponse({'productos': productos})
-
-
-def delete_factura(request, factu_id):
-    factu = persona.objects.get(id=factu_id)
-    factu.delete()
-    return redirect('/gestor/')
+    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factu_cabecera, "productos": prod, "facturas_detalles":factu_detalles})
 
 
 

@@ -119,7 +119,6 @@ class metodo_pago(models.Model):
 
 class factura(models.Model):
     num_factura = models.CharField(max_length=50, null=False)
-    timbrado = models.CharField(max_length=50, null=False)
     cliente = models.ForeignKey(cliente, on_delete=models.CASCADE)
     tipo_factura = models.ForeignKey(tipo_factura, on_delete=models.CASCADE)
     metodo_de_pago = models.ForeignKey(metodo_pago, on_delete=models.CASCADE)
