@@ -59,26 +59,15 @@
                           
                         </div>
 
-                        {% if mensaje_error == 'Asiento ya existe.' %}
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                          {{mensaje_error}}
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>                       
-                        {% elif mensaje_error == 'Asiento guardado!!' %}
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                          {{mensaje_error}}
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>   
-                        {% elif mensaje_error == 'Asiento actualizado!!' %}
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                          {{mensaje_error}}
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>   
-                        {% elif mensaje_error == 'Asiento no esta cargado.' %}
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                          {{mensaje_error}}
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>   
+                        {% if messages %}
+                          <ul class="messages">
+                            {% for message in messages %}
+                              <li class="{% if message.tags == 'error' %}alert alert-danger
+                              {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
+                                {{ message }}
+                              </li>
+                            {% endfor %}
+                          </ul>
                         {% endif %}
 
                       </div>

@@ -22,7 +22,7 @@
 
     <div class="container">
 
-            <div class="col-md-6 offset-md-3">
+            <div class="col-md-10">
 
               <h1 class="display-6">Modulo producto</h1> 
 
@@ -30,80 +30,76 @@
 
                   <form action="{% url 'cargar_roducto' %}" class="row g-3 mb-2" method="POST">
 
-                      {% csrf_token %}
+                    {% csrf_token %}
 
-                      <div class="col-6">
-                      <label for="codigoproduct" class="form-label">Cod. Producto</label>
-                      <input type="text" class="form-control" id="codigoproduct" placeholder="123456ABC" name="cod_producto">
-                      </div>
-                      <div class="col-4">
-                      </div>
-                      
-                      <div class="col-md-6">
-                          <select id="marca_producto" class="form-select" name="marca_producto">
-                              <option selected>Seleciona la marca</option>
-                              {% for marca in marcas %}
-                                <option value={{marca.id}}>{{marca.descripcion}}</option>
-                              {% empty %}
-                                <h4 class="text-center">No hay marcas</h4>
-                              {% endfor %} 
-                          </select>
-                      </div>
+                    <div class="col-ms-12">
+                      <label for="desc_producto" class="form-label">Cod. Producto:</label>
+                    </div>
+                    <div class="col-md-3">
+                    <input type="text" class="form-control" id="codigoproduct" placeholder="Cod. Producto" name="cod_producto" required>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <select id="marca_producto" class="form-select" name="marca_producto" required>
+                            <option selected>Seleciona la marca</option>
+                            {% for marca in marcas %}
+                              <option value={{marca.id}}>{{marca.descripcion}}</option>
+                            {% empty %}
+                              <h4 class="text-center">No hay marcas</h4>
+                            {% endfor %} 
+                        </select>
+                    </div>
 
-                      <div class="col-md-6">
-                          <select id="categoria_producto" class="form-select" name="cod_cateoria">
-                              <option selected>Seleccione la categoria</option>
-                              {% for categoria in categorias %}
-                                <option value={{categoria.id}}>{{categoria.descripcion}}</option>
-                              {% empty %}
-                                <h4 class="text-center">No hay categoria</h4>
-                              {% endfor %} 
-                          </select>
-                      </div>
-
-                      <div class="col-md-12">
-                      <label for="desc_producto" class="form-label">Detalle del producto</label>
-                      <input type="text" class="form-control" id="desc_producto" placeholder="Describir el producto" name="desc_producto">
-                      </div>
-                      <div class="col-6">
-                        <label for="precio_compra" class="form-label">Precio compra</label>
-                          <div class="input-group mb-3">
-                            <span class="input-group-text">G</span>
-                            <input type="text" class="form-control" id="precio_compra" placeholder="99999999" name="precio_compra">
-                            <span class="input-group-text">.00</span>
-                        </div>
-                      </div>
-
-                      <div class="col-6">
-                          <label for="precio_venta" class="form-label">Precio venta</label>
-                          <div class="input-group mb-3">
-                              <span class="input-group-text">G</span>
-                              <input type="text" class="form-control" id="precio_venta" placeholder="99999999" name="precio_venta">
-                              <span class="input-group-text">.00</span>
-                          </div>
-                      </div>
-
-                      <div class="col-md-6">
-                      <label for="cant_product" class="form-label">Catidad</label>
-                      <input type="text" class="form-control" id="cant_product" name="cantidad_producto">
-                      </div>
-                      <div class="col-md-6">
-                      <label for="prov_producto" class="form-label">Proveedor</label>
-                      <select id="prov_producto" class="form-select" name="prov_producto">
-                        <option selected>Elige...</option>
+                    <div class="col-md-3">
+                        <select id="categoria_producto" class="form-select" name="cod_cateoria" required>
+                            <option selected>Seleccione la categoria</option>
+                            {% for categoria in categorias %}
+                              <option value={{categoria.id}}>{{categoria.descripcion}}</option>
+                            {% empty %}
+                              <h4 class="text-center">No hay categoria</h4>
+                            {% endfor %} 
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                      <select id="prov_producto" class="form-select" name="prov_producto" required>
+                        <option selected>Elige proveedor...</option>
                         {% for proveedor in proveedores %}
                           <option value={{proveedor.id}}>{{proveedor.razon_social}}</option>
                         {% empty %}
                           <h4 class="text-center">No hay proveedor</h4>
                         {% endfor %}  
                       </select>
-                      </div>
+                    </div>
 
-                      <div class="col-12">
-                        <div class="form-check">
-                            <button type="submit" class="btn btn-primary">Guardar</button>
-                        </div>
+                    <div class="col-md-5">
+                    <label for="desc_producto" class="form-label">Detalle del producto</label>
+                    <input type="text" class="form-control" id="desc_producto" placeholder="Describir el producto" name="desc_producto" required>
+                    </div>
+                    <div class="col-md-2">
+                      <label for="precio_compra" class="form-label">Precio compra</label>
+                        <div class="input-group mb-3">
+                          <input type="text" class="form-control" id="precio_compra" placeholder="99999999" name="precio_compra" style="text-align: right;" required>
+                          <span class="input-group-text">G</span>
                       </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="precio_venta" class="form-label">Precio venta</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="precio_venta" placeholder="99999999" name="precio_venta" style="text-align: right;" required>
+                            <span class="input-group-text">G</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-1">
+                    <label for="cant_product" class="form-label">Catidad</label>
+                    <input type="text" class="form-control" id="cant_product" name="cantidad_producto" required>
+                    </div>
+                    
+
+                    <div class="col-12">
+                      <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
 
                   </form>  
                   

@@ -189,7 +189,7 @@
                       </ul>
                     </nav>
                     
-                    <form action="{% url 'descargar_libro' %}" method="post">
+                    <form action="{% url 'descargar_libro_mayor' %}" method="post">
                       {% csrf_token %}
                       <div class="col-2">
                         <input type="text" class="form-control" id="fecha_libro" name="fecha_libro" placeholder="AAAA-MM o AAAA" required>

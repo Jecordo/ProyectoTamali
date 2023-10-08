@@ -72,18 +72,6 @@
                 <input type="text" class="form-control" value="{{factura_cabecera.cliente.num_telefono}}" readonly>
               </div>
 
-              <div class="col-md-3">
-                <select id="cod_producto_id" name="cod_producto_id">
-                  <option selected disabled value>seleciones</option>
-                  {% for producto in productos %}
-                  <option value={{producto.id}}>{{producto.cod_producto}}, {{producto.descripcion}}</option>
-                  {% endfor %} 
-                </select>
-              </div>
-              <div class="col-md-3">
-                <button class="btn btn-sm btn-primary" name="id_libro">Agregar</button>
-              </div>
-
               {% if messages %}
                 <ul class="messages">
                   {% for message in messages %}
@@ -95,13 +83,24 @@
                 </ul>
               {% endif %}
 
+              <div class="col-md-3">
+                <select id="cod_producto_id" name="cod_producto_id">
+                  <option selected disabled value>selecione articulo a añadir</option>
+                  {% for producto in productos %}
+                  <option value={{producto.id}}>{{producto.cod_producto}}, {{producto.descripcion}}</option>
+                  {% endfor %} 
+                </select>
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-sm btn-primary" name="id_libro">Agregar</button>
+              </div>
 
             </div>
           </div>         
         
         </form>
         
-        <div class="card card-body bg-dark mb-2">
+        <div class="card card-body bg-light mb-2">
 
           <div class="col-12">
 
@@ -109,41 +108,45 @@
           
               {% csrf_token %}
 
-              <table id="tabla_id" name="tabla_id" class="table table-info table-striped table-bordered border-dark">
-                <caption>Descripción de la tabla</caption>
+              <table id="tabla_id" name="tabla_id" class="table table-striped bordered-dark table-secondary table-bordered">
                 <thead>
-                  <tr>
-                    <th scope="col" style="width: 6%;">Cod.</th>
-                    <th scope="col" style="width: 14%;">Descripción</th>
-                    <th scope="col" style="width: 5%;">Cant.</th>
-                    <th scope="col" style="width: 13%;">Prec. unit.</th>
-                    <th scope="col" style="width: 13%;">Total</th>
-                    <th scope="col" style="width: 12%;">Obs.</th>
-                  </tr>
+                <tr>
+                  <th scope="col" style="width: 3%;">Cod.</th>
+                  <th scope="col" style="width: 50%;">Descripción</th>
+                  <th scope="col" style="width: 2%;">Cant.</th>
+                  <th scope="col" style="width: 10%;">Prec. unit.</th>
+                  <th scope="col" style="width: 10%;">Total</th>
+                  <th scope="col" style="width: 2%;">Obs.</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for factu in facturas_detalles %}
-                    <tr>
-                      <td><input class="text" id="cod_producto_table" name="cod_producto" value="{{factu.cod_producto.cod_producto}}"></td>
-                      <td><input id="desc_producto" name="desc_producto" value="{{factu.cod_producto.descripcion}}"></td>
-                      <td><input id="cantidad_producto" name="cantidad_producto" value="{{factu.cantidad}}"></td>
-                      <td><input id="precio" name="precio" value="{{factu.cod_producto.precio_venta}}"></td>
-                      <td><input id="precio_total" name="precio_total" value="{{factu.total_precio}}"></td>
-                      <td>
-                        <button class="btn btn-sm btn-primary" id="id_detalle" name="id_detalle" value="{{factu.id}}"><i class="fa fa-solid fa-pencil"></i></button>
-                      </td>
-                    </tr>              
-                    {% endfor %}
-
+                  {% for factu in facturas_detalles %}
+                  <tr>
+                    <td>{{factu.cod_producto.cod_producto}}</td>
+                    <td>{{factu.cod_producto.descripcion}}</td>
+                    <td>{{factu.cantidad}}</td>
+                    <td>{{factu.cod_producto.precio_venta}}</td>
+                    <td>{{factu.total_precio}}</td>
+                    <td>
+                      <button class="btn btn-sm btn-danger" id="id_detalle" name="id_detalle" value="{{factu.id}}"><i class="fa fa-solid fa-trash-o"></i></button>
+                    </td>
+                  </tr>              
+                  {% endfor %}
+                  <tr>
+                    <td colspan="4" style="text-align: right;">Total de compra</td>
+                    <td>{{total_compra}}</td>
+                    <td></td>
+                  </tr>
                 </tbody>
               </table>                    
               
-              <div class="col-12">
-              <button type="submit" class="btn btn-primary">Facturar</button>
-              </div>
+              <a class="btn btn-primary" href="{% url 'facturas' %}">Finalizar</a>
+              <a class="btn btn-danger" href="{% url 'cancelar_factura' factura_cabecera.id %}">Cancelar la facturacion</a>
+
             </form>
           </div>
         </div>
+
       </div>   
     </div>
   </div>

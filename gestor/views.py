@@ -71,7 +71,7 @@ def create_factura(request):
             
             aux_cliente.save()
 
-            messages.error(request, 'actualizado')
+            messages.success(request, 'Cabecera generada')
         else:
             est = get_object_or_404(Estados, pk=1)
             
@@ -79,7 +79,7 @@ def create_factura(request):
                                 correo=request.POST['correo_cliente'], num_telefono=request.POST['num_telefono'], estado=est)
 
             aux_cliente.save()
-            messages.success(request, 'Cargado.')
+            messages.success(request, 'Cabecera generada - Cliente creado')
 
     est = get_object_or_404(Estados, pk=1)
     ment_pag = get_object_or_404(metodo_pago, pk=request.POST['metodo_pago'])
@@ -87,57 +87,46 @@ def create_factura(request):
     factura_tipo = get_object_or_404(tipo_factura, pk=request.POST['tipo_factura'])
 
     factura_cabecera = factura(num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
-                                metodo_de_pago=ment_pag, estado=est)
+                                metodo_de_pago=ment_pag, estado=est, timbrado=request.POST['timbrado_factura'])
     factura_cabecera.save()
 
     return redirect(menu_factura_detalle, factura_cabecera_id=factura_cabecera.id)
 
 #-----------------------------------Detalle de la factura----------------------------------------------
 def menu_factura_detalle(request, factura_cabecera_id):
-    print('---------asdasdadasfefawefwerfwefwewefwe---------------------------')
-
     productos = producto.objects.all()
     factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
 
-    factu_detalle = factura_detalle.objects.filter(num_factura=factura_cabecera.id)
+    factu_detalle = factura_detalle.objects.filter(num_factura=factura_cabecera.id).order_by('id')
 
-    return render(request, 'auxiliar.html', {"factura_cabecera": factura_cabecera, "productos": productos, "facturas_detalles": factu_detalle})
+    suma = 0
+    for precio in factu_detalle:
+        suma = suma + precio.total_precio
+
+    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": productos,
+                                                            "facturas_detalles": factu_detalle, "total_compra":suma})
 
 
 def cargar_factura_detalle(request):
-
-    print('sddddddddfsddfncjencjknaeknvklnvklnsklvnklsdanvkldfavklaklnlkdaklnfdvkladf')
-
     factu = get_object_or_404(factura, num_factura=request.POST['num_factura'])
     produc = get_object_or_404(producto, pk=int(request.POST['cod_producto_id']))
 
     existe = factura_detalle.objects.filter(cod_producto=produc.id, num_factura=factu.id).exists()
 
-    print('sddddddddfsddfncjencjknaeknvklnvklnsklvnklsdanvkldfavklaklnlkdaklnfdvkladf')
-
     if existe:
-        print('--+entro aca++++++--')
-
         factu_detalle = get_object_or_404(factura_detalle, Q(cod_producto=produc.id) & Q(num_factura=factu.id))
         factu_detalle.cantidad = factu_detalle.cantidad + 1
         factu_detalle.total_precio = factu_detalle.cantidad * factu_detalle.cod_producto.precio_venta
         factu_detalle.save()
 
-        messages.success(request, 'Agregado uno mas')
+        messages.success(request, 'Se agrego un/a '+ produc.descripcion + ' a la cantidad')
     else:
-        print('---------asdasdadasfefawefwerfwefwewefwe---------------------------')
-
         factu_detalle = factura_detalle(cod_producto=produc, num_factura=factu, total_precio=produc.precio_venta,
                                         cantidad=1)
 
         factu_detalle.save()
 
-        messages.success(request, 'Agregado')
-    
-    print('sddddddddfsddfncjencjknaeknvklnvklnsklvnklsdanvkldfavklaklnlkdaklnfdvkladf')
-
-
-    factura_cabecera = get_object_or_404(factura, pk=request.POST['num_factura'])
+        messages.success(request, 'Se agrego '+produc.descripcion)
 
     return redirect(menu_factura_detalle, factura_cabecera_id=factu.id)
 
@@ -148,12 +137,26 @@ def delete_factura(request):
     num_factura = factu_detalle.num_factura
     factu_detalle.delete()
 
-    factu_detalles = factura_detalle.objects.get(num_factura=num_factura)
-    factu_cabecera = factura.objects.get(id=request.POST['num_factura'])
+    factu_detalles = factura_detalle.objects.filter(num_factura=num_factura).order_by('id')
+
+    suma = 0
+    for precio in factu_detalles:
+        suma = suma + precio.total_precio
+
+    factu_cabecera = get_object_or_404(factura, num_factura=num_factura)
+
+    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factu_cabecera, "productos": prod,
+                                                            "facturas_detalles":factu_detalles, "total_compra":suma})
 
 
-    return render(request, 'create_factura_detalle.html', {"factura_cabecera": factu_cabecera, "productos": prod, "facturas_detalles":factu_detalles})
+def cancelar_factura(request, factura_cabecera_id):
 
+    factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
+    factu_detalle = factura_detalle.objects.filter(num_factura=factura_cabecera.id).order_by('id')
+    factu_detalle.delete()
+    factura_cabecera.delete()
+
+    return redirect(facturar)
 
 
 def ver_facturas(request):
@@ -227,14 +230,7 @@ def cargar_libro_diario(request):
     tipo_mov = request.POST['tipo_movimiento']
 
     if aux_lib and aux_lib.num_asiento != int(request.POST['num_asiento']):
-        corroboration = libro_diario.objects.filter(num_asiento=aux_lib.num_asiento)
-        suma=0
-
-        for lib in corroboration:
-            suma = suma + lib.debe
-            suma = suma - lib.haber
-
-        if suma != 0:
+        if equilibrio() != 0:
             messages.error(request, 'El asiento no está equilibrado.')
             return redirect(menu_libro_diario)
 
@@ -242,18 +238,39 @@ def cargar_libro_diario(request):
 
         libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
                         ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=request.POST['id_monto'], haber=0)
-
         libro.save()
+
+        cta.saldo = cta.saldo + int(request.POST['id_monto'])
+        cta.save()
         
     elif tipo_mov == "2":
 
         libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
                         ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=0, haber=request.POST['id_monto'])
-
         libro.save()
+
+        cta.saldo = cta.saldo - int(request.POST['id_monto'])
+        cta.save()
 
     messages.success(request, 'Asiento guardado!!')
     return redirect(menu_libro_diario)
+
+def equilibrio():
+    if libro_diario.objects.all().exists():
+        aux_lib = libro_diario.objects.order_by('-id').first()
+
+        corroboration = libro_diario.objects.filter(num_asiento=aux_lib.num_asiento)
+        suma=0
+
+        for lib in corroboration:
+            suma = suma + lib.debe
+            suma = suma - lib.haber
+    else:
+        suma = 0
+
+    return int(suma)
+
+
 
 @never_cache
 def modificar_libro_diario(request):
@@ -282,10 +299,10 @@ def modificar_libro_diario(request):
         
         aux_libro.save()
 
-        mensaje_error = "Asiento actualizado!!"
+        messages.success(request, 'Asiento actualizado!!')
         return redirect(menu_libro_diario)
     else:
-        mensaje_error = "Asiento no esta cargado."
+        messages.error(request, 'Asiento no esta cargado.')
 
         return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas, "mensaje_error": mensaje_error})
 
@@ -325,30 +342,28 @@ def migrar_asientos(request):
     asientos_migrar = libro_diario.objects.all().order_by('num_asiento')
     libros_mayores = libro_mayor.objects.all().order_by('num_asiento')
 
-    if asientos_migrar.count()==libros_mayores.count():
-        return redirect(menu_libro_mayor)
+    libros_mayores.delete()
 
-    else:
-        for asiento in asientos_migrar[libros_mayores.count():]:
-            libro_mayor_mas_reciente = libro_mayor.objects.filter(num_cuenta=asiento.num_cuenta).order_by('-id').first()
+    for asiento in asientos_migrar:
+        libro_mayor_mas_reciente = libro_mayor.objects.filter(num_cuenta=asiento.num_cuenta).order_by('-id').first()
 
-            if libro_mayor_mas_reciente:
-                saldo = libro_mayor_mas_reciente.saldo + asiento.debe
-                saldo = saldo - asiento.haber
-                num_asiento = int(libro_mayor_mas_reciente.num_asiento)+1
-            else:
-                saldo = asiento.debe
-                saldo = saldo - asiento.haber
-                num_asiento = 1
+        if libro_mayor_mas_reciente:
+            saldo = libro_mayor_mas_reciente.saldo + asiento.debe
+            saldo = saldo - asiento.haber
+            num_asiento = int(libro_mayor_mas_reciente.num_asiento)+1
+        else:
+            saldo = asiento.debe
+            saldo = saldo - asiento.haber
+            num_asiento = 1
 
-            libro = libro_mayor(fecha=asiento.fecha, num_asiento=num_asiento,concepto=asiento.concepto, 
-                                num_cuenta=asiento.num_cuenta, debe=asiento.debe, haber=asiento.haber, saldo=saldo)
+        libro = libro_mayor(fecha=asiento.fecha, num_asiento=num_asiento,concepto=asiento.concepto, 
+                            num_cuenta=asiento.num_cuenta, debe=asiento.debe, haber=asiento.haber, saldo=saldo)
 
-            libro.save()
+        libro.save()
 
 
-        messages.success(request, 'Asiento guardado!!')
-        return redirect(menu_libro_mayor)
+    messages.success(request, 'Asiento guardado!!')
+    return redirect(menu_libro_mayor)
 
 
 #-------------------------------------------------------------------------------------------------------------------------
@@ -361,8 +376,11 @@ def menu_libro_mayor(request):
     if 'num_cuenta' in request.POST:
         libros_mayores = libro_mayor.objects.filter(num_cuenta=request.POST['num_cuenta'], fecha__year=fecha_hoy.year).order_by('num_asiento', 'num_cuenta')
     else:
-        lib = libro_mayor.objects.order_by('-fecha').first()
-        libros_mayores = libro_mayor.objects.filter(num_cuenta=lib.num_cuenta).order_by('num_asiento', 'num_cuenta')
+        if libro_mayor.objects.all().exists():
+            lib = libro_mayor.objects.order_by('-fecha').first()
+            libros_mayores = libro_mayor.objects.filter(num_cuenta=lib.num_cuenta).order_by('num_asiento', 'num_cuenta')
+        else:
+            libros_mayores = libro_mayor.objects.all()
 
     cuentas = cuenta.objects.all()
 
@@ -396,12 +414,11 @@ def cargar_libro_mayor(request):
         libro_mayor_mas_reciente = libro_mayor.objects.order_by('-fecha').first()
         tipo_mov = request.POST['tipo_movimiento']
 
-        if libro_mayor_mas_reciente:
-            saldo = libro_mayor_mas_reciente.saldo + int(request.POST['id_monto'])
-        else:
-            saldo = int(request.POST['id_monto'])
-
         if tipo_mov == "1":
+            if libro_mayor_mas_reciente:
+                saldo = libro_mayor_mas_reciente.saldo + int(request.POST['id_monto'])
+            else:
+                saldo = int(request.POST['id_monto'])
 
             libro = libro_mayor(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
                             ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=request.POST['id_monto'], haber=0, saldo=saldo)
@@ -409,6 +426,10 @@ def cargar_libro_mayor(request):
             libro.save()
             
         elif tipo_mov == "2":
+            if libro_mayor_mas_reciente:
+                saldo = libro_mayor_mas_reciente.saldo + int(request.POST['id_monto'])
+            else:
+                saldo = int(request.POST['id_monto'])
 
             libro = libro_mayor(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
                             ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=0, haber=request.POST['id_monto'], saldo=saldo)
@@ -472,7 +493,7 @@ def modificar_libro_mayor(request):
         messages.success(request, 'Asiento actualizado!!')
         return redirect(menu_libro_mayor)
     else:
-        messages.success(request, 'Asiento no esta cargado.')
+        messages.error(request, 'Asiento no esta cargado.')
 
         return redirect(menu_libro_mayor)
     
@@ -490,17 +511,17 @@ def descargar_libro_mayor(request):
     if re.match(r'^\d{4}-(0[1-9]|1[0-2])$', fecha_libro):
         year, month = map(int, fecha_libro.split('-'))
 
-        datos = libro_diario.objects.filter(Q(fecha__year=year) & Q(fecha__month=month)).order_by('fecha', 'num_asiento')
+        datos = libro_mayor.objects.filter(Q(fecha__year=year) & Q(fecha__month=month)).order_by('fecha', 'num_asiento')
 
     else:
         year = int(fecha_libro)
         month = 1
 
-        datos = libro_diario.objects.all().order_by('fecha', 'num_asiento')
+        datos = libro_mayor.objects.all().order_by('fecha', 'num_asiento')
 
 
 
-    df = pd.DataFrame(list(datos.values('fecha', 'num_asiento', 'concepto', 'num_cuenta', 'debe', 'haber')))
+    df = pd.DataFrame(list(datos.values('fecha', 'num_asiento', 'concepto', 'num_cuenta', 'debe', 'haber', 'saldo')))
 
     libro_excel = Workbook()
 
@@ -510,11 +531,13 @@ def descargar_libro_mayor(request):
         hoja.append(fila)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=Libro diario.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=Libro mayor.xlsx'
 
     libro_excel.save(response)
 
     return response
+
+
 #----------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Cuentas----------------------------------------------------------------------
 
@@ -531,20 +554,50 @@ def menu_cuenta(request):
 
 @never_cache
 def registrar_cuenta(request):
+    fecha_hoy = date.today()
 
     existe = cuenta.objects.filter(num_cuenta=request.POST['num_cuenta']).exists()
 
-    if existe:
-        mensaje_error = "Producto ya existe."
-        return redirect(menu_cuenta)
+    if equilibrio() == 0: 
+        if existe:
+            messages.error(request, 'Cuenta ya existe!!')
+            return redirect(menu_cuenta)
 
+        else:
+            cta = cuenta(num_cuenta=request.POST['num_cuenta'], descripcion=request.POST['nom_cuenta'], saldo=request.POST['id_monto'])            
+            cta.save()
+            
+            if cuenta.objects.filter(num_cuenta='999999999').exists():
+                aux = cuenta.objects.filter(descripcion='Capital del titular').first()
+                cta_salida = get_object_or_404(cuenta, num_cuenta=aux.num_cuenta)
+            else:    
+                cta_salida = cuenta(num_cuenta='999999999', descripcion='Capital del titular', saldo=request.POST['id_monto'])
+                cta_salida.save()
+
+            concepto_entrada = "Creación de cuenta " + cta.descripcion
+            concepto_salida = 'Aporte capital'
+            
+            if libro_diario.objects.all().exists():
+                asiento = libro_diario.objects.order_by('-num_asiento').first()
+                asiento = int(asiento.num_asiento)+1
+            else:
+                asiento = 1
+
+            if int(cta.saldo) > 0:
+                libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento, concepto=concepto_salida, num_cuenta=cta_salida, debe=0, haber=int(cta.saldo))
+                libro.save()
+
+                libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento, concepto=concepto_entrada, num_cuenta=cta, debe=cta.saldo, haber=0)
+                libro.save()
+        
+            messages.success(request, 'Cuenta guardada!!')
+            return redirect(menu_cuenta)
     else:
+        messages.error(request, 'Cuenta no se pudo registrar por falta de equilibrio en el asiento de libro diario!!')
 
-        cta = cuenta(num_cuenta=request.POST['num_cuenta'], descripcion=request.POST['nom_cuenta'], saldo=request.POST['id_monto'])
-        cta.save()
-
-        mensaje_error = "Producto guardado!!"
         return redirect(menu_cuenta)
+
+
 
 @never_cache
 def modificar_cuenta(request):
@@ -561,26 +614,136 @@ def modificar_cuenta(request):
 
         aux_cuenta.save()
 
-        mensaje_error = "Asiento actualizado!!"
+        messages.success(request, 'Cuenta actualizada!!')
         return redirect(menu_cuenta)
     else:
-        mensaje_error = "Asiento no esta cargado."
+        messages.error(request, 'Cuenta no existe!!')
 
         return redirect(menu_cuenta)
+
+
 
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Proveedor----------------------------------------------------------------------
 
-def create_proveedor(request):
-    return render('/gestor/')
+def menu_proveedor(request):
+    prov = proveedor.objects.all()
+
+    paginator = Paginator(prov, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'carga_proveedor.html', {"proveedores": page_obj})
+
+def carga_proveedor(request):
+    est = get_object_or_404(Estados, pk=1)   
+
+    existe = proveedor.objects.filter(RUC=request.POST['ruc_proveedor']).exists()
+
+    if existe:
+        messages.error(request, 'El proveedor ya esta cargado.')
+        return redirect(menu_proveedor)
+    
+    else:
+        prov = proveedor(RUC=request.POST['ruc_proveedor'], nombre=request.POST['nombre_proveedor']
+                          ,razon_social=request.POST['razon_social'], direccion=request.POST['direccion_proveedor']
+                          ,correo=request.POST['correo_proveedor'], estado=est, num_telefono=request.POST['num_telefono']
+                          ,)
+        prov.save()
+
+        messages.success(request, 'Proveedor cargado!!')
+        return redirect(menu_proveedor)
+    
+def modificar_proveedor(request):
+    id_proveedor = request.POST['id_proveedor']
+
+    existe = proveedor.objects.filter(id=request.POST['id_proveedor']).exists()
+
+    if existe:
+        est = Estados.objects.filter(id=request.POST['estado_proveedor'+id_proveedor]).exists()
+
+        aux_proveedor = get_object_or_404(proveedor, pk=request.POST['id_proveedor'])
+
+        aux_proveedor.RUC = request.POST['ruc_proveedor'+id_proveedor]
+        aux_proveedor.nombre = request.POST['nombre_proveedor'+id_proveedor]
+        aux_proveedor.razon_social = request.POST['razon_social'+id_proveedor]
+        aux_proveedor.direccion = request.POST['direccion_proveedor'+id_proveedor]
+        aux_proveedor.correo = request.POST['correo_proveedor'+id_proveedor]
+        aux_proveedor.num_telefono = request.POST['num_telefono'+id_proveedor]
+
+        if est:
+            est = get_object_or_404(Estados, id=request.POST['estado_proveedor'+id_proveedor])
+            aux_proveedor.estado = est
+
+        aux_proveedor.save()
+
+        messages.success(request, 'Proveedor actualizado!!')
+        return redirect(menu_proveedor)
+    else:
+        messages.error(request, 'Proveedor no existe!!')
+        return redirect(menu_proveedor)
 
 
 
-def create_client(request):
-    return render('/gestor/')
 
+#-------------------------------------------------------------------------------------------------------------------------
+#  ---------------------------------Cliente----------------------------------------------------------------------
 
+def menu_cliente(request):
+    client = cliente.objects.all()
 
-def asistencia_contable(request):
-    return render('/gestor/')
+    paginator = Paginator(client, 10)
 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'carga_cliente.html', {"clientes": page_obj})
+
+def carga_cliente(request):
+    est = get_object_or_404(Estados, pk=1)   
+
+    existe = cliente.objects.filter(RUC=request.POST['ruc_cliente']).exists()
+
+    if existe:
+        messages.error(request, 'El cliente ya esta cargado.')
+        return redirect(menu_cliente)
+    
+    else:
+        client = cliente(RUC=request.POST['ruc_cliente'], nombre=request.POST['nombre_cliente']
+                          ,razon_social=request.POST['razon_social'], direccion=request.POST['direccion_cliente']
+                          ,correo=request.POST['correo_cliente'], estado=est, num_telefono=request.POST['num_telefono']
+                          ,)
+        client.save()
+
+        messages.error(request, 'Producto guardado!!')
+        return redirect(menu_cliente)
+    
+def modificar_cliente(request):
+    id_cliente = request.POST['id_cliente']
+
+    existe = cliente.objects.filter(id=request.POST['id_cliente']).exists()
+
+    if existe:
+        est = Estados.objects.filter(id=request.POST['estado_cliente'+id_cliente]).exists()
+
+        aux_cliente = get_object_or_404(cliente, pk=request.POST['id_cliente'])
+
+        aux_cliente.RUC = request.POST['ruc_cliente'+id_cliente]
+        aux_cliente.nombre = request.POST['nom_cuenta'+id_cliente]
+        aux_cliente.razon_social = request.POST['razon_social'+id_cliente]
+        aux_cliente.direccion = request.POST['direccion_cliente'+id_cliente]
+        aux_cliente.correo = request.POST['correo_cliente'+id_cliente]
+        aux_cliente.num_telefono = request.POST['num_telefono'+id_cliente]
+
+        if est:
+            est = get_object_or_404(Estados, id=request.POST['estado_cliente'+id_cliente])
+            aux_cliente.estado = est
+
+        aux_cliente.save()
+
+        messages.success(request, 'Cliente actualizado!!')
+        return redirect(menu_cliente)
+    else:
+        messages.error(request, 'Cliente no existe!!')
+        return redirect(menu_cliente)

@@ -1,0 +1,168 @@
+{% extends "Base.html" %}
+
+{% load static %}
+<head>
+  <title>{% block title %} Libro Diario {% endblock %}</title>
+</head>
+<body>
+  
+  {% block content %}
+
+  <ul class="nav nav-tabs navbar-light bg-light justify-content-center">
+    <li class="nav-item">
+      <a class="nav-link disabled" aria-current="page">Libro diario</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'menu_libro_mayor' %}">Libro mayor</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'menu_cuenta' %}">Cuentas</a>
+    </li>
+  </ul>
+
+
+        
+  <div class="container">
+    <div class="col-xl-12">
+
+      <h1 class="display-6">Clientes</h1> 
+
+        <div class="card card-body bg-secondary">
+
+          <form action="{% url 'carga_cliente' %}" method="POST" autocomplete="off">
+
+            {% csrf_token %}
+
+            <div class="card card-body bg-dark mb-2">
+
+              <div class="row g-3 mb-2">
+
+                <div class="col-md-12">
+                  <h2 class="form-label">Ingrese datos del cliente</h2>
+                </div>
+                <div class="col-md-4">
+                  <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" placeholder="Ingrese ruc" required>
+                </div>
+                <div class="col-md-4">
+                  <input type="int" class="form-control" id="razon_social" name="razon_social" placeholder="Razon social" required>
+                </div>
+                <div class="col-md-4">
+                  <input type="int" class="form-control" id="nombre_cliente" name="nombre_cliente" placeholder="Nombre">
+                </div>
+                
+                <div class="col-6">
+                  <input type="text" class="form-control" id="direccion_cliente" name="direccion_cliente" placeholder="Direccion">
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" id="correo_cliente" name="correo_cliente" placeholder="Correo electronico">
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" id="num_telefono" name="num_telefono" placeholder="Telefono">
+                </div>
+
+                <div class="col-6">
+                  <button type="submit" class="btn btn-success">Agregar cliente</button>
+                </div>
+                
+                <div class="col-12">
+                  {% if messages %}
+                      <ul class="messages">
+                          {% for message in messages %}
+                              <li class="{% if message.tags == 'error' %}alert alert-danger
+                              {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
+                                  {{ message }}
+                              </li>
+                          {% endfor %}
+                      </ul>
+                  {% endif %}
+                </div>
+
+              </div>
+              
+            </div>
+
+          </form>
+
+
+
+          <form action="{% url 'modificar_cliente' %}" method="POST" autocomplete="off">
+
+            {% csrf_token %}
+
+            <table class="table table-info table-striped table-bordered border-dark">
+              <thead>
+              <tr>
+                <th scope="col" style="width: 8%;">RUC</th>
+                <th scope="col" style="width: 15%;">Nombre</th>
+                <th scope="col" style="width: 14%;">Razon social.</th>
+                <th scope="col" style="width: 26%;">Direccion</th>
+                <th scope="col" style="width: 13%;">Correo</th>
+                <th scope="col" style="width: 10%;">Telefono</th>
+                <th scope="col" style="width: 8%;">Estado</th>
+                <th scope="col" style="width: 2%;">Obs.</th>
+              </tr>
+              </thead>
+              <tbody>
+
+                {% for cliente in clientes %}
+                  <tr>
+                  <td><input type="text" name="ruc_cliente{{cliente.id}}" class="form-control" value="{{ cliente.RUC }}"></td>
+                  <td><input type="int" name="nom_cuenta{{cliente.id}}" class="form-control" value="{{cliente.nombre}}"></td>
+                  <td><input type="text" name="razon_social{{cliente.id}}" class="form-control" value="{{cliente.razon_social}}"></td>
+                  <td><input type="int" name="direccion_cliente{{cliente.id}}" class="form-control" value="{{cliente.direccion}}"></td>
+                  <td><input type="int" name="correo_cliente{{cliente.id}}" class="form-control" value="{{cliente.correo}}"></td>
+                  <td><input type="int" name="num_telefono{{cliente.id}}" class="form-control" value="{{cliente.num_telefono}}"></td>
+                  <td>
+                    <select id="estado_cliente{{cliente.id}}" class="form-select" name="estado_cliente{{cliente.id}}">
+                      <option selected value="{{cliente.estado.id}}">{{cliente.estado}} actualmente</option>
+                      <option value=1>Activo</option>
+                      <option value=2>Inactivo</option>
+                    </select>                                                                      
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-primary" name="id_cliente" value="{{cliente.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
+                  </td>
+                  </tr>
+                {% endfor %} 
+
+              </tbody>
+            </table>
+            
+          </form>
+
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              {% if clientes.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1">&laquo; first</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ clientes.previous_page_number }}">previous</a>
+                </li>
+              {% endif %}
+          
+              <li class="page-item disabled">
+                <span class="page-link">Page {{ clientes.number }} of {{ clientes.paginator.num_pages }}</span>
+              </li>
+          
+              {% if clientes.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ clientes.next_page_number }}">next</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ clientes.paginator.num_pages }}">last &raquo;</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+                                  
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+  {% endblock %}
+
+</body>

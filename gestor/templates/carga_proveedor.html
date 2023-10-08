@@ -1,0 +1,168 @@
+{% extends "Base.html" %}
+
+{% load static %}
+<head>
+  <title>{% block title %} Libro Diario {% endblock %}</title>
+</head>
+<body>
+  
+  {% block content %}
+
+  <ul class="nav nav-tabs navbar-light bg-light justify-content-center">
+    <li class="nav-item">
+      <a class="nav-link disabled" aria-current="page">Libro diario</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'menu_libro_mayor' %}">Libro mayor</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'menu_cuenta' %}">Cuentas</a>
+    </li>
+  </ul>
+
+
+        
+  <div class="container">
+    <div class="col-xl-12">
+
+      <h1 class="display-6">Clientes</h1> 
+
+        <div class="card card-body bg-secondary">
+
+          <form action="{% url 'carga_proveedor' %}" method="POST" autocomplete="off">
+
+            {% csrf_token %}
+
+            <div class="card card-body bg-dark mb-2">
+
+              <div class="row g-3 mb-2">
+
+                <div class="col-md-12">
+                  <h2 class="form-label">Ingrese datos del cliente</h2>
+                </div>
+                <div class="col-md-4">
+                  <input type="text" class="form-control" id="ruc_proveedor" name="ruc_proveedor" placeholder="Ingrese ruc" required>
+                </div>
+                <div class="col-md-4">
+                  <input type="int" class="form-control" id="razon_social" name="razon_social" placeholder="Razon social" required>
+                </div>
+                <div class="col-md-4">
+                  <input type="int" class="form-control" id="nombre_proveedor" name="nombre_proveedor" placeholder="Nombre">
+                </div>
+                
+                <div class="col-6">
+                  <input type="text" class="form-control" id="direccion_proveedor" name="direccion_proveedor" placeholder="Direccion">
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" id="correo_proveedor" name="correo_proveedor" placeholder="Correo electronico">
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" id="num_telefono" name="num_telefono" placeholder="Telefono">
+                </div>
+
+                <div class="col-6">
+                  <button type="submit" class="btn btn-success">Agregar cliente</button>
+                </div>
+                
+                <div class="col-12">
+                  {% if messages %}
+                      <ul class="messages">
+                          {% for message in messages %}
+                              <li class="{% if message.tags == 'error' %}alert alert-danger
+                              {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
+                                  {{ message }}
+                              </li>
+                          {% endfor %}
+                      </ul>
+                  {% endif %}
+                </div>
+
+              </div>
+              
+            </div>
+
+          </form>
+
+
+
+          <form action="{% url 'modificar_proveedor' %}" method="POST" autocomplete="off">
+
+            {% csrf_token %}
+
+            <table class="table table-info table-striped table-bordered border-dark">
+              <thead>
+              <tr>
+                <th scope="col" style="width: 8%;">RUC</th>
+                <th scope="col" style="width: 15%;">Nombre</th>
+                <th scope="col" style="width: 14%;">Razon social.</th>
+                <th scope="col" style="width: 26%;">Direccion</th>
+                <th scope="col" style="width: 13%;">Correo</th>
+                <th scope="col" style="width: 10%;">Telefono</th>
+                <th scope="col" style="width: 8%;">Estado</th>
+                <th scope="col" style="width: 2%;">Obs.</th>
+              </tr>
+              </thead>
+              <tbody>
+
+                {% for proveedor in proveedores %}
+                  <tr>
+                  <td><input type="text" name="ruc_proveedor{{proveedor.id}}" class="form-control" value="{{ proveedor.RUC }}"></td>
+                  <td><input type="int" name="nombre_proveedor{{proveedor.id}}" class="form-control" value="{{proveedor.nombre}}"></td>
+                  <td><input type="text" name="razon_social{{proveedor.id}}" class="form-control" value="{{proveedor.razon_social}}"></td>
+                  <td><input type="int" name="direccion_proveedor{{proveedor.id}}" class="form-control" value="{{proveedor.direccion}}"></td>
+                  <td><input type="int" name="correo_proveedor{{proveedor.id}}" class="form-control" value="{{proveedor.correo}}"></td>
+                  <td><input type="int" name="num_telefono{{proveedor.id}}" class="form-control" value="{{proveedor.num_telefono}}"></td>
+                  <td>
+                    <select id="estado_proveedor{{proveedor.id}}" class="form-select" name="estado_proveedor{{proveedor.id}}">
+                      <option selected value="{{proveedor.estado.id}}">{{proveedor.estado}} actualmente</option>
+                      <option value=1>Activo</option>
+                      <option value=2>Inactivo</option>
+                    </select>                                                                      
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-primary" name="id_proveedor" value="{{proveedor.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
+                  </td>
+                  </tr>
+                {% endfor %} 
+
+              </tbody>
+            </table>
+            
+          </form>
+
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              {% if proveedores.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1">&laquo; first</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ proveedores.previous_page_number }}">previous</a>
+                </li>
+              {% endif %}
+          
+              <li class="page-item disabled">
+                <span class="page-link">Page {{ proveedores.number }} of {{ proveedores.paginator.num_pages }}</span>
+              </li>
+          
+              {% if proveedores.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ proveedores.next_page_number }}">next</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ proveedores.paginator.num_pages }}">last &raquo;</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+                                  
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+  {% endblock %}
+
+</body>

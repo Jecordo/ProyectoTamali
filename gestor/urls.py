@@ -1,11 +1,12 @@
 from django.urls import path
 from .views import (
     create_factura, facturar, delete_factura, menu_principal, 
-    create_product, create_proveedor, create_client, 
+    create_product, menu_cliente, menu_proveedor, carga_proveedor, modificar_proveedor,
     menu_producto, buscar_producto, menu_libro_diario, cargar_libro_diario,
     modificar_libro_diario, descargar_libro, menu_libro_mayor, cargar_libro_mayor,
     modificar_libro_mayor, migrar_asientos, menu_cuenta, registrar_cuenta, modificar_cuenta,
-    cargar_factura_detalle, delete_factura, menu_factura_detalle    
+    cargar_factura_detalle, delete_factura, menu_factura_detalle, cancelar_factura,
+    modificar_cliente, carga_cliente, descargar_libro_mayor
 )
 
 urlpatterns = [
@@ -16,9 +17,15 @@ urlpatterns = [
     path('delete_factura/', delete_factura, name='delete_factura'),
     path('carga_factura_detalle/', cargar_factura_detalle, name='factura_detalle'),
     path('menu_factura_detalle/<int:factura_cabecera_id>/', menu_factura_detalle, name='menu_factura_detalle'),
+    path('cancelar_factura/<int:factura_cabecera_id>/', cancelar_factura, name='cancelar_factura'),
 
-    path('client/', create_client, name='Clientes'),
-    path('proveedor/', create_proveedor, name='Provedores'),
+    path('menu_proveedor/', menu_proveedor, name='menu_proveedor'),
+    path('carga_proveedor/', carga_proveedor, name='carga_proveedor'),
+    path('modificar_proveedor/', modificar_proveedor, name='modificar_proveedor'),
+
+    path('menu_cliente/', menu_cliente, name='menu_cliente'),
+    path('carga_cliente/', carga_cliente, name='carga_cliente'),
+    path('modificar_cliente/', modificar_cliente, name='modificar_cliente'),
 
     path('menproduc/', menu_producto, name='menu_producto'),
     path('producto/', create_product, name='cargar_roducto'),
@@ -36,6 +43,7 @@ urlpatterns = [
     path('registrar_cuenta/', registrar_cuenta, name='registrar_cuenta'),
     path('modificar_cuenta/', modificar_cuenta, name='modificar_cuenta'),
 
+    path('descargar_libro_mayor/', descargar_libro_mayor, name='descargar_libro_mayor'),
     path('descagar_libro/', descargar_libro, name='descargar_libro'),
     path('migrar_asientos/', migrar_asientos, name='migrar_asientos'),    
 
