@@ -90,7 +90,13 @@
                             <span class="input-group-text">G</span>
                         </div>
                     </div>
-
+                    <div class="col-md-2">
+                      <label for="tipo_factura" class="form-label">Tipo IVA</label>
+                      <select id="tipo_factura" class="form-select" name="tipo_factura" disabled>
+                        <option value=0.1>IVA 10%</option>
+                        <option value=0.05>IVA 5%</option>                        
+                      </select>
+                    </div>
                     <div class="col-md-1">
                     <label for="cant_product" class="form-label">Catidad</label>
                     <input type="text" class="form-control" id="cant_product" name="cantidad_producto" required>

@@ -84,7 +84,7 @@
               {% endif %}
 
               <div class="col-md-3">
-                <select id="cod_producto_id" name="cod_producto_id">
+                <select id="cod_producto_id" name="cod_producto_id" required>
                   <option selected disabled value>selecione articulo a añadir</option>
                   {% for producto in productos %}
                   <option value={{producto.id}}>{{producto.cod_producto}}, {{producto.descripcion}}</option>
@@ -114,7 +114,7 @@
                   <th scope="col" style="width: 3%;">Cod.</th>
                   <th scope="col" style="width: 50%;">Descripción</th>
                   <th scope="col" style="width: 2%;">Cant.</th>
-                  <th scope="col" style="width: 10%;">Prec. unit.</th>
+                  <th scope="col" style="width: 10%;">IVA 10%</th>
                   <th scope="col" style="width: 10%;">Total</th>
                   <th scope="col" style="width: 2%;">Obs.</th>
                 </tr>
@@ -125,7 +125,7 @@
                     <td>{{factu.cod_producto.cod_producto}}</td>
                     <td>{{factu.cod_producto.descripcion}}</td>
                     <td>{{factu.cantidad}}</td>
-                    <td>{{factu.cod_producto.precio_venta}}</td>
+                    <td>{{factu.cod_producto.iva_producto}}</td>
                     <td>{{factu.total_precio}}</td>
                     <td>
                       <button class="btn btn-sm btn-danger" id="id_detalle" name="id_detalle" value="{{factu.id}}"><i class="fa fa-solid fa-trash-o"></i></button>
@@ -133,14 +133,15 @@
                   </tr>              
                   {% endfor %}
                   <tr>
-                    <td colspan="4" style="text-align: right;">Total de compra</td>
+                    <td colspan="3" style="text-align: right;">Total de compra</td>
+                    <td>{{total_iva}}</td>
                     <td>{{total_compra}}</td>
                     <td></td>
                   </tr>
                 </tbody>
               </table>                    
               
-              <a class="btn btn-primary" href="{% url 'facturas' %}">Finalizar</a>
+              <a class="btn btn-primary" href="{% url 'factura_libro' factura_cabecera.id %}">Finalizar</a>
               <a class="btn btn-danger" href="{% url 'cancelar_factura' factura_cabecera.id %}">Cancelar la facturacion</a>
 
             </form>
