@@ -74,24 +74,26 @@
                           </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col-3">
                           <button type="submit" class="btn btn-success">Agregar movimiento</button>
+                        </div>
+
+                        <div class="col-6">
+                          {% if messages %}
+                            <ul class="messages">
+                              {% for message in messages %}
+                                <li class="{% if message.tags == 'error' %}alert alert-danger
+                                {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
+                                  {{ message }}
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
                         </div>
                         
                       </div>
 
                     </div>
-
-                    {% if messages %}
-                      <ul class="messages">
-                        {% for message in messages %}
-                          <li class="{% if message.tags == 'error' %}alert alert-danger
-                          {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
-                            {{ message }}
-                          </li>
-                        {% endfor %}
-                      </ul>
-                    {% endif %}
 
                   </form>
 

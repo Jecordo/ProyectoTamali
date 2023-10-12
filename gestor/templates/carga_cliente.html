@@ -2,25 +2,11 @@
 
 {% load static %}
 <head>
-  <title>{% block title %} Libro Diario {% endblock %}</title>
+  <title>{% block title %} Cliente {% endblock %}</title>
 </head>
 <body>
   
   {% block content %}
-
-  <ul class="nav nav-tabs navbar-light bg-light justify-content-center">
-    <li class="nav-item">
-      <a class="nav-link disabled" aria-current="page">Libro diario</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'menu_libro_mayor' %}">Libro mayor</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'menu_cuenta' %}">Cuentas</a>
-    </li>
-  </ul>
-
-
         
   <div class="container">
     <div class="col-xl-12">
@@ -98,7 +84,7 @@
                 <th scope="col" style="width: 26%;">Direccion</th>
                 <th scope="col" style="width: 13%;">Correo</th>
                 <th scope="col" style="width: 10%;">Telefono</th>
-                <th scope="col" style="width: 8%;">Estado</th>
+                <th scope="col" style="width: 9%;">Estado</th>
                 <th scope="col" style="width: 2%;">Obs.</th>
               </tr>
               </thead>

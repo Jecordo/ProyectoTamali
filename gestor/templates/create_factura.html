@@ -37,7 +37,7 @@
                 </div>
                 <div class="col-md-2">
                   <label for="fecha_emision" class="form-label">Fecha:</label>
-                  <input type="date" class="form-control" id="fecha_emision" name="fecha_emision">
+                  <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" required>
                 </div>
                 <div class="col-md-2">
                   <label for="tipo_factura" class="form-label">Tipo de factura</label>
@@ -53,7 +53,7 @@
 
                 <div class="col-2">
                   <label class="form-label">RUC</label>
-                  <select id="id_label_multiple" class="form-control" name="ruc_cliente">
+                  <select id="id_label_multiple" class="form-control" name="ruc_cliente" required>
                     <option selected disabled value>Ingrese el RUC</option>
                     {% for cliente in clientes %}
                     <option value={{cliente.RUC}} data-descripcion="{{ cliente.razon_social }}, {{cliente.direccion}}, {{cliente.correo}}, 
@@ -63,7 +63,7 @@
                 </div>
                 <div class="col-md-3">
                 <label for="razon_social" class="form-label">Razon social</label>
-                <input type="text" class="form-control" id="razon_social" name="razon_social">
+                <input type="text" class="form-control" id="razon_social" name="razon_social" required>
                 </div>
                 <div class="col-2">
                 </div>
@@ -71,12 +71,12 @@
                   <label for="num_factura" class="form-label">N° Factura</label>
                   <div class="input-group mb-3">
                       <span class="input-group-text">009-0085- </span>
-                      <input type="text" class="form-control" id="num_factura" value="{{ultima_factura}}" name="num_factura">
+                      <input type="text" class="form-control" id="num_factura" value="{{ultima_factura}}" name="num_factura" required>
                   </div>
                 </div>
                 <div class="col-md-2">
                   <label for="timbrado_factura" class="form-label ">Timbrado:</label>
-                  <input type="text" class="form-control" id="timbrado_factura" name="timbrado_factura">
+                  <input type="text" class="form-control" id="timbrado_factura" name="timbrado_factura" required>
                 </div>
                 
                 <div class="col-6">

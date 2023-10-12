@@ -50,6 +50,46 @@ def facturar(request):
     return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura, "factu_prduc":factu_prduc, "metodos_pagos":metodo, 'tipos_facturas':tipo})
 
 
+def factura_libro(request, factura_cabecera_id):
+    print('nbasjkdnajkdnkladklnmaslkdmaklmdakwmkldajmwklmdwlkamwdlkmawd')
+    fecha_hoy = date.today()
+
+    factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
+    factu_detalle = factura_detalle.objects.filter(num_factura=factura_cabecera.id).order_by('id')
+
+    for detalle in factu_detalle:
+        print('------------------------------------------------------------')
+
+        if libro_diario.objects.all().exists():
+            asiento = libro_diario.objects.order_by('-num_asiento').first()
+            asiento = asiento.num_asiento
+        else:
+            asiento = 0
+
+        concep_1 = 'Ventas del '+str(fecha_hoy)+', '+detalle.cod_producto.descripcion
+        cta_1 = cuenta.objects.filter(descripcion='Venta').first()
+        concep_2 = 'IVA credito fiscal 10%'
+        cta_2 = cuenta.objects.filter(descripcion='IVA credito fiscal 10%').first()
+        concep_3 = 'Por la venta de producto '+detalle.cod_producto.cod_producto
+        cta_3 = cuenta.objects.filter(descripcion='Mercaderia').first()
+
+        iva= int(detalle.total_precio)-int(detalle.impuesto)
+        
+        libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento+1, concepto=concep_1,
+                             num_cuenta=cta_1, debe=iva, haber=0)
+        libro.save()
+
+        libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento+1, concepto=concep_2,
+                             num_cuenta=cta_2, debe=detalle.impuesto, haber=0)
+        libro.save()
+
+        libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento+1, concepto=concep_3,
+                             num_cuenta=cta_3, debe=0, haber=detalle.total_precio)
+        libro.save()
+        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+
+    return redirect(menu_libro_diario)
+
 
 def create_factura(request):
     prod = producto.objects.all()
@@ -99,12 +139,14 @@ def menu_factura_detalle(request, factura_cabecera_id):
 
     factu_detalle = factura_detalle.objects.filter(num_factura=factura_cabecera.id).order_by('id')
 
-    suma = 0
+    suma = 0 
+    suma_iva = 0
     for precio in factu_detalle:
         suma = suma + precio.total_precio
+        suma_iva = suma_iva + precio.cod_producto.iva_producto
 
     return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": productos,
-                                                            "facturas_detalles": factu_detalle, "total_compra":suma})
+                                                            "facturas_detalles": factu_detalle, "total_compra":suma, "total_iva":suma_iva})
 
 
 def cargar_factura_detalle(request):
@@ -117,12 +159,13 @@ def cargar_factura_detalle(request):
         factu_detalle = get_object_or_404(factura_detalle, Q(cod_producto=produc.id) & Q(num_factura=factu.id))
         factu_detalle.cantidad = factu_detalle.cantidad + 1
         factu_detalle.total_precio = factu_detalle.cantidad * factu_detalle.cod_producto.precio_venta
+        factu_detalle.impuesto = factu_detalle.cantidad * factu_detalle.cod_producto.iva_producto
         factu_detalle.save()
 
         messages.success(request, 'Se agrego un/a '+ produc.descripcion + ' a la cantidad')
     else:
         factu_detalle = factura_detalle(cod_producto=produc, num_factura=factu, total_precio=produc.precio_venta,
-                                        cantidad=1)
+                                        cantidad=1, impuesto=produc.iva_producto)
 
         factu_detalle.save()
 

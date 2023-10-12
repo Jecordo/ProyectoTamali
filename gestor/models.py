@@ -19,8 +19,8 @@ class cliente(models.Model):
     nombre = models.CharField(max_length=50, null=True)
     apellido = models.CharField(max_length=50, null=True)
     razon_social = models.CharField(max_length=100, null=False)
-    RUC = models.CharField(max_length=12)
-    direccion = models.CharField(max_length=150)
+    RUC = models.CharField(max_length=12, null=False)
+    direccion = models.CharField(max_length=150, null=True)
     correo = models.CharField(max_length=50, null=True)
     num_telefono = models.CharField(max_length=12, null=True)
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
@@ -32,8 +32,8 @@ class proveedor(models.Model):
     nombre = models.CharField(max_length=50, null=True)
     apellido = models.CharField(max_length=50, null=True)
     razon_social = models.CharField(max_length=100, null=False)
-    RUC = models.CharField(max_length=12)
-    direccion = models.CharField(max_length=150)
+    RUC = models.CharField(max_length=12, null=False)
+    direccion = models.CharField(max_length=150, null=True)
     correo = models.CharField(max_length=50, null=True)
     num_telefono = models.CharField(max_length=12, null=True)
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
@@ -65,36 +65,44 @@ class producto(models.Model):
     descripcion = models.CharField(max_length=200, null=False)
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
 
+    def calcular_iva_producto(self):
+        return 0.1 * self.precio_venta
+
+    @property
+    def iva_producto(self):
+        return self.calcular_iva_producto()
+
     def __str__(self):
         return self.cod_producto
     
+
 class entrada(models.Model):
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
-    descripcion = models.IntegerField()
-    precio = models.IntegerField()    
-    cantidad_entrante = models.IntegerField()
+    descripcion = models.IntegerField(null=True)
+    precio = models.IntegerField(null=True)    
+    cantidad_entrante = models.IntegerField(null=True)
 
     def __str__(self):
         return self.cantidad_entrante
     
 class salida(models.Model):
-    fecha_salida = models.DateTimeField()
-    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
-    descripcion = models.IntegerField()
-    precio = models.IntegerField()    
-    cantidad_saliente = models.IntegerField()
-    total_venta = models.IntegerField() 
+    fecha_salida = models.DateTimeField(null=True)
+    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE, null=True)  
+    descripcion = models.IntegerField(null=True)
+    precio = models.IntegerField(null=True)    
+    cantidad_saliente = models.IntegerField(null=True)
+    total_venta = models.IntegerField(null=True) 
 
     def __str__(self):
         return self.total_venta
     
 class inventario(models.Model):
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
-    descripcion = models.IntegerField()
+    descripcion = models.CharField(max_length=200, null=False)
     precio = models.IntegerField()  
     entrada = models.IntegerField()
     salida = models.IntegerField()
-    existencia = models.IntegerField()
+    existencia = models.BooleanField()
 
     def __str__(self):
         return self.existencia
@@ -123,9 +131,9 @@ class factura(models.Model):
     cliente = models.ForeignKey(cliente, on_delete=models.CASCADE)
     tipo_factura = models.ForeignKey(tipo_factura, on_delete=models.CASCADE)
     metodo_de_pago = models.ForeignKey(metodo_pago, on_delete=models.CASCADE)
-    total_venta = models.IntegerField()
-    impuesto_total = models.IntegerField()
-    descuento_total = models.IntegerField()
+    total_venta = models.IntegerField(null=True)
+    impuesto_total = models.IntegerField(null=True)
+    descuento_total = models.IntegerField(null=True)
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -135,11 +143,10 @@ class factura_detalle(models.Model):
     num_factura = models.ForeignKey(factura, on_delete=models.CASCADE)
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
-    precio_unitario = models.IntegerField()
+    precio_unitario = models.IntegerField(null=True)
     total_precio = models.IntegerField()
-    impuesto = models.IntegerField()
-    descuento = models.IntegerField()
-    total_precio = models.IntegerField()
+    impuesto = models.IntegerField(null=True)
+    descuento = models.IntegerField(null=True)
 
     def __str__(self):
         return self.num_factura
