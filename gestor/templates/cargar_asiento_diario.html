@@ -40,37 +40,59 @@
                 <div class="col-md-12">
                   <h2 class="form-label">Ingrese datos del asiento</h2>
                 </div>
+                <div class="col-md-12">
+                  <h6 class="form-label">Cabecera del asiento</h6>
+                </div>
+
                 <div class="col-md-4">
                   <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" required>
                 </div>
                 <div class="col-md-4">
                   <input type="int" class="form-control" id="num_asiento" name="num_asiento" placeholder="Num. de asiento" required>
                 </div>
-                <div class="col-md-4">
-                  <select id="num_cuenta" class="form-select" name="num_cuenta" required>
-                    <option selected disabled value>Seleccione la cuenta</option>
-                    {% for cuenta in cuentas %}
-                    <option value={{cuenta.id}}>{{cuenta.descripcion}}</option>
-                    {% empty %}
-                    <h4 class="text-center">No hay cuenta</h4>
-                    {% endfor %} 
-                  </select>
+                <div class="col-md-4 mb-2">
                 </div>
+
                 <div class="col-md-6">
-                  <input type="text" class="form-control" id="id_concepto" name="id_concepto" placeholder="Concepto" required>
+                  <h6 class="form-label">Concepto</h6>
                 </div>
                 <div class="col-md-2">
-                  <select id="tipo_movimiento" class="form-select" name="tipo_movimiento" required>
-                    <option selected disabled value>Tipo movimiento</option>
-                    <option value=1>Debe</option>
-                    <option value=2>Haber</option>
-                  </select>
+                  <h6 class="form-label">Cuenta</h6>
                 </div>
-                <div class="col-md-4">
-                  <div class="input-group">
-                    <span class="input-group-text">G</span>
-                    <input type="int" class="form-control" id="id_monto" name="id_monto" placeholder="Ingrese monto del movimiento" required>
-                    <span class="input-group-text">.00</span>
+                <div class="col-md-2">
+                  <h6 class="form-label">Debe</h6>
+                </div>
+                <div class="col-md-2">
+                  <h6 class="form-label">Haber</h6>
+                </div>
+
+                <div class="container" id="container">
+                  <div class="row g-3 mb-2">
+                    <div class="col-md-6">
+                      <input type="text" class="form-control" id="id_concepto" name="id_concepto" placeholder="Concepto" required>
+                    </div>
+                    <div class="col-md-2">
+                      <select id="num_cuenta" class="form-select" name="num_cuenta" required>
+                        <option selected disabled value>Cuenta</option>
+                        {% for cuenta in cuentas %}
+                        <option value={{cuenta.id}}>{{cuenta.descripcion}}</option>
+                        {% empty %}
+                        <h4 class="text-center">No hay cuenta</h4>
+                        {% endfor %} 
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <div class="input-group">
+                        <input type="int" class="form-control" id="id_monto" name="id_debe" placeholder="Debe" required>
+                        <span class="input-group-text">G</span>
+                      </div>
+                    </div>
+                    <div class="col-md-2">
+                      <div class="input-group">
+                        <input type="int" class="form-control" id="id_monto" name="id_haber" placeholder="Haber" required>
+                        <span class="input-group-text">G</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -97,6 +119,8 @@
 
           </form>
 
+          <button type="button" class="btn btn-primary" onclick="agregarFila()">Agregar Fila</button>
+          <button type="button" class="btn btn-danger mb-2" id="eliminarFila">Eliminar Fila</button>
 
           <div class="card card-body bg-dark mb-2">
 
@@ -198,6 +222,9 @@
     </div>
 
   </div>
+
+  <script src="{% static 'js/agregar-asiento.js' %}"></script>
+
   {% endblock %}
 
 </body>

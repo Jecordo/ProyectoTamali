@@ -51,14 +51,12 @@ def facturar(request):
 
 
 def factura_libro(request, factura_cabecera_id):
-    print('nbasjkdnajkdnkladklnmaslkdmaklmdakwmkldajmwklmdwlkamwdlkmawd')
     fecha_hoy = date.today()
 
     factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
     factu_detalle = factura_detalle.objects.filter(num_factura=factura_cabecera.id).order_by('id')
 
     for detalle in factu_detalle:
-        print('------------------------------------------------------------')
 
         if libro_diario.objects.all().exists():
             asiento = libro_diario.objects.order_by('-num_asiento').first()
@@ -86,7 +84,6 @@ def factura_libro(request, factura_cabecera_id):
         libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento+1, concepto=concep_3,
                              num_cuenta=cta_3, debe=0, haber=detalle.total_precio)
         libro.save()
-        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
     return redirect(menu_libro_diario)
 
@@ -393,13 +390,11 @@ def migrar_asientos(request):
         if libro_mayor_mas_reciente:
             saldo = libro_mayor_mas_reciente.saldo + asiento.debe
             saldo = saldo - asiento.haber
-            num_asiento = int(libro_mayor_mas_reciente.num_asiento)+1
         else:
             saldo = asiento.debe
             saldo = saldo - asiento.haber
-            num_asiento = 1
 
-        libro = libro_mayor(fecha=asiento.fecha, num_asiento=num_asiento,concepto=asiento.concepto, 
+        libro = libro_mayor(fecha=asiento.fecha, num_asiento=asiento.num_asiento,concepto=asiento.concepto, 
                             num_cuenta=asiento.num_cuenta, debe=asiento.debe, haber=asiento.haber, saldo=saldo)
 
         libro.save()

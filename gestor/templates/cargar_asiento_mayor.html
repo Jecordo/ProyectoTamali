@@ -130,9 +130,8 @@
                         <thead>
                         <tr>
                           <th scope="col" style="width: 14%;">fecha</th>
-                          <th scope="col" style="width: 0%;">Asiento</th>
                           <th scope="col" style="width: 45%;">Concepto.</th>
-                          <th scope="col" style="width: 6%;">Cta.</th>
+                          <th scope="col" style="width: 0%;">Asiento</th>
                           <th scope="col" style="width: 12%;">Debe</th>
                           <th scope="col" style="width: 12%;">Haber</th>
                           <th scope="col" style="width: 12%;">Saldo</th>
@@ -144,9 +143,8 @@
                           {% for libro in libros_mayores %}
                             <tr>
                             <td><input type="text" name="fecha_emision{{libro.id}}" class="form-control" value="{{ libro.fecha|date:'Y-m-d' }}"></td>
-                            <td><input type="int" name="num_asiento{{libro.id}}" class="form-control" value="{{libro.num_asiento}}"></td>
                             <td><input type="text" name="id_concepto{{libro.id}}" class="form-control" value="{{libro.concepto}}"></td>
-                            <td><input type="int" name="num_cuenta{{libro.id}}" class="form-control" value="{{libro.num_cuenta_id}}"></td>
+                            <td><input type="int" name="num_asiento{{libro.id}}" class="form-control" value="{{libro.num_asiento}}"></td>
                             <td><input type="int" name="monto_debe{{libro.id}}" class="form-control" value="{{libro.debe}}"></td>
                             <td><input type="int" name="monto_haber{{libro.id}}" class="form-control" value="{{libro.haber}}"></td>
                             <td><input type="int" name="saldo_cuenta{{libro.id}}" class="form-control" value="{{libro.saldo}}" readonly></td>
