@@ -162,8 +162,15 @@ class cuenta(models.Model):
         return self.num_cuenta
     
 class libro_diario(models.Model):
-    fecha = models.DateField()
+    fecha = models.DateField(null=True)
     num_asiento = models.IntegerField()
+    concepto = models.CharField(max_length=200, null=True)
+
+    def __str__(self):
+        return self.num_asiento
+    
+class detalle_libro_diario(models.Model):
+    num_asiento = models.ForeignKey(libro_diario, on_delete=models.CASCADE)
     concepto = models.CharField(max_length=200, null=False)
     num_cuenta = models.ForeignKey(cuenta, on_delete=models.CASCADE)
     debe = models.IntegerField()

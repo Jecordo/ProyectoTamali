@@ -1,15 +1,17 @@
+from audioop import reverse
 from datetime import date
 from io import BytesIO
 import json
 from pyexpat.errors import messages
 import re
 from urllib.parse import urlencode
-from django.http import HttpResponse, JsonResponse, QueryDict
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict
 from django.shortcuts import render,  redirect
 from .models import (
     persona, factura, factura_detalle, cliente, producto,
     categoria,marca,Estados,proveedor, tipo_factura, 
-    metodo_pago, marca, cuenta, libro_diario, libro_mayor)
+    metodo_pago, marca, cuenta, libro_diario, detalle_libro_diario,
+    libro_mayor)
 from django.shortcuts import get_object_or_404
 import pandas as pd
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -249,7 +251,6 @@ def buscar_producto(request):
 
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro diario----------------------------------------------------------------------
-@never_cache
 def menu_libro_diario(request):
     fecha_hoy = date.today()
 
@@ -263,37 +264,62 @@ def menu_libro_diario(request):
 
     return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas})
 
-@never_cache
+@csrf_exempt
 def cargar_libro_diario(request):
-    aux_lib = libro_diario.objects.order_by('-id').first()
-    cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'])
-    tipo_mov = request.POST['tipo_movimiento']
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # Procesa los datos según las necesidades de tu aplicación
+            print(data)
+            # Responde al cliente según sea necesario
+            return HttpResponseRedirect(reverse('Asistencia_contable', args=[id]))
 
-    if aux_lib and aux_lib.num_asiento != int(request.POST['num_asiento']):
-        if equilibrio() != 0:
-            messages.error(request, 'El asiento no está equilibrado.')
-            return redirect(menu_libro_diario)
+        except json.JSONDecodeError as e:
+            return JsonResponse({'error': 'Error al analizar los datos JSON'}, status=400)
 
-    if tipo_mov == "1":
-
-        libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
-                        ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=request.POST['id_monto'], haber=0)
-        libro.save()
-
-        cta.saldo = cta.saldo + int(request.POST['id_monto'])
-        cta.save()
+def temp(request):    
+    try:
+        data = json.loads(request.body)
         
-    elif tipo_mov == "2":
+        datos = data['datos']
 
-        libro = libro_diario(fecha=request.POST['fecha_emision'], num_asiento=request.POST['num_asiento']
-                        ,concepto=request.POST['id_concepto'], num_cuenta=cta, debe=0, haber=request.POST['id_monto'])
-        libro.save()
+        ultimo_registro = datos[0]
 
-        cta.saldo = cta.saldo - int(request.POST['id_monto'])
-        cta.save()
+        if libro_diario.objects.all().exists():
+            asiento = libro_diario.objects.order_by('-num_asiento').first()
+            asiento = asiento.num_asiento + 1
+        else:
+            asiento = 1
 
-    messages.success(request, 'Asiento guardado!!')
-    return redirect(menu_libro_diario)
+        concepto = ultimo_registro['concepto']
+
+        cab_lib = libro_diario(concepto=concepto, num_asiento=asiento)
+        cab_lib.save()
+
+        cab_lib = get_object_or_404(libro_diario, num_asiento=asiento)
+
+        for dato in datos:
+            concepto = dato['concepto']
+            fecha_emision_hiden = dato['fecha_emision_hidden']
+            num_cuenta = dato['numCuenta']
+            cta = get_object_or_404(cuenta, num_cuenta=num_cuenta)
+            debe = dato['debe']
+            haber = dato['haber']
+
+            deta_lib = detalle_libro_diario(num_asiento=cab_lib, concepto=concepto, num_cuenta=cta, debe=debe, haber=haber)
+            deta_lib.save()
+        
+        cab_lib.fecha = fecha_emision_hiden
+        cab_lib.save()
+
+
+        messages.success(request, 'Asiento guardado!!')    
+        return redirect('menu_libro_diario')
+    
+    except json.JSONDecodeError:
+        return redirect('menu_libro_diario')
+    
+    return redirect('menu_libro_diario')
 
 def equilibrio():
     if libro_diario.objects.all().exists():

@@ -29,98 +29,104 @@
 
         <div class="card card-body bg-secondary">
 
-          <form action="{% url 'cargar_libro_diario' %}" method="POST" autocomplete="off">
+          <div class="card card-body bg-dark mb-2">
 
-            {% csrf_token %}
+            <div class="row g-3 mb-2">
 
-            <div class="card card-body bg-dark mb-2">
+              <div class="col-md-12">
+                <h2 class="form-label">Ingrese datos del asiento</h2>
+              </div>
+              <div class="col-md-12">
+                <h6 class="form-label">Cabecera del asiento</h6>
+              </div>
 
-              <div class="row g-3 mb-2">
+              <form id="dataForm" class="row" autocomplete="off">
 
-                <div class="col-md-12">
-                  <h2 class="form-label">Ingrese datos del asiento</h2>
-                </div>
-                <div class="col-md-12">
-                  <h6 class="form-label">Cabecera del asiento</h6>
-                </div>
+                {% csrf_token %}
 
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" required>
                 </div>
+                <div class="col-md-6 mb-2">
+                  <input type="text" class="form-control" id="id_concepto" name="id_concepto" placeholder="Concepto" required>
+                </div>
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-2">
+                  <select id="num_cuenta" class="form-select" name="num_cuenta" required>
+                    <option selected disabled value>Cuenta</option>
+                    {% for cuenta in cuentas %}
+                    <option value="{{cuenta.num_cuenta}}, {{cuenta.descripcion}}">{{cuenta.descripcion}}</option>
+                    {% empty %}
+                    <h4 class="text-center">No hay cuenta</h4>
+                    {% endfor %} 
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <select id="tipo_movimiento" class="form-select" name="tipo_movimiento" required>
+                    <option selected disabled value>Tipo movimiento</option>
+                    <option value=1>Debe</option>
+                    <option value=2>Haber</option>
+                  </select>
+                </div>
                 <div class="col-md-4">
-                  <input type="int" class="form-control" id="num_asiento" name="num_asiento" placeholder="Num. de asiento" required>
-                </div>
-                <div class="col-md-4 mb-2">
-                </div>
-
-                <div class="col-md-6">
-                  <h6 class="form-label">Concepto</h6>
-                </div>
-                <div class="col-md-2">
-                  <h6 class="form-label">Cuenta</h6>
-                </div>
-                <div class="col-md-2">
-                  <h6 class="form-label">Debe</h6>
-                </div>
-                <div class="col-md-2">
-                  <h6 class="form-label">Haber</h6>
-                </div>
-
-                <div class="container" id="container">
-                  <div class="row g-3 mb-2">
-                    <div class="col-md-6">
-                      <input type="text" class="form-control" id="id_concepto" name="id_concepto" placeholder="Concepto" required>
-                    </div>
-                    <div class="col-md-2">
-                      <select id="num_cuenta" class="form-select" name="num_cuenta" required>
-                        <option selected disabled value>Cuenta</option>
-                        {% for cuenta in cuentas %}
-                        <option value={{cuenta.id}}>{{cuenta.descripcion}}</option>
-                        {% empty %}
-                        <h4 class="text-center">No hay cuenta</h4>
-                        {% endfor %} 
-                      </select>
-                    </div>
-                    <div class="col-md-2">
-                      <div class="input-group">
-                        <input type="int" class="form-control" id="id_monto" name="id_debe" placeholder="Debe" required>
-                        <span class="input-group-text">G</span>
-                      </div>
-                    </div>
-                    <div class="col-md-2">
-                      <div class="input-group">
-                        <input type="int" class="form-control" id="id_monto" name="id_haber" placeholder="Haber" required>
-                        <span class="input-group-text">G</span>
-                      </div>
-                    </div>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="id_monto" name="id_monto" placeholder="Ingrese monto del movimiento" required>
+                    <span class="input-group-text">G</span>
                   </div>
                 </div>
-
-                <div class="col-6">
-                  <button type="submit" class="btn btn-success">Agregar asiento</button>
+                <div class="col-md-3">
+                  <input type="submit" class="form-control" value="Agregar a la tabla">
                 </div>
                 
-                <div class="col-12">
-                  {% if messages %}
-                      <ul class="messages">
-                          {% for message in messages %}
-                              <li class="{% if message.tags == 'error' %}alert alert-danger
-                              {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
-                                  {{ message }}
-                              </li>
-                          {% endfor %}
-                      </ul>
-                  {% endif %}
+              </form>
+
+              <form action="{% url 'cargar_libro_diario' %}" method="POST" autocomplete="off">
+
+                <input type="hidden" class="date" id="fecha_emision_hidden" name="fecha_emision_hidden">
+
+                {% csrf_token %}
+
+                <table id="tablaDatos" name="tablaDatos" class="table table-striped bordered-dark table-secondary table-bordered">
+                  <tr>
+                    <th scope="col" style="width: 42%;">Concepto.</th>
+                    <th scope="col" style="width: 8%;">Cta.</th>
+                    <th scope="col" style="width: 11%;">Descrip.</th>
+                    <th scope="col" style="width: 12%;">Debe</th>
+                    <th scope="col" style="width: 12%;">Haber</th>
+                    <th scope="col" style="width: 12%;">Option</th>
+                  </tr>
+                </table>
+
+                <div class="row g-3 mb-2">
+                  <div class="col-4">
+                    <h5>Diferencia de Debe y haber</h5>
+                  </div>
+                  <div class="col-3">
+                    <input id="tdiferencia" name="tdiferencia" class="form-control" value="0" type="text" style="float: left;" readonly="">
+                  </div>
+                  <div class="col-5">
+                    <button id="agregarAsientoButton" type="button" class="btn btn-success">Agregar asiento</button>
+                  </div>
                 </div>
+              </form>
 
+              <div class="col-12">
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li class="{% if message.tags == 'error' %}alert alert-danger
+                            {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
+                                {{ message }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
               </div>
-              
+
             </div>
-
-          </form>
-
-          <button type="button" class="btn btn-primary" onclick="agregarFila()">Agregar Fila</button>
-          <button type="button" class="btn btn-danger mb-2" id="eliminarFila">Eliminar Fila</button>
+            
+          </div>
 
           <div class="card card-body bg-dark mb-2">
 
@@ -135,9 +141,6 @@
                     <th scope="col" style="width: 14%;">fecha</th>
                     <th scope="col" style="width: 0%;">Asiento</th>
                     <th scope="col" style="width: 55%;">Concepto.</th>
-                    <th scope="col" style="width: 6%;">Cta.</th>
-                    <th scope="col" style="width: 12%;">Debe</th>
-                    <th scope="col" style="width: 12%;">Haber</th>
                     <th scope="col" style="width: 12%;">Option</th>
                   </tr>
                   </thead>
@@ -148,9 +151,6 @@
                       <td><input type="text" name="fecha_emision{{libro.id}}" class="form-control" value="{{ libro.fecha|date:'Y-m-d' }}"></td>
                       <td><input type="int" name="num_asiento{{libro.id}}" class="form-control" value="{{libro.num_asiento}}"></td>
                       <td><input type="text" name="id_concepto{{libro.id}}" class="form-control" value="{{libro.concepto}}"></td>
-                      <td><input type="int" name="num_cuenta{{libro.id}}" class="form-control" value="{{libro.num_cuenta_id}}"></td>
-                      <td><input type="int" name="monto_debe{{libro.id}}" class="form-control" value="{{libro.debe}}"></td>
-                      <td><input type="int" name="monto_haber{{libro.id}}" class="form-control" value="{{libro.haber}}"></td>
                       <td>
                         <button class="btn btn-sm btn-primary" name="id_libro" value="{{libro.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
                       </td>
