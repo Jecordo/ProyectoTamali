@@ -84,6 +84,10 @@
               <form action="{% url 'cargar_libro_diario' %}" method="POST" autocomplete="off">
 
                 <input type="hidden" class="date" id="fecha_emision_hidden" name="fecha_emision_hidden">
+                <input type="hidden" name="concepto" id="concepto-hidden">
+                <input type="hidden" name="cuenta" id="cuenta-hidden">
+                <input type="hidden" name="debe" id="debe-hidden">
+                <input type="hidden" name="haber" id="haber-hidden">
 
                 {% csrf_token %}
 
@@ -106,7 +110,7 @@
                     <input id="tdiferencia" name="tdiferencia" class="form-control" value="0" type="text" style="float: left;" readonly="">
                   </div>
                   <div class="col-5">
-                    <button id="agregarAsientoButton" type="button" class="btn btn-success">Agregar asiento</button>
+                    <button id="agregarAsientoButton" type="submit" class="btn btn-success">Agregar asiento</button>
                   </div>
                 </div>
               </form>

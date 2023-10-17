@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const tablaDatos = document.getElementById("tablaDatos");
     const fechaEmision = document.getElementById("fecha_emision");
     const fechaEmisionHidden = document.getElementById("fecha_emision_hidden");
+    var formulario = document.getElementById("miFormulario");
 
     let idCounter = 1; 
     
@@ -23,21 +24,31 @@ document.addEventListener('DOMContentLoaded', function () {
         const cellOption = newRow.insertCell(5);
 
 
+        const conceptosHidden = document.getElementById("concepto-hidden");
+        const cuentasHidden = document.getElementById("cuenta-hidden");
+        const debesHidden = document.getElementById("debe-hidden");
+        const haberesHidden = document.getElementById("haber-hidden");
 
-        cellConcepto.name = "concepto-" + idCounter;
+        const currentIndex = conceptosHidden.value.split(",").length;
+
+        conceptosHidden.value += (currentIndex > 0 ? "," : "") + id_concepto;
+        cuentasHidden.value += (currentIndex > 0 ? "," : "") + num_cuenta;
+
+
         cellConcepto.innerHTML = id_concepto;
-        cellCuenta.name = "cuenta-" + idCounter;
         cellCuenta.innerHTML = num_cuenta;
         cellCuentaDescrip.innerHTML = cuenta_descripcion;
         if (tipo_movimiento === "1") {
-            cellDebe.id = "debe-" + idCounter;
+            debesHidden.value += (currentIndex > 0 ? "," : "") + id_monto;
+            haberesHidden.value += (currentIndex > 0 ? "," : "") + "0";   
+
             cellDebe.innerHTML = dataForm.id_monto.value;
-            cellHaber.id = "haber-" + idCounter;
             cellHaber.innerHTML = 0;
         }else if ((tipo_movimiento === "2")) {
-            cellDebe.id = "debe-" + idCounter;
+            debesHidden.value += (currentIndex > 0 ? "," : "") + "0";
+            haberesHidden.value += (currentIndex > 0 ? "," : "") + id_monto;    
+
             cellDebe.innerHTML = 0;
-            cellHaber.id = "haber-" + idCounter;
             cellHaber.innerHTML = dataForm.id_monto.value;
         }
 
@@ -99,42 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
         dataForm.fecha_emision.value = fecha_emision;
     });
 
-    function enviarTablaAlBackend() {
-        const filas = tablaDatos.rows;
-        const fecha_emision_hidden = document.getElementById("fecha_emision_hidden").value;
-    
-        const datos = [];
-    
-        for (let i = 1; i < filas.length; i++) {
-            const fila = filas[i];
-            const concepto = fila.cells[0].textContent;
-            const numCuenta = fila.cells[1].textContent;
-            const descripcion = fila.cells[2].textContent;
-            const debe = parseFloat(fila.cells[3].textContent);
-            const haber = parseFloat(fila.cells[4].textContent);
-    
-            datos.push({ concepto, numCuenta, descripcion, debe, haber, fecha_emision_hidden});
-        }
-
-
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-        fetch('/gestor/cargar_libro_diario/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({ datos })
-        })
-        .then(response => {
-        })
-        .catch(error => {
-            console.error('Error al enviar datos al backend: ', error);
-        });
-    }
-
-    document.getElementById("agregarAsientoButton").addEventListener("click", function(event) {
+    formulario.addEventListener("submit", function (event) {
         event.preventDefault();
 
         totales();
@@ -142,8 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (parseFloat(document.getElementById("tdiferencia").value) !== 0) {
             alert("La diferencia debe ser igual a 0 para agregar el asiento.");
         } else {
-            // Envía los datos de la tabla al backend
-            enviarTablaAlBackend();
+          formulario.submit();
         }
     });
 

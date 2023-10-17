@@ -266,16 +266,55 @@ def menu_libro_diario(request):
 
 @csrf_exempt
 def cargar_libro_diario(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            # Procesa los datos según las necesidades de tu aplicación
-            print(data)
-            # Responde al cliente según sea necesario
-            return HttpResponseRedirect(reverse('Asistencia_contable', args=[id]))
+    conceptos_str = request.POST.get('concepto', '')
+    cuentas_str = request.POST.get('cuenta', '')
+    debes_str = request.POST.get('debe', '')
+    haberes_str = request.POST.get('haber', '')
 
-        except json.JSONDecodeError as e:
-            return JsonResponse({'error': 'Error al analizar los datos JSON'}, status=400)
+    fecha = request.POST.get('fecha_emision_hidden')
+
+    # Divide las cadenas en listas
+    conceptos = conceptos_str.split(",")
+    cuentas = cuentas_str.split(",")
+    debes = debes_str.split(",")
+    haberes = haberes_str.split(",")
+
+    if libro_diario.objects.all().exists():
+        asiento = libro_diario.objects.order_by('-num_asiento').first()
+        asiento = asiento.num_asiento + 1
+    else:
+        asiento = 1
+
+    cab_lib = libro_diario(concepto=conceptos[1], num_asiento=asiento)
+    cab_lib.save()
+
+    cab_lib = get_object_or_404(libro_diario, num_asiento=asiento)
+
+    for i in range(1, len(conceptos)):
+        concepto = conceptos[i]
+        num_cuenta = cuentas[i]
+        cta = get_object_or_404(cuenta, num_cuenta=num_cuenta)
+
+        if debes[i]:
+            debe = int(debes[i])
+        else:
+            debe = 0  
+        if haberes[i]:
+            haber = int(haberes[i])
+        else:
+            haber = 0
+
+        deta_lib = detalle_libro_diario(num_asiento=cab_lib, concepto=concepto, num_cuenta=cta, debe=debe, haber=haber)
+        deta_lib.save()
+    
+    cab_lib.fecha = fecha
+    cab_lib.save()
+
+
+    messages.success(request, 'Asiento guardado!!')    
+    return redirect(menu_libro_diario)
+
+
 
 def temp(request):    
     try:
