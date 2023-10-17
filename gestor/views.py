@@ -316,50 +316,6 @@ def cargar_libro_diario(request):
 
 
 
-def temp(request):    
-    try:
-        data = json.loads(request.body)
-        
-        datos = data['datos']
-
-        ultimo_registro = datos[0]
-
-        if libro_diario.objects.all().exists():
-            asiento = libro_diario.objects.order_by('-num_asiento').first()
-            asiento = asiento.num_asiento + 1
-        else:
-            asiento = 1
-
-        concepto = ultimo_registro['concepto']
-
-        cab_lib = libro_diario(concepto=concepto, num_asiento=asiento)
-        cab_lib.save()
-
-        cab_lib = get_object_or_404(libro_diario, num_asiento=asiento)
-
-        for dato in datos:
-            concepto = dato['concepto']
-            fecha_emision_hiden = dato['fecha_emision_hidden']
-            num_cuenta = dato['numCuenta']
-            cta = get_object_or_404(cuenta, num_cuenta=num_cuenta)
-            debe = dato['debe']
-            haber = dato['haber']
-
-            deta_lib = detalle_libro_diario(num_asiento=cab_lib, concepto=concepto, num_cuenta=cta, debe=debe, haber=haber)
-            deta_lib.save()
-        
-        cab_lib.fecha = fecha_emision_hiden
-        cab_lib.save()
-
-
-        messages.success(request, 'Asiento guardado!!')    
-        return redirect('menu_libro_diario')
-    
-    except json.JSONDecodeError:
-        return redirect('menu_libro_diario')
-    
-    return redirect('menu_libro_diario')
-
 def equilibrio():
     if libro_diario.objects.all().exists():
         aux_lib = libro_diario.objects.order_by('-id').first()
