@@ -2,11 +2,12 @@
         
         
 document.addEventListener('DOMContentLoaded', function () {
+
     const dataForm = document.getElementById("dataForm");
     const tablaDatos = document.getElementById("tablaDatos");
     const fechaEmision = document.getElementById("fecha_emision");
     const fechaEmisionHidden = document.getElementById("fecha_emision_hidden");
-    var formulario = document.getElementById("miFormulario");
+    var fromu = document.getElementById("fromu");
 
     let idCounter = 1; 
     
@@ -110,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
         dataForm.fecha_emision.value = fecha_emision;
     });
 
-    formulario.addEventListener("submit", function (event) {
+    fromu.addEventListener("submit", function (event) {
         event.preventDefault();
 
         totales();
@@ -118,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (parseFloat(document.getElementById("tdiferencia").value) !== 0) {
             alert("La diferencia debe ser igual a 0 para agregar el asiento.");
         } else {
-          formulario.submit();
+            fromu.submit();
         }
     });
 

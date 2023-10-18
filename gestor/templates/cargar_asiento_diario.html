@@ -50,38 +50,47 @@
                 <div class="col-md-6 mb-2">
                   <input type="text" class="form-control" id="id_concepto" name="id_concepto" placeholder="Concepto" required>
                 </div>
-                <div class="col-md-2">
-                </div>
-                <div class="col-md-2">
-                  <select id="num_cuenta" class="form-select" name="num_cuenta" required>
-                    <option selected disabled value>Cuenta</option>
-                    {% for cuenta in cuentas %}
-                    <option value="{{cuenta.num_cuenta}}, {{cuenta.descripcion}}">{{cuenta.descripcion}}</option>
-                    {% empty %}
-                    <h4 class="text-center">No hay cuenta</h4>
-                    {% endfor %} 
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <select id="tipo_movimiento" class="form-select" name="tipo_movimiento" required>
-                    <option selected disabled value>Tipo movimiento</option>
-                    <option value=1>Debe</option>
-                    <option value=2>Haber</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <div class="input-group">
-                    <input type="number" class="form-control" id="id_monto" name="id_monto" placeholder="Ingrese monto del movimiento" required>
-                    <span class="input-group-text">G</span>
+
+                <div class="card card-body bg-secondary mb-2">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <h6 class="form-label">Detalle del asiento:</h6>
+                    </div>
+                    <div class="col-md-2">
+                      <select id="num_cuenta" class="form-select" name="num_cuenta" required>
+                        <option selected disabled value>Cuenta</option>
+                        {% for cuenta in cuentas %}
+                        <option value="{{cuenta.num_cuenta}}, {{cuenta.descripcion}}">{{cuenta.descripcion}}</option>
+                        {% empty %}
+                        <h4 class="text-center">No hay cuenta</h4>
+                        {% endfor %} 
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <select id="tipo_movimiento" class="form-select" name="tipo_movimiento" required>
+                        <option selected disabled value>Tipo movimiento</option>
+                        <option value=1>Debe</option>
+                        <option value=2>Haber</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="input-group">
+                        <input type="number" class="form-control" id="id_monto" name="id_monto" placeholder="Ingrese monto del movimiento" required>
+                        <span class="input-group-text">G</span>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <input type="submit" class="form-control" value="Agregar al asiento">
+                    </div>
+
                   </div>
                 </div>
-                <div class="col-md-3">
-                  <input type="submit" class="form-control" value="Agregar a la tabla">
-                </div>
+
+                
                 
               </form>
 
-              <form action="{% url 'cargar_libro_diario' %}" method="POST" autocomplete="off">
+              <form id="fromu" action="{% url 'cargar_libro_diario' %}" method="POST" autocomplete="off">
 
                 <input type="hidden" class="date" id="fecha_emision_hidden" name="fecha_emision_hidden">
                 <input type="hidden" name="concepto" id="concepto-hidden">
@@ -91,7 +100,7 @@
 
                 {% csrf_token %}
 
-                <table id="tablaDatos" name="tablaDatos" class="table table-striped bordered-dark table-secondary table-bordered">
+                <table id="tablaDatos" name="tablaDatos" class="table table-info table-striped table-bordered border-dark">
                   <tr>
                     <th scope="col" style="width: 42%;">Concepto.</th>
                     <th scope="col" style="width: 8%;">Cta.</th>
@@ -110,7 +119,7 @@
                     <input id="tdiferencia" name="tdiferencia" class="form-control" value="0" type="text" style="float: left;" readonly="">
                   </div>
                   <div class="col-5">
-                    <button id="agregarAsientoButton" type="submit" class="btn btn-success">Agregar asiento</button>
+                    <button id="agregarAsientoButton" type="submit" class="btn btn-success">Grabar asiento</button>
                   </div>
                 </div>
               </form>
@@ -139,7 +148,7 @@
 
                 {% csrf_token %}
 
-                <table class="table table-info table-striped table-bordered border-dark">
+                <table class="table table-striped table-bordered bordered-dark table-secondary">
                   <thead>
                   <tr>
                     <th scope="col" style="width: 14%;">fecha</th>
@@ -152,9 +161,9 @@
 
                     {% for libro in libros_diarios %}
                       <tr>
-                      <td><input type="text" name="fecha_emision{{libro.id}}" class="form-control" value="{{ libro.fecha|date:'Y-m-d' }}"></td>
-                      <td><input type="int" name="num_asiento{{libro.id}}" class="form-control" value="{{libro.num_asiento}}"></td>
-                      <td><input type="text" name="id_concepto{{libro.id}}" class="form-control" value="{{libro.concepto}}"></td>
+                      <td>{{ libro.fecha|date:'Y-m-d' }}</td>
+                      <td>{{libro.num_asiento}}</td>
+                      <td>{{libro.concepto}}</td>
                       <td>
                         <button class="btn btn-sm btn-primary" name="id_libro" value="{{libro.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
                       </td>
