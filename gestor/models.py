@@ -190,4 +190,10 @@ class libro_mayor(models.Model):
     saldo = models.IntegerField()
 
     def __str__(self):
+        return self.num_asiento
+    
+    def __str__(self):
         return self.saldo
+    
+    def __str__(self):
+        return self.num_cuenta

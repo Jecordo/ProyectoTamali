@@ -400,8 +400,8 @@ def descargar_libro(request):
     return response
 
 def migrar_asientos(request):
-    asientos_migrar = libro_diario.objects.all().order_by('num_asiento')
-    libros_mayores = libro_mayor.objects.all().order_by('num_asiento')
+    asientos_migrar = detalle_libro_diario.objects.all().order_by('num_asiento')
+    libros_mayores = libro_mayor.objects.all()
 
     libros_mayores.delete()
 
@@ -415,11 +415,10 @@ def migrar_asientos(request):
             saldo = asiento.debe
             saldo = saldo - asiento.haber
 
-        libro = libro_mayor(fecha=asiento.fecha, num_asiento=asiento.num_asiento,concepto=asiento.concepto, 
+        libro = libro_mayor(fecha=asiento.num_asiento.fecha, num_asiento=asiento.num_asiento.num_asiento, concepto=asiento.concepto, 
                             num_cuenta=asiento.num_cuenta, debe=asiento.debe, haber=asiento.haber, saldo=saldo)
-
+        
         libro.save()
-
 
     messages.success(request, 'Asiento guardado!!')
     return redirect(menu_libro_mayor)
