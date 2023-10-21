@@ -1,6 +1,3 @@
-
-        
-        
 document.addEventListener('DOMContentLoaded', function () {
 
     const dataForm = document.getElementById("dataForm");
@@ -122,6 +119,52 @@ document.addEventListener('DOMContentLoaded', function () {
             fromu.submit();
         }
     });
+
+    function onPageLoad(cabe_lib) {
+        const detalleHidden = document.getElementById("detalle-hidden"); 
+        const detalle = JSON.parse(detalleHidden.value);
+        const dataForm = document.getElementById("dataForm");
+        const aux = document.getElementById("cabe_lib").value;
+        const partes = aux.split(' - ');
+        const fecha = new Date(partes[0]); // Convierte la primera parte en un objeto de fecha
+        const fecha_cab = fecha.toISOString().slice(0, 10);
+        const concepto_cab = partes[1];
+        const tablaDatos = document.getElementById("tablaDatos"); 
+        let idCounter = 1; 
+    
+        detalle.forEach(function (det) {
+            const newRow = tablaDatos.insertRow(tablaDatos.rows.length);
+            const cellConcepto = newRow.insertCell(0);
+            const cellCuenta = newRow.insertCell(1);
+            const cellCuentaDescrip = newRow.insertCell(2);
+            const cellDebe = newRow.insertCell(3);
+            const cellHaber = newRow.insertCell(4);
+            const cellOption = newRow.insertCell(5);
+
+            cellConcepto.innerHTML = det.concepto;
+            cellCuenta.innerHTML = det.num_cuenta.num_cuenta;
+            cellCuentaDescrip.innerHTML = det.num_cuenta.descripcion;
+            cellDebe.innerHTML = det.debe;
+            cellHaber.innerHTML = det.haber;
+
+            const eliminarBtn = document.createElement("button");
+            eliminarBtn.textContent = "Eliminar";
+            eliminarBtn.addEventListener("click", function () {
+                tablaDatos.deleteRow(newRow.rowIndex);
+                totales();
+            });
+            cellOption.appendChild(eliminarBtn);
+
+            newRow.id = "row-" + idCounter; 
+            idCounter++; 
+        });
+
+
+        dataForm.id_concepto.value = concepto_cab;
+        dataForm.fecha_emision.value = fecha_cab;
+    }
+    
+    onPageLoad(cabe_lib);
 
 });
         

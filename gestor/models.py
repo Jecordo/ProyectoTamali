@@ -167,7 +167,8 @@ class libro_diario(models.Model):
     concepto = models.CharField(max_length=200, null=True)
 
     def __str__(self):
-        return self.num_asiento
+        return f"Asiento {self.num_asiento} - Fecha: {self.fecha}"
+
     
 class detalle_libro_diario(models.Model):
     num_asiento = models.ForeignKey(libro_diario, on_delete=models.CASCADE)
@@ -178,6 +179,21 @@ class detalle_libro_diario(models.Model):
 
     def __str__(self):
         return self.num_asiento
+    
+    def to_dict(self):
+        return {
+            "num_asiento": {
+                "concepto": self.num_asiento.concepto,
+                "num_asiento": self.num_asiento.num_asiento
+            },
+            "concepto": self.concepto,
+            "num_cuenta": {
+                "num_cuenta": self.num_cuenta.num_cuenta,
+                "descripcion": self.num_cuenta.descripcion
+            },
+            "debe": self.debe,
+            "haber": self.haber
+        }
 
 
 class libro_mayor(models.Model):
@@ -190,4 +206,10 @@ class libro_mayor(models.Model):
     saldo = models.IntegerField()
 
     def __str__(self):
+        return self.num_asiento
+    
+    def __str__(self):
         return self.saldo
+    
+    def __str__(self):
+        return self.num_cuenta

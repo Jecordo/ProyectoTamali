@@ -6,7 +6,8 @@ from .views import (
     modificar_libro_diario, descargar_libro, menu_libro_mayor, cargar_libro_mayor,
     modificar_libro_mayor, migrar_asientos, menu_cuenta, registrar_cuenta, modificar_cuenta,
     cargar_factura_detalle, delete_factura, menu_factura_detalle, cancelar_factura,
-    modificar_cliente, carga_cliente, descargar_libro_mayor, factura_libro
+    modificar_cliente, carga_cliente, descargar_libro_mayor, factura_libro,
+    mod_libro_diario
 )
 
 urlpatterns = [
@@ -48,5 +49,7 @@ urlpatterns = [
     path('descargar_libro_mayor/', descargar_libro_mayor, name='descargar_libro_mayor'),
     path('descagar_libro/', descargar_libro, name='descargar_libro'),
     path('migrar_asientos/', migrar_asientos, name='migrar_asientos'),    
+
+    path('mod_libro_diario/', mod_libro_diario, name='mod_libro_diario'),
 
 ]

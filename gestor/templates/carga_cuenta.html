@@ -22,7 +22,7 @@
 
     <div class="container">
 
-            <div class="col-md-10">
+            <div class="col-md-12">
 
                 <h1 class="display-6">Cuentas</h1> 
 
@@ -84,8 +84,7 @@
                         <table class="table table-info table-striped table-bordered border-dark">
                           <thead>
                           <tr>
-                            <th scope="col" style="width: 14%;">ID Cta.</th>
-                            <th scope="col" style="width: 0%;">Num. Cuenta</th>
+                            <th scope="col" style="width: 8%;">Num. Cuenta</th>
                             <th scope="col" style="width: 45%;">Descripcion</th>
                             <th scope="col" style="width: 12%;">Saldo</th>
                             <th scope="col" style="width: 12%;">Opt.</th>
@@ -95,7 +94,6 @@
 
                             {% for cuenta in cuentas %}
                               <tr>
-                              <td><input type="text" name="id_cuenta{{cuenta.id}}" class="form-control" value="{{ cuenta.id }}" readonly></td>
                               <td><input type="int" name="num_cuenta{{cuenta.id}}" class="form-control" value="{{cuenta.num_cuenta}}"></td>
                               <td><input type="text" name="nom_cuenta{{cuenta.id}}" class="form-control" value="{{cuenta.descripcion}}"></td>
                               <td><input type="int" name="id_monto{{cuenta.id}}" class="form-control" value="{{cuenta.saldo}}"></td>
