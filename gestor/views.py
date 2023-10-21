@@ -24,6 +24,7 @@ from django.core.paginator import Paginator, Page
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.core import serializers
 
 
 
@@ -332,6 +333,17 @@ def equilibrio():
     return int(suma)
 
 
+def mod_libro_diario(request):
+    cabecera_libro = get_object_or_404(libro_diario, pk=request.POST['id_libro'])
+    detalle_libro = detalle_libro_diario.objects.filter(num_asiento=cabecera_libro.num_asiento)
+    cuentas = cuenta.objects.all()
+
+    detalle_libro_list = [detalle.to_dict() for detalle in detalle_libro]
+    detalle_libro_json = json.dumps(detalle_libro_list)
+
+    print(detalle_libro_json)
+
+    return render(request, 'modificar_asiento_diario.html', {"cuentas": cuentas, "cabe_lib": cabecera_libro, "deta_lib": detalle_libro_json})
 
 @never_cache
 def modificar_libro_diario(request):
@@ -423,6 +435,14 @@ def migrar_asientos(request):
     messages.success(request, 'Asiento guardado!!')
     return redirect(menu_libro_mayor)
 
+def llamar_funcion_django(request):
+    # Realiza cualquier lógica necesaria aquí
+    
+    # Genera un enlace a la página HTML que deseas abrir en una nueva pestaña
+    enlace_html = '/carga_cuenta.html'  # Reemplaza con la ruta correcta
+
+    # Devuelve una respuesta JSON con el enlace
+    return JsonResponse({'enlace_html': enlace_html})
 
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro mayor----------------------------------------------------------------------
