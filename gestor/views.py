@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict
 from django.shortcuts import render,  redirect
 from .models import (
-    persona, factura, factura_detalle, cliente, producto,
+    Role, CustomUser, factura, factura_detalle, cliente, producto,
     categoria,marca,Estados,proveedor, tipo_factura, 
     metodo_pago, marca, cuenta, libro_diario, detalle_libro_diario,
     libro_mayor)
@@ -25,6 +25,11 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from .decorators import admin_required, vendedor_required, contador_required
+
+
 
 def cerrar_secion(request):
     logout(request)
@@ -34,8 +39,40 @@ def cerrar_secion(request):
 def menu_principal(request):
     return render(request, 'dashboard.html')
 
+@admin_required
+@login_required
+def crear_user(request):
+    if request.method == 'GET':
+        return render(request, 'crear_user.html', {'form': UserCreationForm})
+    elif request.method == 'POST':
+        username = request.POST['username']
+        password1 = request.POST['password1']
+        password2 = request.POST['password2']
 
+        if password1 == password2:
+            # Verificar si el usuario ya existe
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'El usuario ya existe.')
+            else:
+                # Usuario no existe, proceder con la creación
+                user = User.objects.create_user(username=username, password=password1)
+                role = Role.objects.get(name=request.POST['rols'])  # Asigna el rol adecuado
+                custom_user = CustomUser.objects.create(user=user, role=role)
+                custom_user.save()
+                messages.success(request, 'Usuario Guardado.')
+        else:
+            messages.error(request, 'Las contraseñas no coinciden.')
 
+        return redirect('crear_user')
+
+    
+def assign_role_to_user(request, user_id, role_name):
+    user = User.objects.get(id=user_id)
+    role, created = Role.objects.get_or_create(name=role_name)
+    user.role = role
+    user.save()
+
+@vendedor_required
 def facturar(request):
     client = cliente.objects.all()
     metodo = metodo_pago.objects.all()

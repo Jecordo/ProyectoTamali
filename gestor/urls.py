@@ -7,13 +7,14 @@ from .views import (
     modificar_libro_mayor, migrar_asientos, menu_cuenta, registrar_cuenta, modificar_cuenta,
     cargar_factura_detalle, delete_factura, menu_factura_detalle, cancelar_factura,
     modificar_cliente, carga_cliente, descargar_libro_mayor, factura_libro,
-    mod_libro_diario
+    mod_libro_diario, crear_user
 )
 from . import views
 
 urlpatterns = [
     path('', menu_principal, name='Menu_principal'),
     path('cerrar_secion/', views.cerrar_secion , name='cerrar_secion'),
+    path('crear_user/', views.crear_user , name='crear_user'),
 
     path('facturar/', facturar, name='facturas'),
     path('generar_factura/', create_factura, name='Create_factura'),

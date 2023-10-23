@@ -1,0 +1,76 @@
+{% extends "Base.html" %}
+
+{% load static %}
+<head>
+  <title>{% block title %} Create users {% endblock %}</title>
+</head>
+<body>
+  
+  {% block content %}
+
+<div class="container">
+    <div class="col-md-4 offset-md-4 mb-2 mt-5">
+
+        <h1 class="display-6">Usuarios</h1> 
+
+        <div class="card card-body bg-secondary">
+
+            <div class="card card-body bg-dark mb-2">
+
+                <form method="post" class="row">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username">User:</label>
+                        <input type="text" name="username" class="form-control" placeholder="username">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password1">Password:</label>
+                        <input type="password" name="password1" id="password1" class="form-control" placeholder="password">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password2">Confirm password:</label>
+                        <input type="password" name="password2" id="password2" class="form-control" placeholder="confirm password">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="rols">Role del usaurio:</label>
+                        <select id="rols" class="form-select" name="rols" required>
+                            <option value='vendedor'>Vendedor</option>
+                            <option value='contador'>Contador</option>
+                            <option value='admin'>Administrador</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <button class="btn btn-success">Crear</button>
+                    </div>
+
+                    <div class="mb-12">
+                        {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <li class="{% if message.tags == 'error' %}alert alert-danger
+                                    {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
+                                        {{ message }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+        
+
+    </div>
+
+</div>
+
+  {% endblock %}
+
+</body>

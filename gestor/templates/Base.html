@@ -41,9 +41,12 @@
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'Asistencia_contable' %}">Asistencia contable</a>
               </li>
+              <li class="nav-item d-flex">
+                <a class="nav-link" href="{% url 'crear_user' %}">Crear usuarios</a>
+              </li>
             </ul>
-            <form class="d-flex" action="{% url 'cerrar_secion' %}"></form>
-            <button class="btn btn-sm btn-danger">Cerrar seccion</button>
+            <form class="d-flex" action="{% url 'cerrar_secion' %}">
+              <button class="btn btn-sm btn-danger">Cerrar seccion</button>
             </form>
           </div>
         </div>
