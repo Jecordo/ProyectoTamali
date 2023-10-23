@@ -92,7 +92,7 @@
 
               <form id="fromu" action="{% url 'cargar_libro_diario' %}" method="POST" autocomplete="off">
 
-                <input type="hidden" class="date" id="fecha_emision_hidden" name="fecha_emision_hidden">
+                <input type="hidden" id="fecha_emision_hidden" name="fecha_emision_hidden">
                 <input type="hidden" name="concepto" id="concepto-hidden">
                 <input type="hidden" name="cuenta" id="cuenta-hidden">
                 <input type="hidden" name="debe" id="debe-hidden">
@@ -112,7 +112,7 @@
                 </table>
 
                 <div class="row g-3 mb-2">
-                  <div class="col-4">
+                  <div class="col-3">
                     <h5>Diferencia de Debe y haber</h5>
                   </div>
                   <div class="col-3">

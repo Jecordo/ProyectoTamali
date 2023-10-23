@@ -9,9 +9,11 @@ from .views import (
     modificar_cliente, carga_cliente, descargar_libro_mayor, factura_libro,
     mod_libro_diario
 )
+from . import views
 
 urlpatterns = [
     path('', menu_principal, name='Menu_principal'),
+    path('cerrar_secion/', views.cerrar_secion , name='cerrar_secion'),
 
     path('facturar/', facturar, name='facturas'),
     path('generar_factura/', create_factura, name='Create_factura'),

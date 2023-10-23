@@ -1,6 +1,5 @@
 from audioop import reverse
 from datetime import date
-from io import BytesIO
 import json
 from pyexpat.errors import messages
 import re
@@ -24,11 +23,14 @@ from django.core.paginator import Paginator, Page
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from django.core import serializers
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
+def cerrar_secion(request):
+    logout(request)
+    return redirect(menu_principal)
 
-
-# Create your views here.
+@login_required
 def menu_principal(request):
     return render(request, 'dashboard.html')
 
@@ -255,7 +257,7 @@ def buscar_producto(request):
 def menu_libro_diario(request):
     fecha_hoy = date.today()
 
-    libros_diarios = libro_diario.objects.filter(fecha__year=fecha_hoy.year).order_by('fecha', 'num_asiento','id')
+    libros_diarios = libro_diario.objects.filter(fecha__year=fecha_hoy.year).order_by('num_asiento')
     cuentas = cuenta.objects.all()
 
     paginator = Paginator(libros_diarios, 10)
@@ -272,7 +274,7 @@ def cargar_libro_diario(request):
     debes_str = request.POST.get('debe', '')
     haberes_str = request.POST.get('haber', '')
 
-    fecha = request.POST.get('fecha_emision_hidden')
+    fecha = request.POST['fecha_emision_hidden']
 
     # Divide las cadenas en listas
     conceptos = conceptos_str.split(",")
@@ -341,43 +343,63 @@ def mod_libro_diario(request):
     detalle_libro_list = [detalle.to_dict() for detalle in detalle_libro]
     detalle_libro_json = json.dumps(detalle_libro_list)
 
-    print(detalle_libro_json)
-
     return render(request, 'modificar_asiento_diario.html', {"cuentas": cuentas, "cabe_lib": cabecera_libro, "deta_lib": detalle_libro_json})
 
 @never_cache
 def modificar_libro_diario(request):
-    fecha_actual = date.today()
+    asiento_cab = request.POST['asiento']
+    fecha = request.POST['fecha_emision_hidden']
+    
 
-    libros_diarios = libro_diario.objects.filter(fecha__year=fecha_actual.year).order_by('fecha', 'num_asiento')
-    cuentas = cuenta.objects.all()
-
-    paginator = Paginator(libros_diarios, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    existe = libro_diario.objects.filter(id=request.POST['id_libro']).exists()
+    existe = libro_diario.objects.filter(num_asiento=asiento_cab).exists()
 
     if existe:
-        aux = request.POST['id_libro']
-        aux_libro = get_object_or_404(libro_diario, pk=request.POST['id_libro'])
-        cta = get_object_or_404(cuenta, pk=request.POST['num_cuenta'+aux])
+        aux_libro = get_object_or_404(libro_diario, num_asiento=asiento_cab)
 
-        aux_libro.fecha = request.POST['fecha_emision'+aux]
-        aux_libro.num_asiento = request.POST['num_asiento'+aux]
-        aux_libro.concepto = request.POST['id_concepto'+aux]
-        aux_libro.num_cuenta = cta
-        aux_libro.haber = request.POST['monto_haber'+aux]
-        aux_libro.debe = request.POST['monto_debe'+aux]
+        aux_detalle = detalle_libro_diario.objects.filter(num_asiento=asiento_cab)
+
+        aux_detalle.delete()
+
+        conceptos_str = request.POST.get('concepto', '')
+        cuentas_str = request.POST.get('cuenta', '')
+        debes_str = request.POST.get('debe', '')
+        haberes_str = request.POST.get('haber', '')
+
+        conceptos = conceptos_str.split(",")
+        cuentas = cuentas_str.split(",")
+        debes = debes_str.split(",")
+        haberes = haberes_str.split(",")
         
+        aux_libro.concepto = conceptos[1]
+        aux_libro.fecha = fecha
+
         aux_libro.save()
 
-        messages.success(request, 'Asiento actualizado!!')
+        cab_lib = get_object_or_404(libro_diario, num_asiento=asiento_cab)
+
+        for i in range(1, len(conceptos)):
+            concepto = conceptos[i]
+            num_cuenta = cuentas[i]
+            cta = get_object_or_404(cuenta, num_cuenta=num_cuenta)
+
+            if debes[i]:
+                debe = int(debes[i])
+            else:
+                debe = 0  
+            if haberes[i]:
+                haber = int(haberes[i])
+            else:
+                haber = 0
+
+            deta_lib = detalle_libro_diario(num_asiento=cab_lib, concepto=concepto, num_cuenta=cta, debe=debe, haber=haber)
+            deta_lib.save()
+
+        messages.success(request, 'Asiento modificado!!')    
         return redirect(menu_libro_diario)
     else:
         messages.error(request, 'Asiento no esta cargado.')
 
-        return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas, "mensaje_error": mensaje_error})
+        return redirect(menu_libro_diario)
 
 
 @never_cache

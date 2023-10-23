@@ -54,6 +54,29 @@ document.addEventListener('DOMContentLoaded', function () {
         eliminarBtn.textContent = "Eliminar";
         eliminarBtn.addEventListener("click", function () {
             tablaDatos.deleteRow(newRow.rowIndex);
+
+            const conceptosHidden = document.getElementById("concepto-hidden");
+            const cuentasHidden = document.getElementById("cuenta-hidden");
+            const debesHidden = document.getElementById("debe-hidden");
+            const haberesHidden = document.getElementById("haber-hidden");
+
+            const conceptosArray = conceptosHidden.value.split(",");
+            const cuentasArray = cuentasHidden.value.split(",");
+            const debesArray = debesHidden.value.split(",");
+            const haberesArray = haberesHidden.value.split(",");
+
+            const index = newRow.rowIndex - 1; 
+
+            conceptosArray.splice(index, 1);
+            cuentasArray.splice(index, 1);
+            debesArray.splice(index, 1);
+            haberesArray.splice(index, 1);
+
+            conceptosHidden.value = conceptosArray.join(",");
+            cuentasHidden.value = cuentasArray.join(",");
+            debesHidden.value = debesArray.join(",");
+            haberesHidden.value = haberesArray.join(",");
+
             totales();
         });
         cellOption.appendChild(eliminarBtn);
@@ -110,13 +133,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     fromu.addEventListener("submit", function (event) {
         event.preventDefault();
+        const conceptosHidden = document.getElementById("concepto-hidden");
 
         totales();
 
         if (parseFloat(document.getElementById("tdiferencia").value) !== 0) {
             alert("La diferencia debe ser igual a 0 para agregar el asiento.");
         } else {
-            fromu.submit();
+            if (conceptosHidden.value.length < 1) {
+                alert("El asiento esta vacio.");
+            } else {
+               fromu.submit();
+            }
         }
     });
 
@@ -125,10 +153,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const detalle = JSON.parse(detalleHidden.value);
         const dataForm = document.getElementById("dataForm");
         const aux = document.getElementById("cabe_lib").value;
-        const partes = aux.split(' - ');
-        const fecha = new Date(partes[0]); // Convierte la primera parte en un objeto de fecha
+        const partes = aux.split('-');
+        const fecha = new Date(partes[0]);
         const fecha_cab = fecha.toISOString().slice(0, 10);
         const concepto_cab = partes[1];
+        let num_asiento_hidden = document.getElementById("num_asiento-hidden");
+        num_asiento_hidden.value = partes[2];
         const tablaDatos = document.getElementById("tablaDatos"); 
         let idCounter = 1; 
     
@@ -140,6 +170,18 @@ document.addEventListener('DOMContentLoaded', function () {
             const cellDebe = newRow.insertCell(3);
             const cellHaber = newRow.insertCell(4);
             const cellOption = newRow.insertCell(5);
+
+            const conceptosHidden = document.getElementById("concepto-hidden");
+            const cuentasHidden = document.getElementById("cuenta-hidden");
+            const debesHidden = document.getElementById("debe-hidden");
+            const haberesHidden = document.getElementById("haber-hidden");
+
+            const currentIndex = conceptosHidden.value.split(",").length;
+
+            conceptosHidden.value += (currentIndex > 0 ? "," : "") + det.concepto;
+            cuentasHidden.value += (currentIndex > 0 ? "," : "") + det.num_cuenta.num_cuenta;
+            debesHidden.value += (currentIndex > 0 ? "," : "") + det.debe;
+            haberesHidden.value += (currentIndex > 0 ? "," : "") + det.haber;
 
             cellConcepto.innerHTML = det.concepto;
             cellCuenta.innerHTML = det.num_cuenta.num_cuenta;
@@ -162,6 +204,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         dataForm.id_concepto.value = concepto_cab;
         dataForm.fecha_emision.value = fecha_cab;
+
+        fechaEmisionHidden.value = fechaEmision.value;
+
+        totales();
     }
     
     onPageLoad(cabe_lib);
