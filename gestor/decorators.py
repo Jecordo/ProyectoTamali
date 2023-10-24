@@ -22,7 +22,7 @@ def admin_required(view_func):
 def vendedor_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
         custom_user = CustomUser.objects.get(user=request.user)
-        if is_vendedor(custom_user):
+        if is_vendedor(custom_user) or is_admin(custom_user):
             return view_func(request, *args, **kwargs)
         else:
             return HttpResponse("Acceso no autorizado", status=403)
@@ -31,7 +31,7 @@ def vendedor_required(view_func):
 def contador_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
         custom_user = CustomUser.objects.get(user=request.user)
-        if is_contador(custom_user):
+        if is_contador(custom_user) or is_admin(custom_user):
             return view_func(request, *args, **kwargs)
         else:
             return HttpResponse("Acceso no autorizado", status=403)

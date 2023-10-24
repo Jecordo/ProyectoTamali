@@ -30,18 +30,42 @@ from django.contrib.auth.models import User
 from .decorators import admin_required, vendedor_required, contador_required
 
 
-
+@login_required
 def cerrar_secion(request):
     logout(request)
     return redirect(menu_principal)
 
+
 @login_required
 def menu_principal(request):
-    return render(request, 'dashboard.html')
+    user = request.user
 
-@admin_required
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+        
+    return render(request, 'dashboard.html',{'user_role': user_role, 'user':user})
+
+
 @login_required
+@admin_required
 def crear_user(request):
+    user = request.user
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+        else:
+            user_role = "Usuario no autenticado"
+
     if request.method == 'GET':
         return render(request, 'crear_user.html', {'form': UserCreationForm})
     elif request.method == 'POST':
@@ -63,17 +87,24 @@ def crear_user(request):
         else:
             messages.error(request, 'Las contraseñas no coinciden.')
 
-        return redirect('crear_user')
 
-    
+        return render( request, 'crear_user.html', {'user_role': user_role, 'user':user})
+
+@login_required
+@admin_required
 def assign_role_to_user(request, user_id, role_name):
     user = User.objects.get(id=user_id)
     role, created = Role.objects.get_or_create(name=role_name)
     user.role = role
     user.save()
 
+#-----------------------------------Factura----------------------------------------------
+#----------------------------------------------------------------------------------------
+
+@login_required
 @vendedor_required
 def facturar(request):
+    user = request.user
     client = cliente.objects.all()
     metodo = metodo_pago.objects.all()
     tipo = tipo_factura.objects.all()
@@ -89,9 +120,22 @@ def facturar(request):
         num_factura = 1
         num_factura = f"{num_factura:07d}" 
 
-    return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura, "factu_prduc":factu_prduc, "metodos_pagos":metodo, 'tipos_facturas':tipo})
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura,
+                                                   "factu_prduc":factu_prduc, "metodos_pagos":metodo,
+                                                   'tipos_facturas':tipo, 'user_role':user_role})
 
 
+@login_required
+@vendedor_required
 def factura_libro(request, factura_cabecera_id):
     fecha_hoy = date.today()
 
@@ -130,6 +174,8 @@ def factura_libro(request, factura_cabecera_id):
     return redirect(menu_libro_diario)
 
 
+@login_required
+@vendedor_required
 def create_factura(request):
     prod = producto.objects.all()
     existe = factura.objects.filter(num_factura=request.POST['num_factura']).exists()
@@ -172,6 +218,8 @@ def create_factura(request):
     return redirect(menu_factura_detalle, factura_cabecera_id=factura_cabecera.id)
 
 #-----------------------------------Detalle de la factura----------------------------------------------
+@login_required
+@vendedor_required
 def menu_factura_detalle(request, factura_cabecera_id):
     productos = producto.objects.all()
     factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
@@ -188,6 +236,8 @@ def menu_factura_detalle(request, factura_cabecera_id):
                                                             "facturas_detalles": factu_detalle, "total_compra":suma, "total_iva":suma_iva})
 
 
+@login_required
+@vendedor_required
 def cargar_factura_detalle(request):
     factu = get_object_or_404(factura, num_factura=request.POST['num_factura'])
     produc = get_object_or_404(producto, pk=int(request.POST['cod_producto_id']))
@@ -213,6 +263,8 @@ def cargar_factura_detalle(request):
     return redirect(menu_factura_detalle, factura_cabecera_id=factu.id)
 
 
+@login_required
+@vendedor_required
 def delete_factura(request):
     prod = producto.objects.all()
     factu_detalle = get_object_or_404(factura_detalle, pk=int(request.POST['id_detalle']))
@@ -231,6 +283,8 @@ def delete_factura(request):
                                                             "facturas_detalles":factu_detalles, "total_compra":suma})
 
 
+@login_required
+@vendedor_required
 def cancelar_factura(request, factura_cabecera_id):
 
     factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
@@ -241,6 +295,8 @@ def cancelar_factura(request, factura_cabecera_id):
     return redirect(facturar)
 
 
+@login_required
+@vendedor_required
 def ver_facturas(request):
     factu = persona.objects.all()
     return render(request, 'listar_facturas.html', {"personas": factu })
@@ -249,14 +305,28 @@ def ver_facturas(request):
 #---------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Producto----------------------------------------------------------------------
 
+@login_required
+@vendedor_required
 def menu_producto(request):
     marc = marca.objects.all()
     catg = categoria.objects.all()
     prov = proveedor.objects.all()
+    user = request.user
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
 
     return render(request, 'create_product.html', {"marcas": marc, "categorias": catg, 
-                                                   "proveedores": prov})
+                                                   "proveedores": prov, "user_role": user_role})
 
+@login_required
+@vendedor_required
 def create_product(request):
     marcas = marca.objects.all()
     catgedorias = categoria.objects.all()
@@ -285,14 +355,19 @@ def create_product(request):
 
 
     
+@login_required
+@vendedor_required
 def buscar_producto(request):
     objetos = producto.objects.all().values_list('cod_producto', flat=True)
     return JsonResponse(list(objetos), safe=False)
 
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro diario----------------------------------------------------------------------
+@login_required
+@contador_required
 def menu_libro_diario(request):
     fecha_hoy = date.today()
+    user = request.user
 
     libros_diarios = libro_diario.objects.filter(fecha__year=fecha_hoy.year).order_by('num_asiento')
     cuentas = cuenta.objects.all()
@@ -302,9 +377,21 @@ def menu_libro_diario(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas})
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas,
+                                                          "user_role": user_role})
 
 @csrf_exempt
+@login_required
+@contador_required
 def cargar_libro_diario(request):
     conceptos_str = request.POST.get('concepto', '')
     cuentas_str = request.POST.get('cuenta', '')
@@ -356,6 +443,8 @@ def cargar_libro_diario(request):
 
 
 
+@login_required
+@contador_required
 def equilibrio():
     if libro_diario.objects.all().exists():
         aux_lib = libro_diario.objects.order_by('-id').first()
@@ -372,6 +461,8 @@ def equilibrio():
     return int(suma)
 
 
+@login_required
+@contador_required
 def mod_libro_diario(request):
     cabecera_libro = get_object_or_404(libro_diario, pk=request.POST['id_libro'])
     detalle_libro = detalle_libro_diario.objects.filter(num_asiento=cabecera_libro.num_asiento)
@@ -383,6 +474,8 @@ def mod_libro_diario(request):
     return render(request, 'modificar_asiento_diario.html', {"cuentas": cuentas, "cabe_lib": cabecera_libro, "deta_lib": detalle_libro_json})
 
 @never_cache
+@login_required
+@contador_required
 def modificar_libro_diario(request):
     asiento_cab = request.POST['asiento']
     fecha = request.POST['fecha_emision_hidden']
@@ -440,6 +533,8 @@ def modificar_libro_diario(request):
 
 
 @never_cache
+@login_required
+@contador_required
 def descargar_libro(request):
     fecha_libro = request.POST['fecha_deseada']
 
@@ -470,6 +565,8 @@ def descargar_libro(request):
 
     return response
 
+@login_required
+@contador_required
 def migrar_asientos(request):
     asientos_migrar = detalle_libro_diario.objects.all().order_by('num_asiento')
     libros_mayores = libro_mayor.objects.all()
@@ -494,6 +591,8 @@ def migrar_asientos(request):
     messages.success(request, 'Asiento guardado!!')
     return redirect(menu_libro_mayor)
 
+@login_required
+@contador_required
 def llamar_funcion_django(request):
     # Realiza cualquier lógica necesaria aquí
     
@@ -507,6 +606,8 @@ def llamar_funcion_django(request):
 #  ---------------------------------Libro mayor----------------------------------------------------------------------
 
 @never_cache
+@login_required
+@contador_required
 def menu_libro_mayor(request):
     fecha_hoy = date.today()
 
@@ -531,6 +632,8 @@ def menu_libro_mayor(request):
     })
 
 @never_cache
+@login_required
+@contador_required
 def cargar_libro_mayor(request):
     fecha_hoy = date.today()
 
@@ -579,6 +682,8 @@ def cargar_libro_mayor(request):
 
 
 @never_cache
+@login_required
+@contador_required
 def modificar_libro_mayor(request):
     id_libro = request.POST['id_libro']
     cont=0
@@ -634,6 +739,8 @@ def modificar_libro_mayor(request):
 
         return redirect(menu_libro_mayor)
     
+@login_required
+@contador_required
 def obtener_libro_mayor_anterior(id_libro):
     try:
         libro_mayor_anterior = libro_mayor.objects.filter(pk__lt=id_libro).latest('pk')
@@ -642,6 +749,8 @@ def obtener_libro_mayor_anterior(id_libro):
         return None
 
 @never_cache
+@login_required
+@contador_required
 def descargar_libro_mayor(request):
     fecha_libro = request.POST['fecha_libro']
 
@@ -679,6 +788,8 @@ def descargar_libro_mayor(request):
 #  ---------------------------------Cuentas----------------------------------------------------------------------
 
 @never_cache
+@login_required
+@contador_required
 def menu_cuenta(request):
     cuentas = cuenta.objects.all().order_by('id')
 
@@ -690,6 +801,8 @@ def menu_cuenta(request):
     return render(request, 'carga_cuenta.html', {"cuentas": page_obj})
 
 @never_cache
+@login_required
+@contador_required
 def registrar_cuenta(request):
     fecha_hoy = date.today()
 
@@ -737,6 +850,8 @@ def registrar_cuenta(request):
 
 
 @never_cache
+@login_required
+@contador_required
 def modificar_cuenta(request):
     id_cuenta = request.POST['id_cuenta']
 
@@ -763,6 +878,8 @@ def modificar_cuenta(request):
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Proveedor----------------------------------------------------------------------
 
+@login_required
+@vendedor_required
 def menu_proveedor(request):
     prov = proveedor.objects.all()
 
@@ -773,6 +890,8 @@ def menu_proveedor(request):
 
     return render(request, 'carga_proveedor.html', {"proveedores": page_obj})
 
+@login_required
+@vendedor_required
 def carga_proveedor(request):
     est = get_object_or_404(Estados, pk=1)   
 
@@ -792,6 +911,8 @@ def carga_proveedor(request):
         messages.success(request, 'Proveedor cargado!!')
         return redirect(menu_proveedor)
     
+@login_required
+@vendedor_required
 def modificar_proveedor(request):
     id_proveedor = request.POST['id_proveedor']
 
@@ -827,6 +948,8 @@ def modificar_proveedor(request):
 #-------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Cliente----------------------------------------------------------------------
 
+@login_required
+@vendedor_required
 def menu_cliente(request):
     client = cliente.objects.all()
 
@@ -837,6 +960,8 @@ def menu_cliente(request):
 
     return render(request, 'carga_cliente.html', {"clientes": page_obj})
 
+@login_required
+@vendedor_required
 def carga_cliente(request):
     est = get_object_or_404(Estados, pk=1)   
 
@@ -856,6 +981,8 @@ def carga_cliente(request):
         messages.error(request, 'Producto guardado!!')
         return redirect(menu_cliente)
     
+@login_required
+@vendedor_required
 def modificar_cliente(request):
     id_cliente = request.POST['id_cliente']
 
