@@ -63,11 +63,12 @@ def crear_user(request):
             user_role = custom_user.role.name  
         except CustomUser.DoesNotExist:
             user_role = "Sin rol asignado"
-        else:
-            user_role = "Usuario no autenticado"
+    else:
+        user_role = "Usuario no autenticado"
 
     if request.method == 'GET':
-        return render(request, 'crear_user.html', {'form': UserCreationForm})
+        return render(request, 'crear_user.html', {'user_role': user_role, 'user':user})
+    
     elif request.method == 'POST':
         username = request.POST['username']
         password1 = request.POST['password1']
@@ -87,8 +88,9 @@ def crear_user(request):
         else:
             messages.error(request, 'Las contraseñas no coinciden.')
 
+        return redirect(crear_user)
+    
 
-        return render( request, 'crear_user.html', {'user_role': user_role, 'user':user})
 
 @login_required
 @admin_required
@@ -221,6 +223,8 @@ def create_factura(request):
 @login_required
 @vendedor_required
 def menu_factura_detalle(request, factura_cabecera_id):
+    user = request.user
+
     productos = producto.objects.all()
     factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
 
@@ -232,8 +236,19 @@ def menu_factura_detalle(request, factura_cabecera_id):
         suma = suma + precio.total_precio
         suma_iva = suma_iva + precio.cod_producto.iva_producto
 
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+        
     return render(request, 'create_factura_detalle.html', {"factura_cabecera": factura_cabecera, "productos": productos,
-                                                            "facturas_detalles": factu_detalle, "total_compra":suma, "total_iva":suma_iva})
+                                                            "facturas_detalles": factu_detalle, "total_compra":suma, "total_iva":suma_iva,
+                                                            'user_role': user_role, 'user':user})
 
 
 @login_required
@@ -323,7 +338,8 @@ def menu_producto(request):
         user_role = "Usuario no autenticado"
 
     return render(request, 'create_product.html', {"marcas": marc, "categorias": catg, 
-                                                   "proveedores": prov, "user_role": user_role})
+                                                   "proveedores": prov, "user_role": user_role,
+                                                   'user':user})
 
 @login_required
 @vendedor_required
@@ -387,7 +403,7 @@ def menu_libro_diario(request):
         user_role = "Usuario no autenticado"
 
     return render(request, 'cargar_asiento_diario.html', {"libros_diarios": page_obj, "cuentas": cuentas,
-                                                          "user_role": user_role})
+                                                          "user_role": user_role, 'user':user})
 
 @csrf_exempt
 @login_required
@@ -610,6 +626,7 @@ def llamar_funcion_django(request):
 @contador_required
 def menu_libro_mayor(request):
     fecha_hoy = date.today()
+    user = request.user
 
     if 'num_cuenta' in request.POST:
         libros_mayores = libro_mayor.objects.filter(num_cuenta=request.POST['num_cuenta'], fecha__year=fecha_hoy.year).order_by('num_asiento', 'num_cuenta')
@@ -626,10 +643,18 @@ def menu_libro_mayor(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'cargar_asiento_mayor.html', {
-        "libros_mayores": page_obj,
-        "cuentas": cuentas,
-    })
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    return render(request, 'cargar_asiento_mayor.html', {"libros_mayores": page_obj,"cuentas": cuentas,
+                                                        'user_role': user_role, 'user':user})
+
 
 @never_cache
 @login_required
@@ -791,6 +816,7 @@ def descargar_libro_mayor(request):
 @login_required
 @contador_required
 def menu_cuenta(request):
+    user = request.user
     cuentas = cuenta.objects.all().order_by('id')
 
     paginator = Paginator(cuentas, 10)
@@ -798,7 +824,19 @@ def menu_cuenta(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'carga_cuenta.html', {"cuentas": page_obj})
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+
+    return render(request, 'carga_cuenta.html', {"cuentas": page_obj, 'user_role': user_role, 'user':user})
+
+
 
 @never_cache
 @login_required
@@ -881,6 +919,7 @@ def modificar_cuenta(request):
 @login_required
 @vendedor_required
 def menu_proveedor(request):
+    user = request.user
     prov = proveedor.objects.all()
 
     paginator = Paginator(prov, 10)
@@ -888,7 +927,16 @@ def menu_proveedor(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'carga_proveedor.html', {"proveedores": page_obj})
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    return render(request, 'carga_proveedor.html', {"proveedores": page_obj, 'user_role':user_role, 'user':user})
 
 @login_required
 @vendedor_required
@@ -951,6 +999,7 @@ def modificar_proveedor(request):
 @login_required
 @vendedor_required
 def menu_cliente(request):
+    user = request.user
     client = cliente.objects.all()
 
     paginator = Paginator(client, 10)
@@ -958,7 +1007,17 @@ def menu_cliente(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'carga_cliente.html', {"clientes": page_obj})
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name  
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    return render(request, 'carga_cliente.html', {"clientes": page_obj, 'user_role':user_role, 'user':user})
+
 
 @login_required
 @vendedor_required

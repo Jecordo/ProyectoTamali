@@ -8,20 +8,6 @@
   
   {% block content %}
 
-  <ul class="nav nav-tabs navbar-light bg-light justify-content-center">
-    <li class="nav-item">
-      <a class="nav-link disabled" aria-current="page">Libro diario</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'menu_libro_mayor' %}">Libro mayor</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'menu_cuenta' %}">Cuentas</a>
-    </li>
-  </ul>
-
-
-        
   <div class="container">
     <div class="col-md-12">
 
@@ -100,7 +86,7 @@
 
                 {% csrf_token %}
 
-                <table id="tablaDatos" name="tablaDatos" class="table table-info table-striped table-bordered border-dark">
+                <table id="tablaDatos" name="tablaDatos" class="table table-striped table-bordered bordered-dark table-secondary">
                   <tr>
                     <th scope="col" style="width: 42%;">Concepto.</th>
                     <th scope="col" style="width: 8%;">Cta.</th>
@@ -149,7 +135,7 @@
 
                 {% csrf_token %}
 
-                <table class="table table-striped table-bordered bordered-dark table-secondary">
+                <table class="table table-info table-striped table-bordered border-dark">
                   <thead>
                   <tr>
                     <th scope="col" style="width: 14%;">fecha</th>

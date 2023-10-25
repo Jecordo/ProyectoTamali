@@ -18,7 +18,7 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">Tamali tienda</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,8 +44,15 @@
               </li>
               {% endif %}
               {% if user_role == 'contador' or user_role == 'admin' %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'Asistencia_contable' %}">Asistencia contable</a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Asistencia contable
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="{% url 'Asistencia_contable' %}">Libro diario</a></li>
+                  <li><a class="dropdown-item" href="{% url 'menu_libro_mayor' %}">Libro mayor</a></li>
+                  <li><a class="dropdown-item" href="{% url 'menu_cuenta' %}">Cuentas</a></li>
+                </ul>
               </li>
               {% endif %}
               {% if user_role == 'admin' %}
@@ -56,12 +63,12 @@
             </ul>
             <ul class="navbar-nav">
               <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle  mr-3" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      {{ user.username }}
-                  </a>
-                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                      <li><a class="dropdown-item" href="{% url 'cerrar_secion' %}"><i class="fas fa-sign-out-alt"></i></a></li>
-                  </ul>
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                  {{ request.user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="{% url 'cerrar_secion' %}"><i class="fas fa-sign-out-alt"></i></a></li>
+                </ul>
               </li>
             </ul>
           </div>
