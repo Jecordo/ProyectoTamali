@@ -4,8 +4,8 @@ body {
   }
 
 .bg-mi-grisito {
-  background-color: #e6d9d98a; /* Reemplaza esto con tu código de color personalizado */
-  color: #1e2525c4; /* Color de texto si es necesario */
+  background-color: transparent; /* Reemplaza esto con tu código de color personalizado */
+  color: #000000c4; /* Color de texto si es necesario */
 }
 
 
@@ -78,3 +78,4 @@ td.centro {
 #id_label_multiple {
   height: 80px !important; /* Establecer la altura deseada en píxeles o la unidad que prefieras */
 }
+

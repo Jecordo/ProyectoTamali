@@ -1,0 +1,103 @@
+{% extends "Base.html" %} {% load static %}
+<head>
+  <title>{% block title %} Cuentas {% endblock %}</title>
+</head>
+<body>
+  {% block content %}
+
+  <div class="container">
+    <div class="col-md-12">
+      <h1 class="display-6">Cuentas</h1>
+
+      <div class="card card-body bg-secondary">
+        <div class="card card-body bg-dark mb-2">
+          <form
+            action="{% url 'modificar_cuenta' %}"
+            method="POST"
+            autocomplete="off"
+          >
+            {% csrf_token %}
+
+            <table
+              class="table table-info table-striped table-bordered border-dark"
+            >
+              <thead>
+                <tr>
+                  <th scope="col" style="width: 8%">Usuario</th>
+                  <th scope="col" style="width: 45%">Nombre</th>
+                  <th scope="col" style="width: 12%">Correo</th>
+                  <th scope="col" style="width: 12%">Opt.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in usuarios %}
+                <tr>
+                  <td>{{user.user.username}}</td>
+                  <td>{{user.nombre}} {{user.apellido}}</td>
+                  <td>{{user.email}}</td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-primary"
+                      name="id_usuario"
+                      value="{{user.id}}"
+                    >
+                      <i class="fa fa-solid fa-pencil"></i>
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <td colspan="5">
+                  <h3 class="text-center">No hay Usuarios cargadas</h3>
+                </td>
+                {% endfor %}
+              </tbody>
+            </table>
+          </form>
+
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              {% if usuarios.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; first</a>
+              </li>
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ usuarios.previous_page_number }}"
+                  >previous</a
+                >
+              </li>
+              {% endif %}
+
+              <li class="page-item disabled">
+                <span class="page-link"
+                  >Page {{ usuarios.number }} of
+                  {{usuarios.paginator.num_pages}}</span
+                >
+              </li>
+
+              {% if usuarios.has_next %}
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ usuarios.next_page_number }}"
+                  >next</a
+                >
+              </li>
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ usuarios.paginator.num_pages }}"
+                  >last &raquo;</a
+                >
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endblock %}
+</body>
