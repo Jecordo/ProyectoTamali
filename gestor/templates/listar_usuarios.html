@@ -1,18 +1,19 @@
 {% extends "Base.html" %} {% load static %}
 <head>
   <title>{% block title %} Cuentas {% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'buscador_user.css' %}" />
 </head>
 <body>
   {% block content %}
 
   <div class="container">
-    <div class="col-md-12">
-      <h1 class="display-6">Cuentas</h1>
+    <div class="col-md-7 offset-md-2">
+      <h1 class="display-6">Lista de usuarios</h1>
 
       <div class="card card-body bg-secondary">
         <div class="card card-body bg-dark mb-2">
           <form
-            action="{% url 'modificar_cuenta' %}"
+            action="{% url 'modificar_user' %}"
             method="POST"
             autocomplete="off"
           >
@@ -21,15 +22,15 @@
             <table
               class="table table-info table-striped table-bordered border-dark"
             >
-              <thead>
+              <thead class="table-light">
                 <tr>
-                  <th scope="col" style="width: 8%">Usuario</th>
-                  <th scope="col" style="width: 45%">Nombre</th>
-                  <th scope="col" style="width: 12%">Correo</th>
-                  <th scope="col" style="width: 12%">Opt.</th>
+                  <th scope="col" style="width: 10%">Usuario</th>
+                  <th scope="col" style="width: 30%">Nombre</th>
+                  <th scope="col" style="width: 15%">Correo</th>
+                  <th scope="col" style="width: 6%">Opt.</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="table-group-divider">
                 {% for user in usuarios %}
                 <tr>
                   <td>{{user.user.username}}</td>

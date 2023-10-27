@@ -74,9 +74,76 @@ def crear_user(request):
         username = request.POST['username']
         password1 = request.POST['password1']
         password2 = request.POST['password2']
-        nombre = request.POST['nombre', '']
-        apellido = request.POST['apellido', '']
-        email = request.POST['email', '']
+        nombre = request.POST.get('nombre', '')
+        apellido = request.POST.get('apellido', '')
+        email = request.POST.get('email', '')
+
+        if password1 == password2:
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'El usuario ya existe.')
+            else:
+                user = User.objects.create_user(
+                    username=username, password=password1)
+
+                role = Role.objects.get(name=request.POST['rols'])
+                custom_user = CustomUser.objects.create(user=user, role=role, nombre=nombre,
+                                                        apellido=apellido, email=email)
+                custom_user.save()
+                messages.success(request, 'Usuario Guardado.')
+        else:
+            messages.error(request, 'Las contraseñas no coinciden.')
+
+        return redirect(crear_user)
+
+
+@login_required
+@admin_required
+def modificar_user(request):
+    user = request.user
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    usuario = get_object_or_404(CustomUser, pk=request.POST['id_usuario'])
+    return render(request, 'modificar_user.html', {'user_role': user_role, 'user': user, 'usuario': usuario})
+
+
+@login_required
+@admin_required
+def modificar_user_final(request):
+    user = request.user
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    if request.method == 'GET':
+        usuarios = CustomUser.objects.all()
+
+        paginator = Paginator(usuarios, 10)
+
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        return render(request, 'crear_user.html', {'user_role': user_role, 'user': user, 'usuarios': page_obj})
+
+    elif request.method == 'POST':
+        username = request.POST['username']
+        password1 = request.POST['password1']
+        password2 = request.POST['password2']
+        nombre = request.POST.get('nombre', '')
+        apellido = request.POST.get('apellido', '')
+        email = request.POST.get('email', '')
 
         if password1 == password2:
             # Verificar si el usuario ya existe
