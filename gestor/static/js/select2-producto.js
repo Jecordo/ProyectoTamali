@@ -1,37 +1,45 @@
 $(document).ready(function () {
+  var input1Elements = document.querySelectorAll(".cantidad");
+  var input2Elements = document.querySelectorAll(".total_producto");
+  var input3Elements = document.querySelectorAll(".precio_unit");
 
-    $('#cod_producto_id').select2({
-        templateResult: function (option) {
-            // Aplica estilos CSS personalizados a cada opción
-            return $('<span style="color: black;">' + option.text + '</span>');
-        }
+  input1Elements.forEach(function (input1, index) {
+    input1.addEventListener("input", function () {
+      // Obtén el valor del input1 que se está modificando
+      var value = this.value;
+      var precio = input3Elements[index].value;
+
+      // Obtén el input2 correspondiente
+      var input2 = input2Elements[index];
+
+      // Actualiza el valor de input2
+      input2.value = value * precio;
     });
+  });
 
-    $(document).ready(function() {
-        // Deshabilita todos los enlaces
+  $("#cod_producto_id").select2({
+    templateResult: function (option) {
+      return $('<span style="color: black;">' + option.text + "</span>");
+    },
+  });
 
-        $(window).on("beforeunload", function() {
-            // Verifica si la facturación está incompleta
-            if (facturaIncompleta) {
-              return "Debe finalizar la facturación antes de salir de esta página.";
-            }
-        });
+  // Deshabilita todos los enlaces
+  $(window).on("beforeunload", function () {
+    if (facturaIncompleta) {
+      return "Debe finalizar la facturación antes de salir de esta página.";
+    }
+  });
 
-        $("#finalizar_factura").click(function() {
-            // Marca la facturación como completa
-            facturaIncompleta = false;
-            // Redirige al usuario a una página diferente (puedes personalizar la URL)
-        });   
+  $("#finalizar_factura").click(function () {
+    facturaIncompleta = false;
+  });
 
-        $("a").attr("disabled", true).addClass("disabled");
+  $("a").attr("disabled", true).addClass("disabled");
 
-        $("button").attr("disabled", true);
-    
-        // Habilita los botones de "Añadir", "Finalizar" y "Cancelar"
-        $("#anhadir_producto").attr("disabled", false);
-        $("#id_detalle").attr("disabled", false);
-        $("#finalizar_factura").attr("disabled", false).removeClass("disabled");
-        $("#cancelar_factura").attr("disabled", false).removeClass("disabled");
-      });
-      
+  $("button").attr("disabled", true);
+
+  $("#anhadir_producto").attr("disabled", false);
+  $("#id_detalle").attr("disabled", false);
+  $("#finalizar_factura").attr("disabled", false).removeClass("disabled");
+  $("#cancelar_factura").attr("disabled", false).removeClass("disabled");
 });

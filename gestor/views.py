@@ -323,6 +323,9 @@ def create_factura(request):
 
     factura_cabecera_id_encoded = quote(str(factura_cabecera.id))
 
+    factura_cabecera_id = factura_cabecera.id
+    request.session['factura_cabecera_id'] = factura_cabecera_id
+
     return redirect(menu_factura_detalle, factura_cabecera_id=factura_cabecera_id_encoded)
 
 # -----------------------------------Detalle de la factura----------------------------------------------
@@ -331,7 +334,7 @@ def create_factura(request):
 @login_required
 @vendedor_required
 def menu_factura_detalle(request, factura_cabecera_id):
-    factura_cabecera_id = unquote(factura_cabecera_id)
+    factura_cabecera_id = request.session.get('factura_cabecera_id')
     user = request.user
 
     productos = producto.objects.all()
@@ -371,17 +374,8 @@ def cargar_factura_detalle(request):
         cod_producto=produc.id, num_factura=factu.id).exists()
 
     if existe:
-        factu_detalle = get_object_or_404(factura_detalle, Q(
-            cod_producto=produc.id) & Q(num_factura=factu.id))
-        factu_detalle.cantidad = factu_detalle.cantidad + 1
-        factu_detalle.total_precio = factu_detalle.cantidad * \
-            factu_detalle.cod_producto.precio_venta
-        factu_detalle.impuesto = factu_detalle.cantidad * \
-            factu_detalle.cod_producto.iva_producto
-        factu_detalle.save()
-
-        messages.success(request, 'Se agrego un/a ' +
-                         produc.descripcion + ' a la cantidad')
+        messages.success(request,  produc.descripcion +
+                         ', ya se encuentra agregado')
     else:
         factu_detalle = factura_detalle(cod_producto=produc, num_factura=factu, total_precio=produc.precio_venta,
                                         cantidad=1, impuesto=produc.iva_producto)

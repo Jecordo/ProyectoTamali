@@ -11,91 +11,87 @@
       <h1 class="display-6">Lista de usuarios</h1>
 
       <div class="card card-body bg-secondary">
-        <div class="card card-body bg-dark mb-2">
-          <form
-            action="{% url 'modificar_user' %}"
-            method="POST"
-            autocomplete="off"
+        <form
+          action="{% url 'modificar_user' %}"
+          method="POST"
+          autocomplete="off"
+        >
+          {% csrf_token %}
+
+          <table
+            class="table table-info table-striped table-bordered border-dark"
           >
-            {% csrf_token %}
-
-            <table
-              class="table table-info table-striped table-bordered border-dark"
-            >
-              <thead class="table-light">
-                <tr>
-                  <th scope="col" style="width: 10%">Usuario</th>
-                  <th scope="col" style="width: 30%">Nombre</th>
-                  <th scope="col" style="width: 15%">Correo</th>
-                  <th scope="col" style="width: 6%">Opt.</th>
-                </tr>
-              </thead>
-              <tbody class="table-group-divider">
-                {% for user in usuarios %}
-                <tr>
-                  <td>{{user.user.username}}</td>
-                  <td>{{user.nombre}} {{user.apellido}}</td>
-                  <td>{{user.email}}</td>
-                  <td>
-                    <button
-                      class="btn btn-sm btn-primary"
-                      name="id_usuario"
-                      value="{{user.id}}"
-                    >
-                      <i class="fa fa-solid fa-pencil"></i>
-                    </button>
-                  </td>
-                </tr>
-                {% empty %}
-                <td colspan="5">
-                  <h3 class="text-center">No hay Usuarios cargadas</h3>
+            <thead class="table-light">
+              <tr>
+                <th scope="col" style="width: 10%">Usuario</th>
+                <th scope="col" style="width: 30%">Nombre</th>
+                <th scope="col" style="width: 15%">Correo</th>
+                <th scope="col" style="width: 6%">Opt.</th>
+              </tr>
+            </thead>
+            <tbody class="table-group-divider">
+              {% for user in usuarios %}
+              <tr>
+                <td>{{user.user.username}}</td>
+                <td>{{user.nombre}} {{user.apellido}}</td>
+                <td>{{user.email}}</td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-primary"
+                    name="id_usuario"
+                    value="{{user.id}}"
+                  >
+                    <i class="fa fa-solid fa-pencil"></i>
+                  </button>
                 </td>
-                {% endfor %}
-              </tbody>
-            </table>
-          </form>
+              </tr>
+              {% empty %}
+              <td colspan="5">
+                <h3 class="text-center">No hay Usuarios cargadas</h3>
+              </td>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
 
-          <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-center">
-              {% if usuarios.has_previous %}
-              <li class="page-item">
-                <a class="page-link" href="?page=1">&laquo; first</a>
-              </li>
-              <li class="page-item">
-                <a
-                  class="page-link"
-                  href="?page={{ usuarios.previous_page_number }}"
-                  >previous</a
-                >
-              </li>
-              {% endif %}
+        <nav aria-label="Page navigation example">
+          <ul class="pagination justify-content-center">
+            {% if usuarios.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1">&laquo; first</a>
+            </li>
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="?page={{ usuarios.previous_page_number }}"
+                >previous</a
+              >
+            </li>
+            {% endif %}
 
-              <li class="page-item disabled">
-                <span class="page-link"
-                  >Page {{ usuarios.number }} of
-                  {{usuarios.paginator.num_pages}}</span
-                >
-              </li>
+            <li class="page-item disabled">
+              <span class="page-link"
+                >Page {{ usuarios.number }} of
+                {{usuarios.paginator.num_pages}}</span
+              >
+            </li>
 
-              {% if usuarios.has_next %}
-              <li class="page-item">
-                <a
-                  class="page-link"
-                  href="?page={{ usuarios.next_page_number }}"
-                  >next</a
-                >
-              </li>
-              <li class="page-item">
-                <a
-                  class="page-link"
-                  href="?page={{ usuarios.paginator.num_pages }}"
-                  >last &raquo;</a
-                >
-              </li>
-              {% endif %}
-            </ul>
-          </nav>
-        </div>
+            {% if usuarios.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ usuarios.next_page_number }}"
+                >next</a
+              >
+            </li>
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="?page={{ usuarios.paginator.num_pages }}"
+                >last &raquo;</a
+              >
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
       </div>
     </div>
   </div>
