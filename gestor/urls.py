@@ -22,8 +22,9 @@ urlpatterns = [
     path('generar_factura/', create_factura, name='Create_factura'),
     path('delete_factura/', delete_factura, name='delete_factura'),
     path('carga_factura_detalle/', cargar_factura_detalle, name='factura_detalle'),
-    path('menu_factura_detalle/<str:factura_cabecera_id>/',
-         menu_factura_detalle, name='menu_factura_detalle'),
+    path('menu_factura_detalle/', menu_factura_detalle,
+         name='menu_factura_detalle'),
+    path('finalizar_factura/', views.finalizar_factura, name='finalizar_factura'),
 
     path('cancelar_factura/<int:factura_cabecera_id>/',
          cancelar_factura, name='cancelar_factura'),

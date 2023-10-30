@@ -166,91 +166,143 @@
 
         <div class="card card-body bg-light mb-2">
           <div class="col-12">
-            <form action="{% url 'delete_factura' %}" method="post">
-              {% csrf_token %}
+            <table
+              id="tabla_id"
+              name="tabla_id"
+              class="table table-striped bordered-dark table-secondary table-bordered"
+            >
+              <thead>
+                <tr>
+                  <th scope="col" style="width: 3%">Cod.</th>
+                  <th scope="col" style="width: 50%">Descripción</th>
+                  <th scope="col" style="width: 2%">Cant.</th>
+                  <th scope="col" style="width: 8%">Prec. Unit.</th>
+                  <th scope="col" style="width: 2%">Desc.%</th>
+                  <th scope="col" style="width: 8%">Total</th>
+                  <th scope="col" style="width: 2%">Obs.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for factu in facturas_detalles %}
+                <tr>
+                  <td>{{factu.cod_producto.cod_producto}}</td>
+                  <td>{{factu.cod_producto.descripcion}}</td>
 
-              <table
-                id="tabla_id"
-                name="tabla_id"
-                class="table table-striped bordered-dark table-secondary table-bordered"
-              >
-                <thead>
-                  <tr>
-                    <th scope="col" style="width: 3%">Cod.</th>
-                    <th scope="col" style="width: 50%">Descripción</th>
-                    <th scope="col" style="width: 2%">Cant.</th>
-                    <th scope="col" style="width: 8%">Prec. Unit.</th>
-                    <th scope="col" style="width: 10%">IVA 10%</th>
-                    <th scope="col" style="width: 8%">Total</th>
-                    <th scope="col" style="width: 2%">Obs.</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for factu in facturas_detalles %}
-                  <tr>
-                    <td>{{factu.cod_producto.cod_producto}}</td>
-                    <td>{{factu.cod_producto.descripcion}}</td>
-                    <td>
-                      <input
-                        type="int"
-                        class="cantidad"
-                        value="{{factu.cantidad}}"
-                        size="1"
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="int"
-                        class="precio_unit"
-                        value="{{factu.cod_producto.precio_venta}}"
-                        size="5"
-                      />
-                    </td>
-                    <td>{{factu.cod_producto.iva_producto}}</td>
-                    <td>
-                      <input
-                        type="int"
-                        class="total_producto"
-                        value="{{factu.total_precio}}"
-                        size="5"
-                      />
-                    </td>
-                    <td>
+                  {% csrf_token %}
+                  <td>
+                    <input
+                      type="int"
+                      name="cantidad_producto"
+                      id="cantidad_producto_{{factu.cod_producto}}"
+                      class="cantidad"
+                      value="{{factu.cantidad}}"
+                      size="1"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="hidden"
+                      name="iva_producto"
+                      class="iva"
+                      value="{{total_iva}}"
+                    />
+                    <input
+                      type="int"
+                      class="precio_unit"
+                      value="{{factu.cod_producto.precio_venta}}"
+                      size="5"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="int"
+                      name="descuento_producto"
+                      class="descuento_prodcuto"
+                      value="{{factu.descuento}}"
+                      size="1"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="int"
+                      name="total_producto_{{factu.cod_producto}}"
+                      class="total_producto"
+                      value="{{factu.total_precio}}"
+                      size="5"
+                    />
+                  </td>
+                  <td>
+                    <form
+                      action="{% url 'delete_factura' %}"
+                      method="post"
+                      id="eliminar_producto_{{factu.id}}"
+                    >
+                      {% csrf_token %}
                       <button
-                        class="btn btn-sm btn-danger"
+                        class="btn btn-sm btn-danger delete_button"
                         id="id_detalle"
                         name="id_detalle"
+                        form="eliminar_producto_{{factu.id}}"
                         value="{{factu.id}}"
                       >
                         <i class="fa fa-solid fa-trash-o"></i>
                       </button>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                  <tr>
-                    <td colspan="3" style="text-align: right">
-                      Total de compra
-                    </td>
-                    <td>{{total_iva}}</td>
-                    <td>{{total_compra}}</td>
-                    <td></td>
-                  </tr>
-                </tbody>
-              </table>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                  <td colspan="5" style="text-align: right">Total de IVA%</td>
+                  <td>
+                    <input
+                      type="int"
+                      id="total_iva"
+                      value="{{total_iva}}"
+                      size="5"
+                    />
+                  </td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td colspan="5" style="text-align: right">Total de compra</td>
+                  <td>
+                    <input
+                      type="int"
+                      id="total_productos"
+                      value="{{total_compra}}"
+                      size="5"
+                    />
+                  </td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+            <form
+              action="{% url 'finalizar_factura' %}"
+              method="post"
+              id="formu_finalizar"
+            >
+              {% csrf_token %}
 
-              <a
+              <input type="hidden" name="iva_prod" id="iva_prod" />
+              <input type="hidden" name="desc_prod" id="desc_prod" />
+              <input type="hidden" name="cant_prod" id="cant_prod" />
+
+              <button
                 id="finalizar_factura"
                 class="btn btn-primary"
-                href="{% url 'facturas' %}"
-                >Finalizar</a
+                form="formu_finalizar"
               >
-              <a
-                id="cancelar_factura"
-                class="btn btn-danger"
-                href="{% url 'cancelar_factura' factura_cabecera.id %}"
-                >Cancelar la facturacion</a
-              >
+                Finalizar
+              </button>
             </form>
+
+            <a
+              id="cancelar_factura"
+              class="btn btn-danger"
+              href="{% url 'cancelar_factura' factura_cabecera.id %}"
+              >Cancelar la facturacion</a
+            >
           </div>
         </div>
       </div>

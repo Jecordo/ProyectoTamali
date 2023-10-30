@@ -203,6 +203,8 @@ def assign_role_to_user(request, user_id, role_name):
 @login_required
 @vendedor_required
 def facturar(request):
+    request.session.pop('factura_cabecera_id', None)
+
     user = request.user
     client = cliente.objects.all()
     metodo = metodo_pago.objects.all()
@@ -231,49 +233,6 @@ def facturar(request):
     return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura,
                                                    "factu_prduc": factu_prduc, "metodos_pagos": metodo,
                                                    'tipos_facturas': tipo, 'user_role': user_role})
-
-
-@login_required
-@vendedor_required
-def factura_libro(request, factura_cabecera_id):
-    fecha_hoy = date.today()
-
-    factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
-    factu_detalle = factura_detalle.objects.filter(
-        num_factura=factura_cabecera.id).order_by('id')
-
-    for detalle in factu_detalle:
-
-        if libro_diario.objects.all().exists():
-            asiento = libro_diario.objects.order_by('-num_asiento').first()
-            asiento = asiento.num_asiento
-        else:
-            asiento = 0
-
-        concep_1 = 'Ventas del '+str(fecha_hoy) + \
-            ', '+detalle.cod_producto.descripcion
-        cta_1 = cuenta.objects.filter(descripcion='Venta').first()
-        concep_2 = 'IVA credito fiscal 10%'
-        cta_2 = cuenta.objects.filter(
-            descripcion='IVA credito fiscal 10%').first()
-        concep_3 = 'Por la venta de producto '+detalle.cod_producto.cod_producto
-        cta_3 = cuenta.objects.filter(descripcion='Mercaderia').first()
-
-        iva = int(detalle.total_precio)-int(detalle.impuesto)
-
-        libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento+1, concepto=concep_1,
-                             num_cuenta=cta_1, debe=iva, haber=0)
-        libro.save()
-
-        libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento+1, concepto=concep_2,
-                             num_cuenta=cta_2, debe=detalle.impuesto, haber=0)
-        libro.save()
-
-        libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento+1, concepto=concep_3,
-                             num_cuenta=cta_3, debe=0, haber=detalle.total_precio)
-        libro.save()
-
-    return redirect(menu_libro_diario)
 
 
 @login_required
@@ -321,19 +280,17 @@ def create_factura(request):
                                metodo_de_pago=ment_pag, estado=est, timbrado=request.POST['timbrado_factura'])
     factura_cabecera.save()
 
-    factura_cabecera_id_encoded = quote(str(factura_cabecera.id))
-
     factura_cabecera_id = factura_cabecera.id
     request.session['factura_cabecera_id'] = factura_cabecera_id
 
-    return redirect(menu_factura_detalle, factura_cabecera_id=factura_cabecera_id_encoded)
+    return redirect(menu_factura_detalle)
 
 # -----------------------------------Detalle de la factura----------------------------------------------
 
 
 @login_required
 @vendedor_required
-def menu_factura_detalle(request, factura_cabecera_id):
+def menu_factura_detalle(request):
     factura_cabecera_id = request.session.get('factura_cabecera_id')
     user = request.user
 
@@ -378,13 +335,148 @@ def cargar_factura_detalle(request):
                          ', ya se encuentra agregado')
     else:
         factu_detalle = factura_detalle(cod_producto=produc, num_factura=factu, total_precio=produc.precio_venta,
-                                        cantidad=1, impuesto=produc.iva_producto)
+                                        cantidad=1, impuesto=produc.iva_producto, descuento=0)
 
         factu_detalle.save()
 
         messages.success(request, 'Se agrego '+produc.descripcion)
 
-    return redirect(menu_factura_detalle, factura_cabecera_id=factu.id)
+    return redirect(menu_factura_detalle)
+
+
+@login_required
+@vendedor_required
+def finalizar_factura(request):
+    factura_cabecera_id = request.session.get('factura_cabecera_id')
+    request.session.pop('factura_cabecera_id', None)
+
+    cantidad_str = request.POST.get('cant_prod', '')
+    descuento_str = request.POST.get('desc_prod', '')
+    iva_str = request.POST.get('iva_prod', '')
+
+    cantidad_lista = cantidad_str.split(",")
+    descuento_lista = descuento_str.split(",")
+    iva_lista = iva_str.split(",")
+
+    factu = get_object_or_404(factura, pk=factura_cabecera_id)
+    existe = factura_detalle.objects.filter(
+        num_factura=factura_cabecera_id).exists()
+
+    if existe:
+        factu_detall = factura_detalle.objects.filter(
+            num_factura=factura_cabecera_id)
+        total_iva = 0
+        total_precios = 0
+        i = 1
+        for pro in (factu_detall):
+            cantidad = int(cantidad_lista[i])
+            iva = float(iva_lista[i])
+            descuento = int(descuento_lista[i])
+
+            descuento_pro = (
+                (pro.cod_producto.precio_venta*descuento)/100)*cantidad
+
+            iva = iva
+
+            pro.total_precio = (
+                pro.cod_producto.precio_venta*cantidad) - descuento_pro
+            pro.cantidad = cantidad
+            pro.impuesto = iva
+            pro.descuento = descuento_pro
+            pro.save()
+
+            total_iva = total_iva + iva
+            total_precios = total_precios + pro.total_precio
+
+            i += 1
+        factu.total_venta = total_precios
+        factu.impuesto_total = total_iva
+        factu.save()
+
+        factura_cabecera_id = int(factu.id)
+        return redirect(factura_libro, factura_cabecera_id)
+    else:
+        factu.delete()
+
+        messages.error(request, 'No se facturo, factura vacia')
+
+        return redirect(facturar)
+
+
+# -------------------------------------------------------Carga de la factura en el libro--------------------------------------------------
+
+
+def factura_libro(request, factura_cabecera_id):
+    fecha_hoy = date.today()
+
+    factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
+    factu_detalle = factura_detalle.objects.filter(
+        num_factura=factura_cabecera.id)
+
+    cta1 = cuenta.objects.filter(descripcion__icontains='mercade').exists()
+    cta2 = cuenta.objects.filter(descripcion__icontains='10%').exists()
+    cta3 = cuenta.objects.filter(descripcion__icontains='caja').exists()
+
+    if cta1 and cta2 and cta3:
+        libro_detalles = []
+        for detalle in factu_detalle:
+            if libro_diario.objects.all().exists():
+                asiento = libro_diario.objects.order_by('-num_asiento').first()
+                asiento = asiento.num_asiento+1
+            else:
+                asiento = 1
+
+            libro_cab = libro_diario(fecha=fecha_hoy, num_asiento=asiento, concepto='Venta de ' +
+                                     detalle.cod_producto.descripcion+' en factura N° '+detalle.num_factura.num_factura)
+            libro_cab.save()
+
+            cta_1 = cuenta.objects.filter(
+                descripcion__icontains='mercade').first()
+            cta_2 = cuenta.objects.filter(
+                descripcion__icontains='10%').first()
+            cta_3 = cuenta.objects.filter(
+                descripcion__icontains='caja').first()
+
+            concep_1 = 'Ventas de fatura '+detalle.num_factura.num_factura + \
+                ', '+detalle.cod_producto.descripcion
+            concep_2 = 'IVA credito fiscal 10%'
+            concep_3 = 'Por la venta de producto '+detalle.cod_producto.cod_producto
+
+            libro_detalle1 = detalle_libro_diario(num_asiento=libro_cab, concepto=concep_1,
+                                                  num_cuenta=cta_1, debe=0, haber=detalle.total_precio)
+            libro_detalle1.save()
+
+            print(detalle.cod_producto.descripcion, detalle.cod_producto.cod_producto, detalle.impuesto,
+                  detalle.total_precio, detalle.total_precio+detalle.impuesto+detalle.descuento)
+
+            libro_detalle2 = detalle_libro_diario(num_asiento=libro_cab, concepto=concep_2,
+                                                  num_cuenta=cta_2, debe=0, haber=detalle.impuesto)
+            libro_detalle2.save()
+
+            if detalle.descuento != 0:
+                libro_detalle3 = detalle_libro_diario(num_asiento=libro_cab, concepto='Descuento de la venta',
+                                                      num_cuenta=cta_2, debe=0, haber=detalle.descuento)
+                libro_detalle3.save()
+                libro_detalle3 = 0
+
+                libro_detalle4 = detalle_libro_diario(num_asiento=libro_cab, concepto=concep_3,
+                                                      num_cuenta=cta_3, debe=(detalle.total_precio+detalle.impuesto+detalle.descuento), haber=0)
+                libro_detalle4.save()
+            else:
+                libro_detalle4 = detalle_libro_diario(num_asiento=libro_cab, concepto=concep_3,
+                                                      num_cuenta=cta_3, debe=detalle.total_precio+detalle.impuesto, haber=0)
+                libro_detalle4.save()
+            libro_detalle1 = 0
+            libro_detalle2 = 0
+            libro_detalle4 = 0
+
+        messages.success(
+            request, 'Se realizo la carga del movimiento al libro')
+        return redirect(facturar)
+    else:
+        messages.error(
+            request, 'No se realizo la carga en el libro diario, no se cuenta con la cuentas: Mercaderia, Caja y IVA 10%')
+        return redirect(facturar)
 
 
 @login_required
@@ -572,25 +664,6 @@ def cargar_libro_diario(request):
 
     messages.success(request, 'Asiento guardado!!')
     return redirect(menu_libro_diario)
-
-
-@login_required
-@contador_required
-def equilibrio():
-    if libro_diario.objects.all().exists():
-        aux_lib = libro_diario.objects.order_by('-id').first()
-
-        corroboration = libro_diario.objects.filter(
-            num_asiento=aux_lib.num_asiento)
-        suma = 0
-
-        for lib in corroboration:
-            suma = suma + lib.debe
-            suma = suma - lib.haber
-    else:
-        suma = 0
-
-    return int(suma)
 
 
 @login_required
@@ -955,7 +1028,7 @@ def menu_cuenta(request):
     user = request.user
     cuentas = cuenta.objects.all().order_by('id')
 
-    paginator = Paginator(cuentas, 1)
+    paginator = Paginator(cuentas, 10)
 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -981,50 +1054,16 @@ def registrar_cuenta(request):
     existe = cuenta.objects.filter(
         num_cuenta=request.POST['num_cuenta']).exists()
 
-    if equilibrio() == 0:
-        if existe:
-            messages.error(request, 'Cuenta ya existe!!')
-            return redirect(menu_cuenta)
+    if existe:
+        messages.error(request, 'Cuenta ya existe!!')
+        return redirect(menu_cuenta)
 
-        else:
-            cta = cuenta(num_cuenta=request.POST['num_cuenta'],
-                         descripcion=request.POST['nom_cuenta'], saldo=request.POST['id_monto'])
-            cta.save()
-
-            if cuenta.objects.filter(num_cuenta='999999999').exists():
-                aux = cuenta.objects.filter(
-                    descripcion='Capital del titular').first()
-                cta_salida = get_object_or_404(
-                    cuenta, num_cuenta=aux.num_cuenta)
-            else:
-                cta_salida = cuenta(
-                    num_cuenta='999999999', descripcion='Capital del titular', saldo=request.POST['id_monto'])
-                cta_salida.save()
-
-            concepto_entrada = "Creación de cuenta " + cta.descripcion
-            concepto_salida = 'Aporte capital'
-
-            if libro_diario.objects.all().exists():
-                asiento = libro_diario.objects.order_by('-num_asiento').first()
-                asiento = int(asiento.num_asiento)+1
-            else:
-                asiento = 1
-
-            if int(cta.saldo) > 0:
-                libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento, concepto=concepto_salida,
-                                     num_cuenta=cta_salida, debe=0, haber=int(cta.saldo))
-                libro.save()
-
-                libro = libro_diario(fecha=fecha_hoy, num_asiento=asiento,
-                                     concepto=concepto_entrada, num_cuenta=cta, debe=cta.saldo, haber=0)
-                libro.save()
-
-            messages.success(request, 'Cuenta guardada!!')
-            return redirect(menu_cuenta)
     else:
-        messages.error(
-            request, 'Cuenta no se pudo registrar por falta de equilibrio en el asiento de libro diario!!')
+        cta = cuenta(num_cuenta=request.POST['num_cuenta'],
+                     descripcion=request.POST['nom_cuenta'], saldo=request.POST['id_monto'])
+        cta.save()
 
+        messages.success(request, 'Cuenta guardada!!')
         return redirect(menu_cuenta)
 
 
