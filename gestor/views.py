@@ -446,16 +446,13 @@ def factura_libro(request, factura_cabecera_id):
                                                   num_cuenta=cta_1, debe=0, haber=detalle.total_precio)
             libro_detalle1.save()
 
-            print(detalle.cod_producto.descripcion, detalle.cod_producto.cod_producto, detalle.impuesto,
-                  detalle.total_precio, detalle.total_precio+detalle.impuesto+detalle.descuento)
-
             libro_detalle2 = detalle_libro_diario(num_asiento=libro_cab, concepto=concep_2,
                                                   num_cuenta=cta_2, debe=0, haber=detalle.impuesto)
             libro_detalle2.save()
 
             if detalle.descuento != 0:
                 libro_detalle3 = detalle_libro_diario(num_asiento=libro_cab, concepto='Descuento de la venta',
-                                                      num_cuenta=cta_2, debe=0, haber=detalle.descuento)
+                                                      num_cuenta=cta_1, debe=0, haber=detalle.descuento)
                 libro_detalle3.save()
                 libro_detalle3 = 0
 
@@ -672,11 +669,13 @@ def mod_libro_diario(request):
     cabecera_libro = get_object_or_404(
         libro_diario, pk=request.POST['id_libro'])
     detalle_libro = detalle_libro_diario.objects.filter(
-        num_asiento=cabecera_libro.num_asiento)
+        num_asiento=cabecera_libro)
     cuentas = cuenta.objects.all()
 
     detalle_libro_list = [detalle.to_dict() for detalle in detalle_libro]
     detalle_libro_json = json.dumps(detalle_libro_list)
+
+    print(detalle_libro_json)
 
     return render(request, 'modificar_asiento_diario.html', {"cuentas": cuentas, "cabe_lib": cabecera_libro, "deta_lib": detalle_libro_json})
 
