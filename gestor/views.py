@@ -10,7 +10,7 @@ from .models import (
     Role, CustomUser, factura, factura_detalle, cliente, producto,
     categoria, marca, Estados, proveedor, tipo_factura,
     metodo_pago, marca, cuenta, libro_diario, detalle_libro_diario,
-    libro_mayor)
+    libro_mayor, inventario, entrada, salida)
 from django.shortcuts import get_object_or_404
 import pandas as pd
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -577,6 +577,25 @@ def create_product(request):
 def buscar_producto(request):
     objetos = producto.objects.all().values_list('cod_producto', flat=True)
     return JsonResponse(list(objetos), safe=False)
+
+
+@login_required
+@vendedor_required
+def menu_iventario(request):
+    Invent = inventario.objects.all()
+    user = request.user
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    return render(request, 'inventario.html', {"inventario": Invent, "user_role": user_role,
+                                               'user': user})
 
 # -------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro diario----------------------------------------------------------------------
