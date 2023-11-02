@@ -96,39 +96,28 @@ class producto(models.Model):
         return self.cod_producto
 
 
-class entrada(models.Model):
-    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
-    descripcion = models.IntegerField(null=True)
-    precio = models.IntegerField(null=True)
-    cantidad_entrante = models.IntegerField(null=True)
-
-    def __str__(self):
-        return self.cantidad_entrante
-
-
-class salida(models.Model):
-    fecha_salida = models.DateTimeField(null=True)
-    cod_producto = models.ForeignKey(
-        producto, on_delete=models.CASCADE, null=True)
-    descripcion = models.IntegerField(null=True)
-    precio = models.IntegerField(null=True)
-    cantidad_saliente = models.IntegerField(null=True)
-    total_venta = models.IntegerField(null=True)
-
-    def __str__(self):
-        return self.total_venta
+# -------------------------------------------------------------------------------------------
 
 
 class inventario(models.Model):
+    fecha = models.DateTimeField(null=True)
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
     descripcion = models.CharField(max_length=200, null=False)
-    precio = models.IntegerField()
-    entrada = models.IntegerField()
-    salida = models.IntegerField()
-    existencia = models.BooleanField()
+    tipo_movimiento = models.BooleanField()
+    cantidad = models.BooleanField()
 
     def __str__(self):
         return self.existencia
+
+
+class stock(models.Model):
+    cod_producto = models.ForeignKey(
+        producto, on_delete=models.CASCADE, null=True)
+    descripcion = models.IntegerField(null=True)
+    existencia = models.IntegerField(null=False)
+
+    def __str__(self):
+        return self.total_venta
 
 # ------------------------------------------------------------------------------------------------
 
