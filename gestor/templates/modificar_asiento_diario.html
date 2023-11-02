@@ -43,7 +43,7 @@
               <form id="dataForm" class="row" autocomplete="off">
 
                 <input type="hidden" name="detalle" id="detalle-hidden" value='{{ deta_lib|safe }}'>
-                <input type="hidden" name="cabe_lib" id="cabe_lib" value='{{ cabe_lib.fecha }} - {{ cabe_lib.concepto }}'>
+                <input type="hidden" name="cabe_lib" id="cabe_lib" value='{{ cabe_lib.fecha }} - {{ cabe_lib.concepto }} - {{ cabe_lib.num_asiento }}'>
 
                 {% csrf_token %}
 
@@ -100,6 +100,8 @@
                 <input type="hidden" name="cuenta" id="cuenta-hidden">
                 <input type="hidden" name="debe" id="debe-hidden">
                 <input type="hidden" name="haber" id="haber-hidden">
+
+                <input type="hidden" name="asiento" id="num_asiento-hidden">
 
                 {% csrf_token %}
 

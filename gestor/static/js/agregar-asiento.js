@@ -129,8 +129,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const fecha = new Date(partes[0]); // Convierte la primera parte en un objeto de fecha
         const fecha_cab = fecha.toISOString().slice(0, 10);
         const concepto_cab = partes[1];
+        let num_asiento_hidden = document.getElementById("num_asiento-hidden");
+        num_asiento_hidden.value = partes[2];
         const tablaDatos = document.getElementById("tablaDatos"); 
         let idCounter = 1; 
+
     
         detalle.forEach(function (det) {
             const newRow = tablaDatos.insertRow(tablaDatos.rows.length);
