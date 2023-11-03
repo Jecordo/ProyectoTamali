@@ -104,20 +104,18 @@ class inventario(models.Model):
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
     descripcion = models.CharField(max_length=200, null=False)
     tipo_movimiento = models.BooleanField()
-    cantidad = models.BooleanField()
+    cantidad = models.IntegerField(default=0)
 
     def __str__(self):
         return self.existencia
 
 
 class stock(models.Model):
-    cod_producto = models.ForeignKey(
-        producto, on_delete=models.CASCADE, null=True)
-    descripcion = models.IntegerField(null=True)
-    existencia = models.IntegerField(null=False)
+    producto = models.ForeignKey(producto, on_delete=models.CASCADE)
+    cantidad = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.total_venta
+        return f"Stock de {self.producto.nombre}: {self.cantidad}"
 
 # ------------------------------------------------------------------------------------------------
 

@@ -1,6 +1,7 @@
 from audioop import reverse
 from datetime import date
 import json
+from django.views.generic import ListView
 from pyexpat.errors import messages
 import re
 from urllib.parse import urlencode
@@ -546,6 +547,7 @@ def menu_producto(request):
 @login_required
 @vendedor_required
 def create_product(request):
+    fecha_hoy = date.today()
     marcas = marca.objects.all()
     catgedorias = categoria.objects.all()
     proveedores = proveedor.objects.all()
@@ -567,6 +569,10 @@ def create_product(request):
         produc = producto(cod_producto=request.POST['cod_producto'], precio_costo=request.POST['precio_compra'], precio_venta=request.POST['precio_venta'],
                           cod_categoria=cat, cod_proveedor=prov, cod_marca=marc, estado=est, descripcion=request.POST['desc_producto'])
         produc.save()
+
+        inv = inventario(fecha=fecha_hoy, cod_producto=produc, descripcion='Primera carga de stock',
+                         tipo_movimiento=True, cantidad=request.POST['cantidad_producto'])
+        inv.save()
 
         mensaje_error = "Producto guardado!!"
         return render(request, 'create_product.html', {'mensaje_error': mensaje_error, "marcas": marcas, "categorias": catgedorias, "proveedores": proveedores, "estados": estados})
@@ -596,6 +602,12 @@ def menu_iventario(request):
 
     return render(request, 'inventario.html', {"inventario": Invent, "user_role": user_role,
                                                'user': user})
+
+
+class StockListView(ListView):
+    model = stock
+    template_name = 'stock_list.html'
+    context_object_name = 'stock_items'
 
 # -------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro diario----------------------------------------------------------------------

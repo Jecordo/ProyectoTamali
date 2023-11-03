@@ -43,6 +43,8 @@ urlpatterns = [
     path('producto/', create_product, name='cargar_roducto'),
     path('busc_produc/', buscar_producto, name='buscar_producto'),
 
+    path('stock/', views.StockListView.as_view(), name='stock_list'),
+
     path('menu_libro_diario/', menu_libro_diario, name='Asistencia_contable'),
     path('cargar_libro_diario/', cargar_libro_diario, name='cargar_libro_diario'),
     path('modif_libro_diario/', modificar_libro_diario,
