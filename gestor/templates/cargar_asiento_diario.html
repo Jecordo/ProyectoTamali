@@ -1,243 +1,300 @@
-{% extends "Base.html" %}
-
-{% load static %}
+{% extends "Base.html" %} {% load static %}
 <head>
   <title>{% block title %} Libro Diario {% endblock %}</title>
 </head>
 <body>
-  
   {% block content %}
 
-  <ul class="nav nav-tabs navbar-light bg-light justify-content-center">
-    <li class="nav-item">
-      <a class="nav-link disabled" aria-current="page">Libro diario</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'menu_libro_mayor' %}">Libro mayor</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'menu_cuenta' %}">Cuentas</a>
-    </li>
-  </ul>
-
-
-        
   <div class="container">
     <div class="col-md-12">
+      <h1 class="display-6">Libro diario</h1>
 
-      <h1 class="display-6">Libro diario</h1> 
-
-        <div class="card card-body bg-secondary">
-
-          <div class="card card-body bg-dark mb-2">
-
-            <div class="row g-3 mb-2">
-
-              <div class="col-md-12">
-                <h2 class="form-label">Ingrese datos del asiento</h2>
-              </div>
-              <div class="col-md-12">
-                <h6 class="form-label">Cabecera del asiento</h6>
-              </div>
-
-              <form id="dataForm" class="row" autocomplete="off">
-
-                {% csrf_token %}
-
-                <div class="col-md-3">
-                  <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" required>
-                </div>
-                <div class="col-md-6 mb-2">
-                  <input type="text" class="form-control" id="id_concepto" name="id_concepto" placeholder="Concepto" required>
-                </div>
-
-                <div class="card card-body bg-secondary mb-2">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <h6 class="form-label">Detalle del asiento:</h6>
-                    </div>
-                    <div class="col-md-2">
-                      <select id="num_cuenta" class="form-select" name="num_cuenta" required>
-                        <option selected disabled value>Cuenta</option>
-                        {% for cuenta in cuentas %}
-                        <option value="{{cuenta.num_cuenta}}, {{cuenta.descripcion}}">{{cuenta.descripcion}}</option>
-                        {% empty %}
-                        <h4 class="text-center">No hay cuenta</h4>
-                        {% endfor %} 
-                      </select>
-                    </div>
-                    <div class="col-md-3">
-                      <select id="tipo_movimiento" class="form-select" name="tipo_movimiento" required>
-                        <option selected disabled value>Tipo movimiento</option>
-                        <option value=1>Debe</option>
-                        <option value=2>Haber</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
-                      <div class="input-group">
-                        <input type="number" class="form-control" id="id_monto" name="id_monto" placeholder="Ingrese monto del movimiento" required>
-                        <span class="input-group-text">G</span>
-                      </div>
-                    </div>
-                    <div class="col-md-3">
-                      <input type="submit" class="form-control" value="Agregar al asiento">
-                    </div>
-
-                  </div>
-                </div>
-
-                
-                
-              </form>
-
-              <form id="fromu" action="{% url 'cargar_libro_diario' %}" method="POST" autocomplete="off">
-
-                <input type="hidden" class="date" id="fecha_emision_hidden" name="fecha_emision_hidden">
-                <input type="hidden" name="concepto" id="concepto-hidden">
-                <input type="hidden" name="cuenta" id="cuenta-hidden">
-                <input type="hidden" name="debe" id="debe-hidden">
-                <input type="hidden" name="haber" id="haber-hidden">
-
-                {% csrf_token %}
-
-                <table id="tablaDatos" name="tablaDatos" class="table table-info table-striped table-bordered border-dark">
-                  <tr>
-                    <th scope="col" style="width: 42%;">Concepto.</th>
-                    <th scope="col" style="width: 8%;">Cta.</th>
-                    <th scope="col" style="width: 20%;">Descrip.</th>
-                    <th scope="col" style="width: 12%;">Debe</th>
-                    <th scope="col" style="width: 12%;">Haber</th>
-                    <th scope="col" style="width: 12%;">Option</th>
-                  </tr>
-                </table>
-
-                <div class="row g-3 mb-2">
-                  <div class="col-4">
-                    <h5>Diferencia de Debe y haber</h5>
-                  </div>
-                  <div class="col-3">
-                    <input id="tdiferencia" name="tdiferencia" class="form-control" value="0" type="text" style="float: left;" readonly="">
-                  </div>
-                  <div class="col-5">
-                    <button id="agregarAsientoButton" type="submit" class="btn btn-success">Grabar asiento</button>
-                  </div>
-                </div>
-              </form>
-
-              <div class="col-12">
-                {% if messages %}
-                    <ul class="messages">
-                        {% for message in messages %}
-                            <li class="{% if message.tags == 'error' %}alert alert-danger
-                            {% elif message.tags == 'success' %}alert alert-success{% endif %}" role="alert">
-                                {{ message }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-              </div>
-
+      <div class="card card-body bg-secondary">
+        <div class="card card-body bg-dark mb-2">
+          <div class="row g-3 mb-2">
+            <div class="col-md-12">
+              <h2 class="form-label">Ingrese datos del asiento</h2>
             </div>
-            
-          </div>
-
-          <div class="card card-body bg-dark mb-2">
-
-            <div class="col-12">
-
-              <form action="{% url 'mod_libro_diario' %}" method="POST" autocomplete="off">
-
-                {% csrf_token %}
-
-                <table class="table table-striped table-bordered bordered-dark table-secondary">
-                  <thead>
-                  <tr>
-                    <th scope="col" style="width: 14%;">fecha</th>
-                    <th scope="col" style="width: 0%;">Asiento</th>
-                    <th scope="col" style="width: 55%;">Concepto.</th>
-                    <th scope="col" style="width: 12%;">Option</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-
-                    {% for libro in libros_diarios %}
-                      <tr>
-                      <td>{{ libro.fecha|date:'Y-m-d' }}</td>
-                      <td>{{libro.num_asiento}}</td>
-                      <td>{{libro.concepto}}</td>
-                      <td>
-                        <button class="btn btn-sm btn-primary" name="id_libro" value="{{libro.id}}"><i class="fa fa-solid fa-pencil" ></i></button>
-                      </td>
-                      </tr>
-                    {% empty %}
-                      <td colspan="7">
-                        <h3 class="text-center">No hay asientos cargados</h3>
-                      </td>
-                    {% endfor %} 
-
-                  </tbody>
-                </table>
-              </form>
-
-              <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                  {% if libros_diarios.has_previous %}
-                    <li class="page-item">
-                      <a class="page-link" href="?page=1">&laquo; first</a>
-                    </li>
-                    <li class="page-item">
-                      <a class="page-link" href="?page={{ libros_diarios.previous_page_number }}">previous</a>
-                    </li>
-                  {% endif %}
-              
-                  <li class="page-item disabled">
-                    <span class="page-link">Page {{ libros_diarios.number }} of {{ libros_diarios.paginator.num_pages }}</span>
-                  </li>
-              
-                  {% if libros_diarios.has_next %}
-                    <li class="page-item">
-                      <a class="page-link" href="?page={{ libros_diarios.next_page_number }}">next</a>
-                    </li>
-                    <li class="page-item">
-                      <a class="page-link" href="?page={{ libros_diarios.paginator.num_pages }}">last &raquo;</a>
-                    </li>
-                  {% endif %}
-                </ul>
-              </nav>
-
+            <div class="col-md-12">
+              <h6 class="form-label">Cabecera del asiento</h6>
             </div>
 
-
-            <form action="{% url 'descargar_libro' %}" method="POST">
+            <form id="dataForm" class="row" autocomplete="off">
               {% csrf_token %}
 
-              <div class="row">
+              <div class="col-md-3">
+                <input
+                  type="date"
+                  class="form-control"
+                  id="fecha_emision"
+                  name="fecha_emision"
+                  required
+                />
+              </div>
+              <div class="col-md-6 mb-2">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="id_concepto"
+                  name="id_concepto"
+                  placeholder="Concepto"
+                  required
+                />
+              </div>
 
-                <div class="col-12 mb-2">
-                  <a class="btn btn-primary" href="{% url 'migrar_asientos' %}">Migrar</a>
+              <div class="card card-body bg-secondary mb-2">
+                <div class="row">
+                  <div class="col-md-12">
+                    <h6 class="form-label">Detalle del asiento:</h6>
+                  </div>
+                  <div class="col-md-2">
+                    <select
+                      id="num_cuenta"
+                      class="form-select"
+                      name="num_cuenta"
+                      required
+                    >
+                      <option selected disabled value>Cuenta</option>
+                      {% for cuenta in cuentas %}
+                      <option
+                        value="{{cuenta.num_cuenta}}, {{cuenta.descripcion}}"
+                      >
+                        {{cuenta.descripcion}}
+                      </option>
+                      {% empty %}
+                      <h4 class="text-center">No hay cuenta</h4>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <select
+                      id="tipo_movimiento"
+                      class="form-select"
+                      name="tipo_movimiento"
+                      required
+                    >
+                      <option selected disabled value>Tipo movimiento</option>
+                      <option value="1">Debe</option>
+                      <option value="2">Haber</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="id_monto"
+                        name="id_monto"
+                        placeholder="Ingrese monto del movimiento"
+                        required
+                      />
+                      <span class="input-group-text">G</span>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <input
+                      type="submit"
+                      class="form-control"
+                      value="Agregar al asiento"
+                    />
+                  </div>
                 </div>
-                <div class="col-2">
-                  <input type="text" class="form-control" id="fecha_deseada" name="fecha_deseada" placeholder="AAAA-MM o AAAA" required>
-                </div>
-                <div class="col-4">
-                  <button class="btn btn-primary">Descargar libro</a>
-                </div>
-
               </div>
             </form>
-          
+
+            <form
+              id="fromu"
+              action="{% url 'cargar_libro_diario' %}"
+              method="POST"
+              autocomplete="off"
+            >
+              <input
+                type="hidden"
+                id="fecha_emision_hidden"
+                name="fecha_emision_hidden"
+              />
+              <input type="hidden" name="concepto" id="concepto-hidden" />
+              <input type="hidden" name="cuenta" id="cuenta-hidden" />
+              <input type="hidden" name="debe" id="debe-hidden" />
+              <input type="hidden" name="haber" id="haber-hidden" />
+
+              {% csrf_token %}
+
+              <table
+                id="tablaDatos"
+                name="tablaDatos"
+                class="table table-striped table-bordered bordered-dark table-secondary"
+              >
+                <tr>
+                  <th scope="col" style="width: 42%">Concepto.</th>
+                  <th scope="col" style="width: 8%">Cta.</th>
+                  <th scope="col" style="width: 20%">Descrip.</th>
+                  <th scope="col" style="width: 12%">Debe</th>
+                  <th scope="col" style="width: 12%">Haber</th>
+                  <th scope="col" style="width: 12%">Option</th>
+                </tr>
+              </table>
+
+              <div class="row g-3 mb-2">
+                <div class="col-3">
+                  <h5>Diferencia de Debe y haber</h5>
+                </div>
+                <div class="col-3">
+                  <input
+                    id="tdiferencia"
+                    name="tdiferencia"
+                    class="form-control"
+                    value="0"
+                    type="text"
+                    style="float: left"
+                    readonly=""
+                  />
+                </div>
+                <div class="col-5">
+                  <button
+                    id="agregarAsientoButton"
+                    type="submit"
+                    class="btn btn-success"
+                  >
+                    Grabar asiento
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <div class="col-12">
+              {% if messages %}
+              <ul class="messages">
+                {% for message in messages %}
+                <li
+                  class="{% if message.tags == 'error' %}alert alert-danger {% elif message.tags == 'success' %}alert alert-success{% endif %}"
+                  role="alert"
+                >
+                  {{ message }}
+                </li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+            </div>
           </div>
-                                  
         </div>
 
+        <div class="card card-body bg-dark mb-2">
+          <div class="col-12">
+            <table
+              class="table table-info table-striped table-bordered border-dark"
+            >
+              <thead>
+                <tr>
+                  <th scope="col" style="width: 14%">fecha</th>
+                  <th scope="col" style="width: 0%">Asiento</th>
+                  <th scope="col" style="width: 55%">Concepto.</th>
+                  <th scope="col" style="width: 12%">Option</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for libro in libros_diarios %}
+                <tr>
+                  <td>{{ libro.fecha|date:'Y-m-d' }}</td>
+                  <td>{{libro.num_asiento}}</td>
+                  <td>{{libro.concepto}}</td>
+                  <td>
+                    <form
+                      action="{% url 'mod_libro_diario' %}"
+                      method="POST"
+                      autocomplete="off"
+                    >
+                      {% csrf_token %}
+                      <button
+                        class="btn btn-sm btn-primary"
+                        name="id_libro"
+                        value="{{libro.id}}"
+                      >
+                        <i class="fa fa-solid fa-pencil"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% empty %}
+                <td colspan="7">
+                  <h3 class="text-center">No hay asientos cargados</h3>
+                </td>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <nav aria-label="Page navigation example">
+              <ul class="pagination justify-content-center">
+                {% if libros_diarios.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1">&laquo; first</a>
+                </li>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page={{libros_diarios.previous_page_number}}"
+                    >previous</a
+                  >
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                  <span class="page-link"
+                    >Page {{ libros_diarios.number }} of
+                    {{libros_diarios.paginator.num_pages}}</span
+                  >
+                </li>
+
+                {% if libros_diarios.has_next %}
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page={{ libros_diarios.next_page_number }}"
+                    >next</a
+                  >
+                </li>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page={{ libros_diarios.paginator.num_pages }}"
+                    >last &raquo;</a
+                  >
+                </li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+
+          <form action="{% url 'descargar_libro' %}" method="POST">
+            {% csrf_token %}
+
+            <div class="row">
+              <div class="col-12 mb-2">
+                <a class="btn btn-primary" href="{% url 'migrar_asientos' %}"
+                  >Migrar</a
+                >
+              </div>
+              <div class="col-2">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="fecha_deseada"
+                  name="fecha_deseada"
+                  placeholder="AAAA-MM o AAAA"
+                  required
+                />
+              </div>
+              <div class="col-4">
+                <button class="btn btn-primary">Descargar libro</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-
     </div>
-
   </div>
 
   <script src="{% static 'js/agregar-asiento.js' %}"></script>
 
   {% endblock %}
-
 </body>

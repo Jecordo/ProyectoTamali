@@ -1,19 +1,35 @@
+from django.contrib.auth.models import User
 from django.db import models
 
-# Create your models here.
-class persona(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
 
-#----------------------------------------------------------------------------------------------------------------------------
-    
+class Role(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class CustomUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=30, null=True)
+    apellido = models.CharField(max_length=30, null=True)
+    email = models.EmailField(max_length=100, null=True)
+
+    def __str__(self):
+        return self.user.username
+
+# ----------------------------------------------------------------------------------------------------------------------------
+
+
 class Estados(models.Model):
     estado = models.CharField(max_length=10)
 
     def __str__(self):
         return self.estado
-    
-#----------------------------------------------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------------------------------------------
+
 
 class cliente(models.Model):
     nombre = models.CharField(max_length=50, null=True)
@@ -27,7 +43,8 @@ class cliente(models.Model):
 
     def __str__(self):
         return self.RUC
-    
+
+
 class proveedor(models.Model):
     nombre = models.CharField(max_length=50, null=True)
     apellido = models.CharField(max_length=50, null=True)
@@ -40,26 +57,29 @@ class proveedor(models.Model):
 
     def __str__(self):
         return self.nombre
-    
-#------------------------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------------------------
+
 
 class categoria(models.Model):
     descripcion = models.CharField(max_length=50, null=False)
 
     def __str__(self):
         return self.descripcion
-    
+
+
 class marca(models.Model):
     descripcion = models.CharField(max_length=50, null=False)
 
     def __str__(self):
         return self.descripcion
 
+
 class producto(models.Model):
     cod_producto = models.CharField(max_length=50, null=False)
     cod_proveedor = models.ForeignKey(proveedor, on_delete=models.CASCADE)
     cod_categoria = models.ForeignKey(categoria, on_delete=models.CASCADE)
-    cod_marca = models.ForeignKey(marca, on_delete=models.CASCADE)    
+    cod_marca = models.ForeignKey(marca, on_delete=models.CASCADE)
     precio_costo = models.IntegerField()
     precio_venta = models.IntegerField()
     descripcion = models.CharField(max_length=200, null=False)
@@ -74,40 +94,31 @@ class producto(models.Model):
 
     def __str__(self):
         return self.cod_producto
-    
 
-class entrada(models.Model):
-    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
-    descripcion = models.IntegerField(null=True)
-    precio = models.IntegerField(null=True)    
-    cantidad_entrante = models.IntegerField(null=True)
 
-    def __str__(self):
-        return self.cantidad_entrante
-    
-class salida(models.Model):
-    fecha_salida = models.DateTimeField(null=True)
-    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE, null=True)  
-    descripcion = models.IntegerField(null=True)
-    precio = models.IntegerField(null=True)    
-    cantidad_saliente = models.IntegerField(null=True)
-    total_venta = models.IntegerField(null=True) 
+# -------------------------------------------------------------------------------------------
 
-    def __str__(self):
-        return self.total_venta
-    
+
 class inventario(models.Model):
-    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)  
+    fecha = models.DateTimeField(null=True)
+    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
     descripcion = models.CharField(max_length=200, null=False)
-    precio = models.IntegerField()  
-    entrada = models.IntegerField()
-    salida = models.IntegerField()
-    existencia = models.BooleanField()
+    tipo_movimiento = models.BooleanField()
+    cantidad = models.IntegerField(default=0)
 
     def __str__(self):
         return self.existencia
 
-#------------------------------------------------------------------------------------------------
+
+class Stock(models.Model):
+    producto = models.ForeignKey(producto, on_delete=models.CASCADE)
+    cantidad = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"Stock de {self.producto.nombre}: {self.cantidad}"
+
+# ------------------------------------------------------------------------------------------------
+
 
 class tipo_factura(models.Model):
     ESTADOS = (
@@ -119,11 +130,13 @@ class tipo_factura(models.Model):
     def __str__(self):
         return self.estado
 
+
 class metodo_pago(models.Model):
     descripcion = models.CharField(max_length=50, null=False)
 
     def __str__(self):
         return self.descripcion
+
 
 class factura(models.Model):
     num_factura = models.CharField(max_length=50, null=False)
@@ -138,7 +151,8 @@ class factura(models.Model):
 
     def __str__(self):
         return self.num_factura
-    
+
+
 class factura_detalle(models.Model):
     num_factura = models.ForeignKey(factura, on_delete=models.CASCADE)
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
@@ -151,7 +165,8 @@ class factura_detalle(models.Model):
     def __str__(self):
         return self.num_factura
 
-#------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
+
 
 class cuenta(models.Model):
     num_cuenta = models.CharField(max_length=50, null=False)
@@ -160,7 +175,8 @@ class cuenta(models.Model):
 
     def __str__(self):
         return self.num_cuenta
-    
+
+
 class libro_diario(models.Model):
     fecha = models.DateField(null=True)
     num_asiento = models.IntegerField()
@@ -169,7 +185,7 @@ class libro_diario(models.Model):
     def __str__(self):
         return f"Asiento {self.num_asiento} - Fecha: {self.fecha}"
 
-    
+
 class detalle_libro_diario(models.Model):
     num_asiento = models.ForeignKey(libro_diario, on_delete=models.CASCADE)
     concepto = models.CharField(max_length=200, null=False)
@@ -179,7 +195,7 @@ class detalle_libro_diario(models.Model):
 
     def __str__(self):
         return self.num_asiento
-    
+
     def to_dict(self):
         return {
             "num_asiento": {
@@ -207,9 +223,9 @@ class libro_mayor(models.Model):
 
     def __str__(self):
         return self.num_asiento
-    
+
     def __str__(self):
         return self.saldo
-    
+
     def __str__(self):
         return self.num_cuenta

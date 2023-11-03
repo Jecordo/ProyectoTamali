@@ -95,7 +95,7 @@
 
               <form id="fromu" action="{% url 'modificar_libro_diario' %}" method="POST" autocomplete="off">
 
-                <input type="hidden" class="date" id="fecha_emision_hidden" name="fecha_emision_hidden">
+                <input type="hidden" id="fecha_emision_hidden" name="fecha_emision_hidden">
                 <input type="hidden" name="concepto" id="concepto-hidden">
                 <input type="hidden" name="cuenta" id="cuenta-hidden">
                 <input type="hidden" name="debe" id="debe-hidden">
@@ -105,7 +105,7 @@
 
                 {% csrf_token %}
 
-                <table id="tablaDatos" name="tablaDatos" class="table table-info table-striped table-bordered border-dark">
+                <table id="tablaDatos" name="tablaDatos" class="table table-secondary table-striped table-bordered bordered-dark ">
                   <tr>
                     <th scope="col" style="width: 42%;">Concepto.</th>
                     <th scope="col" style="width: 8%;">Cta.</th>
@@ -117,14 +117,19 @@
                 </table>
 
                 <div class="row g-3 mb-2">
-                  <div class="col-4">
+                  <div class="col-3">
                     <h5>Diferencia de Debe y haber</h5>
                   </div>
                   <div class="col-3">
                     <input id="tdiferencia" name="tdiferencia" class="form-control" value="0" type="text" style="float: left;" readonly="">
                   </div>
-                  <div class="col-5">
+                  <div class="col-3">
+                  </div>
+                  <div class="col-2">
                     <button id="agregarAsientoButton" type="submit" class="btn btn-primary">Modificar asiento</button>
+                  </div>
+                  <div class="col-1">
+                    <a class="btn btn-danger" href="{% url 'Asistencia_contable' %}">Cancelar</a>
                   </div>
                 </div>
               </form>
