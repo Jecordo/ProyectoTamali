@@ -570,7 +570,10 @@ def create_product(request):
                           cod_categoria=cat, cod_proveedor=prov, cod_marca=marc, estado=est, descripcion=request.POST['desc_producto'])
         produc.save()
 
-        inv = inventario(fecha=fecha_hoy, cod_producto=produc, descripcion='Primera carga de stock',
+        product = get_object_or_404(
+            producto, cod_producto=request.POST['cod_producto'])
+
+        inv = inventario(fecha=fecha_hoy, cod_producto=product, descripcion='Primera carga de stock',
                          tipo_movimiento=True, cantidad=request.POST['cantidad_producto'])
         inv.save()
 
@@ -604,10 +607,29 @@ def menu_iventario(request):
                                                'user': user})
 
 
-class StockListView(ListView):
-    model = stock
-    template_name = 'stock_list.html'
-    context_object_name = 'stock_items'
+@login_required
+@vendedor_required
+def StockListView(request):
+    stocks = stock.objects.all()
+    user = request.user
+
+    paginator = Paginator(stocks, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    return render(request, 'stock_list.html', {"stock": page_obj, "user_role": user_role,
+                                               'user': user})
+
 
 # -------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro diario----------------------------------------------------------------------

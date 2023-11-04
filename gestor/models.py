@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 
 
 class Role(models.Model):
@@ -106,8 +106,27 @@ class inventario(models.Model):
     tipo_movimiento = models.BooleanField()
     cantidad = models.IntegerField(default=0)
 
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            super().save(*args, **kwargs)  # Guarda el objeto inventario
+
+            # Actualiza el stock según el tipo de movimiento
+            if self.tipo_movimiento:  # Si es True (entrada)
+                stock_obj, created = stock.objects.get_or_create(
+                    producto=self.cod_producto)
+                stock_obj.cantidad += int(self.cantidad)
+                stock_obj.save()
+            else:  # Si es False (salida)
+                try:
+                    stock_obj = stock.objects.get(producto=self.cod_producto)
+                    stock_obj.cantidad -= int(self.cantidad)
+                    stock_obj.save()
+                except stock.DoesNotExist:
+                    # Maneja el caso en el que no se encuentra el registro de stock
+                    pass
+
     def __str__(self):
-        return self.existencia
+        return self.cantidad
 
 
 class stock(models.Model):
