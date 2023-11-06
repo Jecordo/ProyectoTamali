@@ -103,6 +103,7 @@ class inventario(models.Model):
     fecha = models.DateTimeField(null=True)
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
     descripcion = models.CharField(max_length=200, null=False)
+    referencia = models.CharField(max_length=200, null=True)
     tipo_movimiento = models.BooleanField()
     cantidad = models.IntegerField(default=0)
 
@@ -134,7 +135,7 @@ class stock(models.Model):
     cantidad = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"Stock de {self.producto.nombre}: {self.cantidad}"
+        return self.cantidad
 
 # ------------------------------------------------------------------------------------------------
 
@@ -173,6 +174,19 @@ class factura(models.Model):
 
 
 class factura_detalle(models.Model):
+    num_factura = models.ForeignKey(factura, on_delete=models.CASCADE)
+    cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()
+    precio_unitario = models.IntegerField(null=True)
+    total_precio = models.IntegerField()
+    impuesto = models.IntegerField(null=True)
+    descuento = models.IntegerField(null=True)
+
+    def __str__(self):
+        return self.num_factura
+
+
+class detalle_temp(models.Model):
     num_factura = models.ForeignKey(factura, on_delete=models.CASCADE)
     cod_producto = models.ForeignKey(producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()

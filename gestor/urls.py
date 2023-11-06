@@ -13,10 +13,16 @@ from . import views
 
 urlpatterns = [
     path('', menu_principal, name='Menu_principal'),
+    path('get_chart/', views.get_chart, name='get_chart'),
+    path('get_chart2/', views.get_chart2, name='get_chart2'),
+
     path('cerrar_secion/', views.cerrar_secion, name='cerrar_secion'),
     path('crear_user/', views.crear_user, name='crear_user'),
     path('listar_user/', views.listar_user, name='listar_user'),
     path('modificar_user/', views.modificar_user, name='modificar_user'),
+    path('modificar_user_final/', views.modificar_user_final,
+         name='modificar_user_final'),
+    path('eliminar_user/', views.eliminar_user, name='eliminar_user'),
 
     path('facturar/', facturar, name='facturas'),
     path('generar_factura/', create_factura, name='Create_factura'),
@@ -44,6 +50,8 @@ urlpatterns = [
     path('busc_produc/', buscar_producto, name='buscar_producto'),
 
     path('stock/', views.StockListView, name='stock_list'),
+    path('menu_iventario/', views.menu_iventario, name='menu_iventario'),
+    path('cargar_inventario/', views.cargar_inventario, name='cargar_inventario'),
 
     path('menu_libro_diario/', menu_libro_diario, name='Asistencia_contable'),
     path('cargar_libro_diario/', cargar_libro_diario, name='cargar_libro_diario'),

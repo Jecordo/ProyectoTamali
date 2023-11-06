@@ -10,10 +10,10 @@
       <a class="nav-link active" aria-current="page" href="#">Producto</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">Inventario</a>
+      <a class="nav-link" href="{% url 'menu_iventario' %}">Inventario</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">Modificar producto</a>
+      <a class="nav-link" href="">Modificar producto</a>
     </li>
   </ul>
 
@@ -166,10 +166,17 @@
           </div>
         </form>
 
-        {% if mensaje_error == 'Producto ya existe.' %}
-        <div class="alert alert-danger" role="alert">{{mensaje_error}}</div>
-        {% elif mensaje_error == 'Producto guardado!!' %}
-        <div class="alert alert-success" role="alert">{{mensaje_error}}</div>
+        {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+          <li
+            class="{% if message.tags == 'error' %}alert alert-danger {% elif message.tags == 'success' %}alert alert-success{% endif %}"
+            role="alert"
+          >
+            {{ message }}
+          </li>
+          {% endfor %}
+        </ul>
         {% endif %}
       </div>
     </div>

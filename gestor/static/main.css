@@ -1,19 +1,16 @@
 body {
-    background-color: #202020;
-    color:white;
-  }
+  background-color: #202020;
+  color: white;
+}
 
 .bg-mi-grisito {
   background-color: transparent; /* Reemplaza esto con tu código de color personalizado */
   color: #000000c4; /* Color de texto si es necesario */
 }
 
-
 td.centro {
   text-align: center !important;
 }
-
-
 
 /* Estilos para la paginación */
 .pagination {
@@ -79,3 +76,7 @@ td.centro {
   height: 80px !important; /* Establecer la altura deseada en píxeles o la unidad que prefieras */
 }
 
+.chart {
+  width: 100% !important;
+  min-height: 400px !important;
+}

@@ -126,4 +126,15 @@ $(document).ready(function () {
   $("#id_detalle").attr("disabled", false);
   $("#finalizar_factura").attr("disabled", false).removeClass("disabled");
   $("#cancelar_factura").attr("disabled", false).removeClass("disabled");
+
+  window.onload = function () {
+    var table = document.getElementById("tabla_id");
+    var rowCount = table.rows.length;
+    console.log("rowCount");
+    console.log(rowCount);
+
+    for (var i = 0; i < rowCount; i++) {
+      actualizarValoresdelista(i);
+    }
+  };
 });

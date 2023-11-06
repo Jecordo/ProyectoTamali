@@ -160,73 +160,20 @@
                 <th scope="col" style="width: 12%">Debe</th>
                 <th scope="col" style="width: 12%">Haber</th>
                 <th scope="col" style="width: 12%">Saldo</th>
-                <th scope="col" style="width: 12%">Opt.</th>
               </tr>
             </thead>
             <tbody>
               {% for libro in libros_mayores %}
               <tr>
-                <td>
-                  <input
-                    type="text"
-                    name="fecha_emision{{libro.id}}"
-                    class="form-control"
-                    value="{{ libro.fecha|date:'Y-m-d' }}"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    name="id_concepto{{libro.id}}"
-                    class="form-control"
-                    value="{{libro.concepto}}"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="int"
-                    name="num_asiento{{libro.id}}"
-                    class="form-control"
-                    value="{{libro.num_asiento}}"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="int"
-                    name="monto_debe{{libro.id}}"
-                    class="form-control"
-                    value="{{libro.debe}}"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="int"
-                    name="monto_haber{{libro.id}}"
-                    class="form-control"
-                    value="{{libro.haber}}"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="int"
-                    name="saldo_cuenta{{libro.id}}"
-                    class="form-control"
-                    value="{{libro.saldo}}"
-                    readonly
-                  />
-                </td>
-                <td>
-                  <button
-                    class="btn btn-sm btn-primary"
-                    name="id_libro"
-                    value="{{libro.id}}"
-                  >
-                    <i class="fa fa-solid fa-pencil"></i>
-                  </button>
-                </td>
+                <td>{{ libro.fecha|date:'Y-m-d' }}</td>
+                <td>{{libro.concepto}}</td>
+                <td>{{libro.num_asiento}}</td>
+                <td>{{libro.debe}}</td>
+                <td>{{libro.haber}}</td>
+                <td>{{libro.saldo}}</td>
               </tr>
               {% empty %}
-              <td colspan="8">
+              <td colspan="7">
                 <h3 class="text-center">No hay movimientos cargados</h3>
               </td>
               {% endfor %}

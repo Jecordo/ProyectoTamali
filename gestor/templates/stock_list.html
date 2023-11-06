@@ -11,6 +11,54 @@
 
       <div class="card card-body bg-secondary">
         <div class="col-12">
+          <form action="{% url 'stock_list' %}" method="post">
+            {% csrf_token %}
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <select
+                  id="marca_filter"
+                  class="form-select"
+                  name="marca_filter"
+                >
+                  <option value="" selected>Seleciona la marca</option>
+                  {% for marca in marcas %}
+                  <option value="{{marca.id}}">{{marca.descripcion}}</option>
+                  {% empty %}
+                  <h4 class="text-center">No hay marcas</h4>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <select
+                  id="categoria_filter"
+                  class="form-select"
+                  name="categoria_filter"
+                >
+                  <option value="" selected>Seleccione la categoria</option>
+                  {% for categoria in categorias %}
+                  <option value="{{categoria.id}}">
+                    {{categoria.descripcion}}
+                  </option>
+                  {% empty %}
+                  <h4 class="text-center">No hay categoria</h4>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col">
+                <input
+                  type="text"
+                  name="nombre_filter"
+                  class="form-control"
+                  placeholder="Buscar por nombre"
+                />
+              </div>
+              <div class="col">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+              </div>
+            </div>
+          </form>
+
           <table
             class="table table-info table-striped table-bordered border-dark"
           >
@@ -43,7 +91,7 @@
                 <td>{{produc.cantidad}}</td>
               </tr>
               {% empty %}
-              <td colspan="7">
+              <td colspan="6">
                 <h3 class="text-center">No hay producto cargados</h3>
               </td>
               {% endfor %}
