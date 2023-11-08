@@ -10,7 +10,7 @@ from .models import (
     Role, CustomUser, factura, factura_detalle, cliente, producto,
     categoria, marca, Estados, proveedor, tipo_factura,
     metodo_pago, marca, cuenta, libro_diario, detalle_libro_diario,
-    libro_mayor, inventario, stock)
+    libro_mayor, inventario, Stock)
 from django.shortcuts import get_object_or_404
 import pandas as pd
 from openpyxl.utils.dataframe import dataframe_to_rows
