@@ -179,117 +179,115 @@
           </div>
         </div>
 
-        <div class="card card-body bg-dark mb-2">
-          <div class="col-12">
-            <table
-              class="table table-info table-striped table-bordered border-dark"
-            >
-              <thead>
-                <tr>
-                  <th scope="col" style="width: 14%">fecha</th>
-                  <th scope="col" style="width: 0%">Asiento</th>
-                  <th scope="col" style="width: 55%">Concepto.</th>
-                  <th scope="col" style="width: 12%">Option</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for libro in libros_diarios %}
-                <tr>
-                  <td>{{ libro.fecha|date:'Y-m-d' }}</td>
-                  <td>{{libro.num_asiento}}</td>
-                  <td>{{libro.concepto}}</td>
-                  <td>
-                    <form
-                      action="{% url 'mod_libro_diario' %}"
-                      method="POST"
-                      autocomplete="off"
+        <div class="col-12">
+          <table
+            class="table table-info table-striped table-bordered border-dark"
+          >
+            <thead>
+              <tr>
+                <th scope="col" style="width: 14%">fecha</th>
+                <th scope="col" style="width: 0%">Asiento</th>
+                <th scope="col" style="width: 55%">Concepto.</th>
+                <th scope="col" style="width: 12%">Option</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for libro in libros_diarios %}
+              <tr>
+                <td>{{ libro.fecha|date:'Y-m-d' }}</td>
+                <td>{{libro.num_asiento}}</td>
+                <td>{{libro.concepto}}</td>
+                <td>
+                  <form
+                    action="{% url 'mod_libro_diario' %}"
+                    method="POST"
+                    autocomplete="off"
+                  >
+                    {% csrf_token %}
+                    <button
+                      class="btn btn-sm btn-primary"
+                      name="id_libro"
+                      value="{{libro.id}}"
                     >
-                      {% csrf_token %}
-                      <button
-                        class="btn btn-sm btn-primary"
-                        name="id_libro"
-                        value="{{libro.id}}"
-                      >
-                        <i class="fa fa-solid fa-pencil"></i>
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-                {% empty %}
-                <td colspan="7">
-                  <h3 class="text-center">No hay asientos cargados</h3>
+                      <i class="fa fa-solid fa-pencil"></i>
+                    </button>
+                  </form>
                 </td>
-                {% endfor %}
-              </tbody>
-            </table>
+              </tr>
+              {% empty %}
+              <td colspan="7">
+                <h3 class="text-center">No hay asientos cargados</h3>
+              </td>
+              {% endfor %}
+            </tbody>
+          </table>
 
-            <nav aria-label="Page navigation example">
-              <ul class="pagination justify-content-center">
-                {% if libros_diarios.has_previous %}
-                <li class="page-item">
-                  <a class="page-link" href="?page=1">&laquo; first</a>
-                </li>
-                <li class="page-item">
-                  <a
-                    class="page-link"
-                    href="?page={{libros_diarios.previous_page_number}}"
-                    >previous</a
-                  >
-                </li>
-                {% endif %}
-
-                <li class="page-item disabled">
-                  <span class="page-link"
-                    >Page {{ libros_diarios.number }} of
-                    {{libros_diarios.paginator.num_pages}}</span
-                  >
-                </li>
-
-                {% if libros_diarios.has_next %}
-                <li class="page-item">
-                  <a
-                    class="page-link"
-                    href="?page={{ libros_diarios.next_page_number }}"
-                    >next</a
-                  >
-                </li>
-                <li class="page-item">
-                  <a
-                    class="page-link"
-                    href="?page={{ libros_diarios.paginator.num_pages }}"
-                    >last &raquo;</a
-                  >
-                </li>
-                {% endif %}
-              </ul>
-            </nav>
-          </div>
-
-          <form action="{% url 'descargar_libro' %}" method="POST">
-            {% csrf_token %}
-
-            <div class="row">
-              <div class="col-12 mb-2">
-                <a class="btn btn-primary" href="{% url 'migrar_asientos' %}"
-                  >Migrar</a
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              {% if libros_diarios.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; first</a>
+              </li>
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{libros_diarios.previous_page_number}}"
+                  >previous</a
                 >
-              </div>
-              <div class="col-2">
-                <input
-                  type="text"
-                  class="form-control"
-                  id="fecha_deseada"
-                  name="fecha_deseada"
-                  placeholder="AAAA-MM o AAAA"
-                  required
-                />
-              </div>
-              <div class="col-4">
-                <button class="btn btn-primary">Descargar libro</button>
-              </div>
-            </div>
-          </form>
+              </li>
+              {% endif %}
+
+              <li class="page-item disabled">
+                <span class="page-link"
+                  >Page {{ libros_diarios.number }} of
+                  {{libros_diarios.paginator.num_pages}}</span
+                >
+              </li>
+
+              {% if libros_diarios.has_next %}
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ libros_diarios.next_page_number }}"
+                  >next</a
+                >
+              </li>
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ libros_diarios.paginator.num_pages }}"
+                  >last &raquo;</a
+                >
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
         </div>
+
+        <form action="{% url 'descargar_libro' %}" method="POST">
+          {% csrf_token %}
+
+          <div class="row">
+            <div class="col-12 mb-2">
+              <a class="btn btn-primary" href="{% url 'migrar_asientos' %}"
+                >Migrar</a
+              >
+            </div>
+            <div class="col-2">
+              <input
+                type="text"
+                class="form-control"
+                id="fecha_deseada"
+                name="fecha_deseada"
+                placeholder="AAAA-MM o AAAA"
+                required
+              />
+            </div>
+            <div class="col-4">
+              <button class="btn btn-primary">Descargar libro</button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>

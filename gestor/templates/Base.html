@@ -54,9 +54,39 @@
                 >Inicio</a
               >
             </li>
-            {% if user_role == 'vendedor' or user_role == 'admin' %}
+            {% if user_role == 'vendedor' or user_role == 'admin' or request.session.rol == 'vendedor' or request.session.rol == 'admin' %}
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Facturas
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'facturas' %}"
+                    >Nueva facturar</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'listar_factura' %}"
+                    >Listar factura</a
+                  >
+                </li>
+                
+              </ul>
+            </li>
             <li class="nav-item">
               <a class="nav-link active" href="{% url 'facturas' %}">Factura</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="{% url 'stock_list' %}">stock</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'menu_cliente' %}">Cliente</a>
@@ -69,7 +99,7 @@
             <li class="nav-item">
               <a class="nav-link" href="{% url 'menu_producto' %}">Producto</a>
             </li>
-            {% endif %} {% if user_role == 'contador' or user_role == 'admin' %}
+            {% endif %} {% if user_role == 'contador' or user_role == 'admin' or request.session.rol == 'vendedor' or request.session.rol == 'admin' %}
             <li class="nav-item dropdown">
               <a
                 class="nav-link dropdown-toggle"
@@ -101,7 +131,7 @@
                 </li>
               </ul>
             </li>
-            {% endif %} {% if user_role == 'admin' %}
+            {% endif %} {% if user_role == 'admin' or request.session.rol == 'admin' %}
             <li class="nav-item dropdown">
               <a
                 class="nav-link dropdown-toggle"

@@ -10,10 +10,23 @@
       <h1 class="display-6">Usuario</h1>
 
       <div class="card card-body bg-secondary">
-        <form method="post">
+        <form action="{% url 'modificar_user_final' %}" method="post">
           {% csrf_token %}
 
           <div class="row g-2">
+            <div class="col-md-10">
+              <label for="username"
+                ><strong> Cod. User: {{usuario.user.id}} </strong></label
+              >
+              <p name></p>
+              <input
+                type="hidden"
+                name="id_user"
+                value="{{usuario.user.id}}"
+                readonly
+              />
+            </div>
+
             <div class="col-md-3 mb-2">
               <label for="username">User:</label>
               <input
@@ -24,6 +37,7 @@
                 placeholder="username"
                 required
               />
+              <input type="hidden" name="id_user" value="{{usuario.user.id}}" />
             </div>
             <div class="col-md-4 offset-md-1">
               <label for="nombre">Nombre:</label>
@@ -83,6 +97,7 @@
                 type="email"
                 name="email"
                 class="form-control"
+                value="{{usuario.email}}"
                 placeholder="test@example.com"
               />
             </div>

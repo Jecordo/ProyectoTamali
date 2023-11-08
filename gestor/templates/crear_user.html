@@ -79,9 +79,9 @@
             <div class="col-md-4 mb-2">
               <label for="rols">Rol del usaurio:</label>
               <select id="rols" class="form-select" name="rols" required>
-                <option value="vendedor">Vendedor</option>
-                <option value="contador">Contador</option>
-                <option value="admin">Administrador</option>
+                {% for rol in rols %}
+                <option value="{{rol.name}}">{{rol.name}}</option>
+                {% endfor %}
               </select>
             </div>
 

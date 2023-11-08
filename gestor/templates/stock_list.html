@@ -1,0 +1,145 @@
+{% extends "Base.html" %} {% load static %}
+<head>
+  <title>{% block title %} Inventario {% endblock %}</title>
+</head>
+<body>
+  {% block content %}
+
+  <div class="container">
+    <div class="col-md-12">
+      <h1 class="display-6">Stock actual</h1>
+
+      <div class="card card-body bg-secondary">
+        <div class="col-12">
+          <form action="{% url 'stock_list' %}" method="post">
+            {% csrf_token %}
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <select
+                  id="marca_filter"
+                  class="form-select"
+                  name="marca_filter"
+                >
+                  <option value="" selected>Seleciona la marca</option>
+                  {% for marca in marcas %}
+                  <option value="{{marca.id}}">{{marca.descripcion}}</option>
+                  {% empty %}
+                  <h4 class="text-center">No hay marcas</h4>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <select
+                  id="categoria_filter"
+                  class="form-select"
+                  name="categoria_filter"
+                >
+                  <option value="" selected>Seleccione la categoria</option>
+                  {% for categoria in categorias %}
+                  <option value="{{categoria.id}}">
+                    {{categoria.descripcion}}
+                  </option>
+                  {% empty %}
+                  <h4 class="text-center">No hay categoria</h4>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col">
+                <input
+                  type="text"
+                  name="nombre_filter"
+                  class="form-control"
+                  placeholder="Buscar por nombre"
+                />
+              </div>
+              <div class="col">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+              </div>
+            </div>
+          </form>
+
+          <table
+            class="table table-info table-striped table-bordered border-dark"
+          >
+            <thead>
+              <tr>
+                <th scope="col" style="width: 14%" class="bg-light">
+                  Cod. Producto
+                </th>
+                <th scope="col" style="width: 50%" class="bg-light">Nombre</th>
+                <th scope="col" style="width: 12%" class="bg-light">Marca</th>
+                <th scope="col" style="width: 12%" class="bg-light">
+                  Categoria
+                </th>
+                <th scope="col" style="width: 12%" class="bg-light">
+                  Precio unitario.
+                </th>
+                <th scope="col" style="width: 12%" class="bg-light">
+                  Cantidad
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for produc in stock %}
+              <tr>
+                <td>{{produc.producto.cod_producto}}</td>
+                <td>{{produc.producto.descripcion}}</td>
+                <td>{{produc.producto.cod_marca.descripcion}}</td>
+                <td>{{produc.producto.cod_categoria.descripcion}}</td>
+                <td>{{produc.producto.precio_venta}}</td>
+                <td>{{produc.cantidad}}</td>
+              </tr>
+              {% empty %}
+              <td colspan="6">
+                <h3 class="text-center">No hay producto cargados</h3>
+              </td>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              {% if stock.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; first</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{stock.previous_page_number}}"
+                  >previous</a
+                >
+              </li>
+              {% endif %}
+
+              <li class="page-item disabled">
+                <span class="page-link"
+                  >Page {{ stock.number }} of
+                  {{stock.paginator.num_pages}}</span
+                >
+              </li>
+
+              {% if stock.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ stock.next_page_number }}"
+                  >next</a
+                >
+              </li>
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ stock.paginator.num_pages }}"
+                  >last &raquo;</a
+                >
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/agregar-asiento.js' %}"></script>
+
+  {% endblock %}
+</body>

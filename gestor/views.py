@@ -1,16 +1,18 @@
 from audioop import reverse
 from datetime import date
 import json
+from random import randrange
+from django.views.generic import ListView
 from pyexpat.errors import messages
 import re
 from urllib.parse import urlencode
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,  redirect
 from .models import (
     Role, CustomUser, factura, factura_detalle, cliente, producto,
     categoria, marca, Estados, proveedor, tipo_factura,
     metodo_pago, marca, cuenta, libro_diario, detalle_libro_diario,
-    libro_mayor, inventario, Stock)
+    libro_mayor, inventario, stock, detalle_temp)
 from django.shortcuts import get_object_or_404
 import pandas as pd
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -33,10 +35,13 @@ from urllib.parse import quote, unquote
 
 @login_required
 def cerrar_secion(request):
+    request.session.pop('rol', None)
+
     logout(request)
     return redirect(menu_principal)
 
 
+@never_cache
 @login_required
 def menu_principal(request):
     user = request.user
@@ -50,13 +55,134 @@ def menu_principal(request):
     else:
         user_role = "Usuario no autenticado"
 
-    return render(request, 'dashboard.html', {'user_role': user_role, 'user': user})
+    request.session['rol'] = user_role
+
+    return render(request, 'dashboard.html', {'user': user})
+
+
+@never_cache
+def get_chart(request):
+    produc = producto.objects.all()
+
+    chart = {
+        'tooltip': {
+            'show': True,
+            'trigger': "axis",
+            'triggerOn': "mousemove|click"
+        },
+        'xAxis': [
+            {
+                'type': "category",
+                'data': []
+            }
+        ],
+        'yAxis': [
+            {
+                'type': "value"
+            }
+        ],
+        'series': []
+    }
+
+    colors = ['blue', 'orange', 'red', 'black', 'yellow',
+              'green', 'magenta', 'lightblue', 'purple', 'brown']
+
+    for idx, p in enumerate(produc):
+        fecha_labels = []
+        fecha_labels_aux = []
+        stock_accumulative = []
+        current_stock = 0
+
+        linea = inventario.objects.filter(cod_producto=p).order_by('fecha')
+        for l in linea:
+            fecha_labels.append(l.fecha.strftime('%Y-%m-%d'))
+            fecha_labels_aux.append(l.fecha.strftime('%Y-%m-%d'))
+            if l.tipo_movimiento:
+                current_stock += l.cantidad
+            else:
+                current_stock -= l.cantidad
+            stock_accumulative.append(current_stock)
+
+        random_color = colors[idx % len(colors)]
+
+        chart['series'].append({
+            'name': p.descripcion,
+            'data': stock_accumulative,
+            'type': "line",
+            'itemStyle': {'color': random_color},
+        })
+
+        # Asegúrate de que todas las series tengan la misma fecha_labels (eje X)
+        chart['xAxis'][0]['data'] = fecha_labels_aux
+
+    return JsonResponse(chart)
+
+
+@never_cache
+def get_chart2(request):
+    produc = cuenta.objects.all()
+
+    chart1 = {
+        'tooltip': {
+            'show': True,
+            'trigger': "axis",
+            'triggerOn': "mousemove|click"
+        },
+        'xAxis': [
+            {
+                'type': "category",
+                'data': []
+            }
+        ],
+        'yAxis': [
+            {
+                'type': "value"
+            }
+        ],
+        'series': []
+    }
+
+    colors = ['blue', 'orange', 'red', 'black', 'yellow',
+              'green', 'magenta', 'lightblue', 'purple', 'brown']
+
+    for idx, p in enumerate(produc):
+        fecha_labels = []
+        fecha_labels_aux = []
+        stock_accumulative = []
+        current_stock = 0
+
+        linea = libro_mayor.objects.filter(num_cuenta=p).order_by('fecha')
+        for l in linea:
+            fecha_labels.append(l.fecha.strftime('%Y-%m-%d'))
+            fecha_labels_aux.append(l.fecha.strftime('%Y-%m-%d'))
+            current_stock += l.debe
+            current_stock -= l.haber
+            stock_accumulative.append(current_stock)
+
+        random_color = colors[idx % len(colors)]
+
+        chart1['series'].append({
+            'name': p.descripcion,
+            'data': stock_accumulative,
+            'type': 'bar',
+            'seriesLayoutBy': 'row',
+            'emphasis': {
+                'focus': 'series'
+            },
+            'itemStyle': {'color': random_color},
+        })
+
+        # Asegúrate de que todas las series tengan la misma fecha_labels (eje X)
+        chart1['xAxis'][0]['data'] = fecha_labels_aux
+
+    return JsonResponse(chart1)
 
 
 @login_required
 @admin_required
 def crear_user(request):
     user = request.user
+    rol = Role.objects.all()
 
     if user.is_authenticated:
         try:
@@ -68,7 +194,7 @@ def crear_user(request):
         user_role = "Usuario no autenticado"
 
     if request.method == 'GET':
-        return render(request, 'crear_user.html', {'user_role': user_role, 'user': user})
+        return render(request, 'crear_user.html', {'user_role': user_role, 'user': user, 'rols': rol})
 
     elif request.method == 'POST':
         username = request.POST['username']
@@ -117,52 +243,57 @@ def modificar_user(request):
 @login_required
 @admin_required
 def modificar_user_final(request):
+    print(request.POST['id_user'])
+
+    id_user = request.POST['id_user']
+    username = request.POST['username']
+    password1 = request.POST['password1']
+    password2 = request.POST['password2']
+    nombre = request.POST.get('nombre', '')
+    apellido = request.POST.get('apellido', '')
+    email = request.POST.get('email', '')
+
+    if password1 == password2:
+        if User.objects.filter(id=id_user).exists():
+            user_aux = User.objects.filter(id=id_user).first()
+            role = Role.objects.get(name=request.POST['rols'])
+
+            custom_user = get_object_or_404(CustomUser, user=user_aux)
+
+            user_aux.username = username
+            user_aux.save()
+
+            custom_user.role = role
+            custom_user.nombre = nombre
+            custom_user.apellido = apellido
+            custom_user.email = email
+            custom_user.save()
+
+            messages.success(request, 'Usuario actualizado.')
+        else:
+
+            messages.error(request, 'El usuario no existe.')
+
+    else:
+        messages.error(request, 'Las contraseñas no coinciden.')
+
+    return redirect(listar_user)
+
+
+@login_required
+@admin_required
+def eliminar_user(request):
+    user_aux = get_object_or_404(CustomUser, pk=request.POST['id_usuario'])
+    usuario = get_object_or_404(User, id=user_aux.user.id)
     user = request.user
 
-    if user.is_authenticated:
-        try:
-            custom_user = CustomUser.objects.get(user=user)
-            user_role = custom_user.role.name
-        except CustomUser.DoesNotExist:
-            user_role = "Sin rol asignado"
+    if user == usuario:
+        messages.error(request, 'No se puede eliminar usuario logeado.')
     else:
-        user_role = "Usuario no autenticado"
+        usuario.delete()
+        user_aux.delete()
 
-    if request.method == 'GET':
-        usuarios = CustomUser.objects.all()
-
-        paginator = Paginator(usuarios, 10)
-
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-        return render(request, 'crear_user.html', {'user_role': user_role, 'user': user, 'usuarios': page_obj})
-
-    elif request.method == 'POST':
-        username = request.POST['username']
-        password1 = request.POST['password1']
-        password2 = request.POST['password2']
-        nombre = request.POST.get('nombre', '')
-        apellido = request.POST.get('apellido', '')
-        email = request.POST.get('email', '')
-
-        if password1 == password2:
-            # Verificar si el usuario ya existe
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'El usuario ya existe.')
-            else:
-                # Usuario no existe, proceder con la creación
-                user = User.objects.create_user(
-                    username=username, password=password1)
-                # Asigna el rol adecuado
-                role = Role.objects.get(name=request.POST['rols'])
-                custom_user = CustomUser.objects.create(user=user, role=role, nombre=nombre,
-                                                        apellido=apellido, email=email)
-                custom_user.save()
-                messages.success(request, 'Usuario Guardado.')
-        else:
-            messages.error(request, 'Las contraseñas no coinciden.')
-
-        return redirect(crear_user)
+    return redirect(listar_user)
 
 
 @login_required
@@ -215,7 +346,9 @@ def facturar(request):
 
     if ultimoa_factura:
         ultimoa_factura = factura.objects.order_by('-num_factura').first()
-        num_factura = int(ultimoa_factura.num_factura) + 1
+        timbrado = ultimoa_factura.timbrado
+        fecha_fact = ultimoa_factura.fecha
+        num_factura = int(ultimoa_factura.num_factura[-7:]) + 1
         num_factura = f"{num_factura:07d}"
     else:
         num_factura = 1
@@ -230,7 +363,7 @@ def facturar(request):
     else:
         user_role = "Usuario no autenticado"
 
-    return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura,
+    return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura, "timbrado": timbrado,
                                                    "factu_prduc": factu_prduc, "metodos_pagos": metodo,
                                                    'tipos_facturas': tipo, 'user_role': user_role})
 
@@ -276,7 +409,7 @@ def create_factura(request):
     factura_tipo = get_object_or_404(
         tipo_factura, pk=request.POST['tipo_factura'])
 
-    factura_cabecera = factura(num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
+    factura_cabecera = factura(fecha=request.POST['fecha_emision'], num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
                                metodo_de_pago=ment_pag, estado=est, timbrado=request.POST['timbrado_factura'])
     factura_cabecera.save()
 
@@ -294,10 +427,10 @@ def menu_factura_detalle(request):
     factura_cabecera_id = request.session.get('factura_cabecera_id')
     user = request.user
 
-    productos = producto.objects.all()
+    productos = stock.objects.exclude(cantidad=0)
     factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
 
-    factu_detalle = factura_detalle.objects.filter(
+    factu_detalle = detalle_temp.objects.filter(
         num_factura=factura_cabecera.id).order_by('id')
 
     suma = 0
@@ -327,15 +460,15 @@ def cargar_factura_detalle(request):
     produc = get_object_or_404(
         producto, pk=int(request.POST['cod_producto_id']))
 
-    existe = factura_detalle.objects.filter(
+    existe = detalle_temp.objects.filter(
         cod_producto=produc.id, num_factura=factu.id).exists()
 
     if existe:
         messages.success(request,  produc.descripcion +
                          ', ya se encuentra agregado')
     else:
-        factu_detalle = factura_detalle(cod_producto=produc, num_factura=factu, total_precio=produc.precio_venta,
-                                        cantidad=1, impuesto=produc.iva_producto, descuento=0)
+        factu_detalle = detalle_temp(cod_producto=produc, num_factura=factu, total_precio=produc.precio_venta,
+                                     cantidad=1, impuesto=produc.iva_producto, descuento=0)
 
         factu_detalle.save()
 
@@ -347,6 +480,7 @@ def cargar_factura_detalle(request):
 @login_required
 @vendedor_required
 def finalizar_factura(request):
+    fecha_hoy = date.today()
     factura_cabecera_id = request.session.get('factura_cabecera_id')
     request.session.pop('factura_cabecera_id', None)
 
@@ -359,12 +493,10 @@ def finalizar_factura(request):
     iva_lista = iva_str.split(",")
 
     factu = get_object_or_404(factura, pk=factura_cabecera_id)
-    existe = factura_detalle.objects.filter(
-        num_factura=factura_cabecera_id).exists()
+    existe = detalle_temp.objects.all().exists()
 
     if existe:
-        factu_detall = factura_detalle.objects.filter(
-            num_factura=factura_cabecera_id)
+        factu_detall = detalle_temp.objects.all()
         total_iva = 0
         total_precios = 0
         i = 1
@@ -373,22 +505,39 @@ def finalizar_factura(request):
             iva = float(iva_lista[i])
             descuento = int(descuento_lista[i])
 
+            stocks = stock.objects.filter(producto=pro.cod_producto.id).first()
+            if cantidad > int(stocks.cantidad):
+                print('entro')
+                request.session['factura_cabecera_id'] = factura_cabecera_id
+
+                messages.error(
+                    request, 'El producto '+str(pro.cod_producto.cod_producto)+' supera la cantidad de stock, se cuenta con '+str(stocks.cantidad))
+                return redirect(menu_factura_detalle)
+            else:
+                print('no entrro')
+
             descuento_pro = (
                 (pro.cod_producto.precio_venta*descuento)/100)*cantidad
 
-            iva = iva
-
-            pro.total_precio = (
+            total_precio = (
                 pro.cod_producto.precio_venta*cantidad) - descuento_pro
-            pro.cantidad = cantidad
-            pro.impuesto = iva
-            pro.descuento = descuento_pro
-            pro.save()
+
+            factu_detalle = factura_detalle(cod_producto=pro.cod_producto, num_factura=factu, total_precio=total_precio,
+                                            cantidad=cantidad, impuesto=iva, descuento=descuento_pro)
+            factu_detalle.save()
 
             total_iva = total_iva + iva
             total_precios = total_precios + pro.total_precio
 
+            inv = inventario(fecha=fecha_hoy, cod_producto=pro.cod_producto, descripcion='Venta',
+                             tipo_movimiento=False, cantidad=cantidad)
+            inv.save()
+
             i += 1
+
+        factu_detall = detalle_temp.objects.all()
+        factu_detall.delete()
+
         factu.total_venta = total_precios
         factu.impuesto_total = total_iva
         factu.save()
@@ -401,6 +550,42 @@ def finalizar_factura(request):
         messages.error(request, 'No se facturo, factura vacia')
 
         return redirect(facturar)
+    
+
+@login_required
+@vendedor_required
+def listar_factura(request):
+    factu = factura.objects.all()
+    user = request.user
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    tipo = tipo_factura.objects.all()
+
+    # Filtrar los productos
+
+    if 'categoria_filter' in request.POST and request.POST['categoria_filter'] != '':
+        factu = factu.filter(
+            tipo_factura=request.POST['categoria_filter'])
+
+    if 'nombre_filter' in request.POST and request.POST['nombre_filter'] != '':
+        factu = factu.filter(
+            num_factura__icontains=request.POST['nombre_filter'])
+
+    paginator = Paginator(factu, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'listar_factura.html', {"facturas": page_obj, "user_role": user_role, 'user': user,
+                                               "tipos_facturas": tipo})
 
 
 # -------------------------------------------------------Carga de la factura en el libro--------------------------------------------------
@@ -471,6 +656,8 @@ def factura_libro(request, factura_cabecera_id):
             request, 'Se realizo la carga del movimiento al libro')
         return redirect(facturar)
     else:
+        messages.success(
+            request, 'Se facturo, pero:')
         messages.error(
             request, 'No se realizo la carga en el libro diario, no se cuenta con la cuentas: Mercaderia, Caja y IVA 10%')
         return redirect(facturar)
@@ -479,13 +666,15 @@ def factura_libro(request, factura_cabecera_id):
 @login_required
 @vendedor_required
 def delete_factura(request):
-    prod = producto.objects.all()
+    prod = stock.objects.all()
+    for p in prod:
+        print(p.producto, p.cantidad)
     factu_detalle = get_object_or_404(
-        factura_detalle, pk=int(request.POST['id_detalle']))
+        detalle_temp, pk=int(request.POST['id_detalle']))
     num_factura = factu_detalle.num_factura
     factu_detalle.delete()
 
-    factu_detalles = factura_detalle.objects.filter(
+    factu_detalles = detalle_temp.objects.filter(
         num_factura=num_factura).order_by('id')
 
     suma = 0
@@ -503,19 +692,13 @@ def delete_factura(request):
 def cancelar_factura(request, factura_cabecera_id):
 
     factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
-    factu_detalle = factura_detalle.objects.filter(
+    factu_detalle = detalle_temp.objects.filter(
         num_factura=factura_cabecera.id).order_by('id')
     factu_detalle.delete()
     factura_cabecera.delete()
 
     return redirect(facturar)
 
-
-@login_required
-@vendedor_required
-def ver_facturas(request):
-    factu = persona.objects.all()
-    return render(request, 'listar_facturas.html', {"personas": factu})
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -546,6 +729,7 @@ def menu_producto(request):
 @login_required
 @vendedor_required
 def create_product(request):
+    fecha_hoy = date.today()
     marcas = marca.objects.all()
     catgedorias = categoria.objects.all()
     proveedores = proveedor.objects.all()
@@ -568,6 +752,13 @@ def create_product(request):
                           cod_categoria=cat, cod_proveedor=prov, cod_marca=marc, estado=est, descripcion=request.POST['desc_producto'])
         produc.save()
 
+        product = get_object_or_404(
+            producto, cod_producto=request.POST['cod_producto'])
+
+        inv = inventario(fecha=fecha_hoy, cod_producto=product, descripcion='Primera carga de stock',
+                         tipo_movimiento=True, cantidad=request.POST['cantidad_producto'])
+        inv.save()
+
         mensaje_error = "Producto guardado!!"
         return render(request, 'create_product.html', {'mensaje_error': mensaje_error, "marcas": marcas, "categorias": catgedorias, "proveedores": proveedores, "estados": estados})
 
@@ -579,10 +770,67 @@ def buscar_producto(request):
     return JsonResponse(list(objetos), safe=False)
 
 
+# ------------------------------------Inventario.....................................................
+
 @login_required
 @vendedor_required
 def menu_iventario(request):
+    produc = producto.objects.all()
     Invent = inventario.objects.all()
+    user = request.user
+
+    paginator = Paginator(Invent, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    return render(request, 'inventario.html', {"inventario": page_obj, "user_role": user_role,
+                                               'user': user, 'productos': produc})
+
+
+@login_required
+@vendedor_required
+def cargar_inventario(request):
+    fecha_hoy = request.POST['fecha_emision']
+    cantidad = request.POST['cantidad_producto']
+    desc = request.POST['descripcion']
+    refe = request.POST['cod_referecnia']
+    mov = request.POST['tip_mov']
+
+    if mov == "True":
+        mov = True
+    else:
+        mov = False
+
+    produc = get_object_or_404(producto, id=request.POST['cod_producto_id'])
+
+    print(fecha_hoy)
+
+    inv = inventario(fecha=fecha_hoy, cod_producto=produc, descripcion=desc, referencia=refe,
+                     tipo_movimiento=mov, cantidad=cantidad)
+    inv.save()
+
+    messages.success(request, 'Se agrego '+produc.descripcion)
+
+    return redirect(menu_iventario)
+
+
+# ------------------------------------------------Stock...................................................................
+
+
+@login_required
+@vendedor_required
+def StockListView(request):
+    stocks = stock.objects.all()
     user = request.user
 
     if user.is_authenticated:
@@ -594,8 +842,31 @@ def menu_iventario(request):
     else:
         user_role = "Usuario no autenticado"
 
-    return render(request, 'inventario.html', {"inventario": Invent, "user_role": user_role,
-                                               'user': user})
+    categorias = categoria.objects.all()
+    marcas = marca.objects.all()
+
+    # Filtrar los productos
+
+    if 'categoria_filter' in request.POST and request.POST['categoria_filter'] != '':
+        stocks = stocks.filter(
+            producto__cod_categoria__id=request.POST['categoria_filter'])
+
+    if 'marca_filter' in request.POST and request.POST['marca_filter'] != '':
+        stocks = stocks.filter(
+            producto__cod_marca__id=request.POST['marca_filter'])
+
+    if 'nombre_filter' in request.POST and request.POST['nombre_filter'] != '':
+        stocks = stocks.filter(
+            producto__descripcion__icontains=request.POST['nombre_filter'])
+
+    paginator = Paginator(stocks, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'stock_list.html', {"stock": page_obj, "user_role": user_role, 'user': user,
+                                               "categorias": categorias, "marcas": marcas})
+
 
 # -------------------------------------------------------------------------------------------------------------------------
 #  ---------------------------------Libro diario----------------------------------------------------------------------
@@ -1078,7 +1349,7 @@ def registrar_cuenta(request):
 
     else:
         cta = cuenta(num_cuenta=request.POST['num_cuenta'],
-                     descripcion=request.POST['nom_cuenta'], saldo=request.POST['id_monto'])
+                     descripcion=request.POST['nom_cuenta'], saldo=0)
         cta.save()
 
         messages.success(request, 'Cuenta guardada!!')

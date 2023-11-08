@@ -7,52 +7,80 @@
   {% block content %}
 
   <div class="container">
-    <div class="col-md-7 offset-md-2">
+    <div class="col-md-8 offset-md-2">
       <h1 class="display-6">Lista de usuarios</h1>
 
       <div class="card card-body bg-secondary">
-        <form
-          action="{% url 'modificar_user' %}"
-          method="POST"
-          autocomplete="off"
+        <div class="col-12">
+          {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+            <li
+              class="{% if message.tags == 'error' %}alert alert-danger {% elif message.tags == 'success' %}alert alert-success{% endif %}"
+              role="alert"
+            >
+              {{ message }}
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        <table
+          class="table table-info table-striped table-bordered border-dark"
         >
-          {% csrf_token %}
-
-          <table
-            class="table table-info table-striped table-bordered border-dark"
-          >
-            <thead class="table-light">
-              <tr>
-                <th scope="col" style="width: 10%">Usuario</th>
-                <th scope="col" style="width: 30%">Nombre</th>
-                <th scope="col" style="width: 15%">Correo</th>
-                <th scope="col" style="width: 6%">Opt.</th>
-              </tr>
-            </thead>
-            <tbody class="table-group-divider">
-              {% for user in usuarios %}
-              <tr>
-                <td>{{user.user.username}}</td>
-                <td>{{user.nombre}} {{user.apellido}}</td>
-                <td>{{user.email}}</td>
-                <td>
-                  <button
-                    class="btn btn-sm btn-primary"
-                    name="id_usuario"
-                    value="{{user.id}}"
+          <thead class="table-light">
+            <tr>
+              <th scope="col" style="width: 8%">Usuario</th>
+              <th scope="col" style="width: 30%">Nombre</th>
+              <th scope="col" style="width: 15%">Correo</th>
+              <th scope="col" style="width: 8%">Rol</th>
+              <th scope="col" style="width: 8%">Opt.</th>
+            </tr>
+          </thead>
+          <tbody class="table-group-divider">
+            {% for user in usuarios %}
+            <tr>
+              <td>{{user.user.username}}</td>
+              <td>{{user.nombre}} {{user.apellido}}</td>
+              <td>{{user.email}}</td>
+              <td>{{user.role.name}}</td>
+              <td>
+                <div class="btn-group">
+                  <form
+                    action="{% url 'modificar_user' %}"
+                    method="POST"
+                    autocomplete="off"
                   >
-                    <i class="fa fa-solid fa-pencil"></i>
-                  </button>
-                </td>
-              </tr>
-              {% empty %}
-              <td colspan="5">
-                <h3 class="text-center">No hay Usuarios cargadas</h3>
+                    {% csrf_token %}
+                    <button
+                      class="btn btn-sm btn-primary"
+                      name="id_usuario"
+                      value="{{user.id}}"
+                    >
+                      <i class="fa fa-solid fa-pencil"></i>
+                    </button>
+                  </form>
+
+                  <form action="{% url 'eliminar_user' %}" method="post">
+                    {% csrf_token %}
+                    <button
+                      class="btn btn-sm btn-danger"
+                      name="id_usuario"
+                      value="{{user.id}}"
+                    >
+                      <i class="fa fa-solid fa-trash"></i>
+                    </button>
+                  </form>
+                </div>
               </td>
-              {% endfor %}
-            </tbody>
-          </table>
-        </form>
+            </tr>
+            {% empty %}
+            <td colspan="5">
+              <h3 class="text-center">No hay Usuarios cargadas</h3>
+            </td>
+            {% endfor %}
+          </tbody>
+        </table>
 
         <nav aria-label="Page navigation example">
           <ul class="pagination justify-content-center">
