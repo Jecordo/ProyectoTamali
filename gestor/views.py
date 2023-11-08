@@ -346,7 +346,9 @@ def facturar(request):
 
     if ultimoa_factura:
         ultimoa_factura = factura.objects.order_by('-num_factura').first()
-        num_factura = int(ultimoa_factura.num_factura) + 1
+        timbrado = ultimoa_factura.timbrado
+        fecha_fact = ultimoa_factura.fecha
+        num_factura = int(ultimoa_factura.num_factura[-7:]) + 1
         num_factura = f"{num_factura:07d}"
     else:
         num_factura = 1
@@ -361,7 +363,7 @@ def facturar(request):
     else:
         user_role = "Usuario no autenticado"
 
-    return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura,
+    return render(request, 'create_factura.html', {"clientes": client, "ultima_factura": num_factura, "timbrado": timbrado,
                                                    "factu_prduc": factu_prduc, "metodos_pagos": metodo,
                                                    'tipos_facturas': tipo, 'user_role': user_role})
 
@@ -407,7 +409,7 @@ def create_factura(request):
     factura_tipo = get_object_or_404(
         tipo_factura, pk=request.POST['tipo_factura'])
 
-    factura_cabecera = factura(num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
+    factura_cabecera = factura(fecha=request.POST['fecha_emision'], num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
                                metodo_de_pago=ment_pag, estado=est, timbrado=request.POST['timbrado_factura'])
     factura_cabecera.save()
 
@@ -548,6 +550,42 @@ def finalizar_factura(request):
         messages.error(request, 'No se facturo, factura vacia')
 
         return redirect(facturar)
+    
+
+@login_required
+@vendedor_required
+def listar_factura(request):
+    factu = factura.objects.all()
+    user = request.user
+
+    if user.is_authenticated:
+        try:
+            custom_user = CustomUser.objects.get(user=user)
+            user_role = custom_user.role.name
+        except CustomUser.DoesNotExist:
+            user_role = "Sin rol asignado"
+    else:
+        user_role = "Usuario no autenticado"
+
+    tipo = tipo_factura.objects.all()
+
+    # Filtrar los productos
+
+    if 'categoria_filter' in request.POST and request.POST['categoria_filter'] != '':
+        factu = factu.filter(
+            tipo_factura=request.POST['categoria_filter'])
+
+    if 'nombre_filter' in request.POST and request.POST['nombre_filter'] != '':
+        factu = factu.filter(
+            num_factura__icontains=request.POST['nombre_filter'])
+
+    paginator = Paginator(factu, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'listar_factura.html', {"facturas": page_obj, "user_role": user_role, 'user': user,
+                                               "tipos_facturas": tipo})
 
 
 # -------------------------------------------------------Carga de la factura en el libro--------------------------------------------------
@@ -661,12 +699,6 @@ def cancelar_factura(request, factura_cabecera_id):
 
     return redirect(facturar)
 
-
-@login_required
-@vendedor_required
-def ver_facturas(request):
-    factu = persona.objects.all()
-    return render(request, 'listar_facturas.html', {"personas": factu})
 
 
 # ---------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,147 @@
+{% extends "Base.html" %} {% load static %}
+<head>
+  <title>{% block title %} Facturas {% endblock %}</title>
+</head>
+<body>
+  {% block content %}
+
+  <div class="container">
+    <div class="col-md-12">
+      <h1 class="display-6">Facturas</h1>
+
+      <div class="card card-body bg-secondary">
+        <div class="col-12">
+          <form action="{% url 'listar_factura' %}" method="post">
+            {% csrf_token %}
+            <div class="row mb-3">
+              
+
+              <div class="col-md-3">
+                <select id="tipo_factura" class="form-select" name="tipo_factura" readonly>
+                  {% for tipo in tipos_facturas %}
+                  <option value="{{ tipo.id }}">{{ tipo.estado }}</option>
+                  {% empty %}
+                  <h4 class="text-center">No hay tipo</h4>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-2">
+                <input
+                  type="text"
+                  name="nombre_filter"
+                  class="form-control"
+                  placeholder="Buscar por N° Factura"
+                />
+              </div>
+              <div class="col-3">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+              </div>
+            </div>
+          </form>
+
+          <table
+            class="table table-info table-striped table-bordered border-dark"
+          >
+            <thead>
+              <tr>
+                <th scope="col" style="width: 6%" class="bg-light">
+                  N° Fact.
+                </th>
+                <th scope="col" style="width: 20%" class="bg-light">Cliente</th>
+                <th scope="col" style="width: 20%" class="bg-light">Fecha</th>
+                <th scope="col" style="width: 12%" class="bg-light">
+                  Total venta
+                </th>
+                <th scope="col" style="width: 6%" class="bg-light">Opt.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for factu in facturas %}
+              <tr>
+                <td>{{factu.num_factura}}</td>
+                <td>{{factu.cliente.razon_social}}</td>
+                <td>{{factu.fecha}}</td>
+                <td>{{factu.total_venta}}</td>
+                <td>
+                  <div class="btn-group">
+                    <form
+                      action="{% url 'modificar_user' %}"
+                      method="POST"
+                      autocomplete="off"
+                    >
+                      {% csrf_token %}
+                      <button
+                        class="btn btn-sm btn-primary"
+                        name="id_usuario"
+                        value="{{user.id}}"
+                      >
+                        <i class="fa fa-solid fa-pencil"></i>
+                      </button>
+                    </form>
+
+                    <form action="{% url 'eliminar_user' %}" method="post">
+                      {% csrf_token %}
+                      <button
+                        class="btn btn-sm btn-danger"
+                        name="id_usuario"
+                        value="{{user.id}}"
+                      >
+                        <i class="fa fa-solid fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <td colspan="6">
+                <h3 class="text-center">No hay producto cargados</h3>
+              </td>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              {% if facturas.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; first</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{facturas.previous_page_number}}"
+                  >previous</a
+                >
+              </li>
+              {% endif %}
+
+              <li class="page-item disabled">
+                <span class="page-link"
+                  >Page {{ facturas.number }} of
+                  {{facturas.paginator.num_pages}}</span
+                >
+              </li>
+
+              {% if facturas.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ facturas.next_page_number }}"
+                  >next</a
+                >
+              </li>
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ facturas.paginator.num_pages }}"
+                  >last &raquo;</a
+                >
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/agregar-asiento.js' %}"></script>
+
+  {% endblock %}
+</body>

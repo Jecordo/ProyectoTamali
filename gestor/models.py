@@ -1,3 +1,4 @@
+import datetime
 from django.contrib.auth.models import User
 from django.db import models, transaction
 
@@ -159,6 +160,7 @@ class metodo_pago(models.Model):
 
 
 class factura(models.Model):
+    fecha = models.DateTimeField(null=True)
     num_factura = models.CharField(max_length=50, null=False)
     timbrado = models.CharField(max_length=50, null=False)
     cliente = models.ForeignKey(cliente, on_delete=models.CASCADE)
@@ -171,6 +173,10 @@ class factura(models.Model):
 
     def __str__(self):
         return self.num_factura
+    
+    def guardar_fecha(self, year, month, day):
+        # Crea un objeto datetime con los valores proporcionados
+        fecha_obj = datetime(year, month, day)
 
 
 class factura_detalle(models.Model):

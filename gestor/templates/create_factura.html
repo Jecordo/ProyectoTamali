@@ -37,7 +37,7 @@
                 </div>
                 <div class="col-md-2">
                   <label for="fecha_emision" class="form-label">Fecha:</label>
-                  <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" required>
+                  <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" value="{{fecha_fact}}" required>
                 </div>
                 <div class="col-md-2">
                   <label for="tipo_factura" class="form-label">Tipo de factura</label>
@@ -70,13 +70,13 @@
                 <div class="col-md-3">
                   <label for="num_factura" class="form-label">N° Factura</label>
                   <div class="input-group mb-3">
-                      <span class="input-group-text">009-0085- </span>
-                      <input type="text" class="form-control" id="num_factura" value="{{ultima_factura}}" name="num_factura" required>
+                      <span class="input-group-text">N° Factura :</span>
+                      <input type="text" class="form-control" id="num_factura" value="001-005-{{ultima_factura}}" name="num_factura" required>
                   </div>
                 </div>
                 <div class="col-md-2">
                   <label for="timbrado_factura" class="form-label ">Timbrado:</label>
-                  <input type="text" class="form-control" id="timbrado_factura" name="timbrado_factura" required>
+                  <input type="text" class="form-control" id="timbrado_factura" name="timbrado_factura" value="{{timbrado}}" required>
                 </div>
                 
                 <div class="col-6">
@@ -117,6 +117,17 @@
       </div>    
     </div>
   </div>
+
+  <script>
+    // Obtén el elemento de entrada de fecha por su ID
+    var fechaEmisionInput = document.getElementById("fecha_emision");
+  
+    // Obtén la fecha actual en el formato "YYYY-MM-DD"
+    var fechaActual = new Date().toISOString().split('T')[0];
+  
+    // Asigna la fecha actual al campo de entrada de fecha
+    fechaEmisionInput.value = fechaActual;
+  </script>
   
   <script src="{% static 'js/select2-custom.js' %}"></script>
   {% endblock %}

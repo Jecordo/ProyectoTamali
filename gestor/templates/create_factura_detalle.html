@@ -34,8 +34,8 @@
                   class="form-control"
                   id="fecha_emision"
                   name="fecha_emision"
-                  readonly
-                />
+                  value="{{factura_cabecera.fecha}}"
+                  readonly/>
               </div>
               <div class="col-md-2">
                 <label for="tipo_factura" class="form-label"
@@ -309,6 +309,21 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // Obtén el elemento de entrada de fecha por su ID
+    var fechaEmisionInput = document.getElementById("fecha_emision");
+  
+    // Obtén el valor actual del campo de entrada de fecha
+    var fechaActual = fechaEmisionInput.value;
+  
+    // Formatea la fecha actual como desees (por ejemplo, al formato "DD-MM-YYYY")
+    var partesFecha = fechaActual.split('-'); // Divide la fecha en partes (año, mes, día)
+    var fechaFormateada = partesFecha[2] + '-' + partesFecha[1] + '-' + partesFecha[0]; // Formatea como "DD-MM-YYYY"
+  
+    // Asigna la fecha formateada al campo de entrada de fecha
+    fechaEmisionInput.value = fechaFormateada;
+  </script>
 
   <script src="{% static 'js/select2-producto.js' %}"></script>
 

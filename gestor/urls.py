@@ -31,6 +31,7 @@ urlpatterns = [
     path('menu_factura_detalle/', menu_factura_detalle,
          name='menu_factura_detalle'),
     path('finalizar_factura/', views.finalizar_factura, name='finalizar_factura'),
+    path('listar_factura/', views.listar_factura, name='listar_factura'),
 
     path('cancelar_factura/<int:factura_cabecera_id>/',
          cancelar_factura, name='cancelar_factura'),
