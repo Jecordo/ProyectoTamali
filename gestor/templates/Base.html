@@ -83,9 +83,6 @@
               </ul>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" href="{% url 'facturas' %}">Factura</a>
-            </li>
-            <li class="nav-item">
               <a class="nav-link active" href="{% url 'stock_list' %}">stock</a>
             </li>
             <li class="nav-item">
@@ -99,7 +96,7 @@
             <li class="nav-item">
               <a class="nav-link" href="{% url 'menu_producto' %}">Producto</a>
             </li>
-            {% endif %} {% if user_role == 'contador' or user_role == 'admin' or request.session.rol == 'vendedor' or request.session.rol == 'admin' %}
+            {% endif %} {% if user_role == 'contador' or user_role == 'admin' or request.session.rol == 'contador' or request.session.rol == 'admin' %}
             <li class="nav-item dropdown">
               <a
                 class="nav-link dropdown-toggle"
@@ -155,11 +152,6 @@
                   >
                 </li>
               </ul>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'crear_user' %}"
-                >Crear usuarios</a
-              >
             </li>
             {% endif %}
           </ul>

@@ -1,7 +1,9 @@
 {% extends "Base.html" %} {% load static %}
+
 <head>
   <title>{% block title %} Producto {% endblock %}</title>
 </head>
+
 <body>
   {% block content %}
 
@@ -22,35 +24,20 @@
       <h1 class="display-6">Modulo producto</h1>
 
       <div class="card card-body bg-secondary">
-        <form
-          action="{% url 'cargar_roducto' %}"
-          class="row g-3 mb-2"
-          method="POST"
-        >
+        <form action="{% url 'cargar_roducto' %}" class="row g-3 mb-2" method="POST">
           {% csrf_token %}
 
           <div class="col-ms-12">
             <label for="desc_producto" class="form-label">Cod. Producto:</label>
           </div>
           <div class="col-md-3">
-            <input
-              type="text"
-              class="form-control"
-              id="codigoproduct"
-              placeholder="Cod. Producto"
-              name="cod_producto"
-              required
-            />
+            <input type="text" class="form-control" id="codigoproduct" placeholder="Cod. Producto" name="cod_producto"
+              required />
           </div>
 
           <div class="col-md-3">
-            <select
-              id="marca_producto"
-              class="form-select"
-              name="marca_producto"
-              required
-            >
-              <option selected>Seleciona la marca</option>
+            <select id="marca_producto" class="form-select" name="marca_producto" required>
+              <option selected>Selecciona la marca</option>
               {% for marca in marcas %}
               <option value="{{marca.id}}">{{marca.descripcion}}</option>
               {% empty %}
@@ -59,13 +46,9 @@
             </select>
           </div>
 
+
           <div class="col-md-3">
-            <select
-              id="categoria_producto"
-              class="form-select"
-              name="cod_cateoria"
-              required
-            >
+            <select id="categoria_producto" class="form-select" name="cod_cateoria" required>
               <option selected>Seleccione la categoria</option>
               {% for categoria in categorias %}
               <option value="{{categoria.id}}">
@@ -77,12 +60,7 @@
             </select>
           </div>
           <div class="col-md-3">
-            <select
-              id="prov_producto"
-              class="form-select"
-              name="prov_producto"
-              required
-            >
+            <select id="prov_producto" class="form-select" name="prov_producto" required>
               <option selected>Elige proveedor...</option>
               {% for proveedor in proveedores %}
               <option value="{{proveedor.id}}">
@@ -95,30 +73,15 @@
           </div>
 
           <div class="col-md-5">
-            <label for="desc_producto" class="form-label"
-              >Detalle del producto</label
-            >
-            <input
-              type="text"
-              class="form-control"
-              id="desc_producto"
-              placeholder="Describir el producto"
-              name="desc_producto"
-              required
-            />
+            <label for="desc_producto" class="form-label">Detalle del producto</label>
+            <input type="text" class="form-control" id="desc_producto" placeholder="Describir el producto"
+              name="desc_producto" required />
           </div>
           <div class="col-md-2">
             <label for="precio_compra" class="form-label">Precio compra</label>
             <div class="input-group mb-3">
-              <input
-                type="text"
-                class="form-control"
-                id="precio_compra"
-                placeholder="99999999"
-                name="precio_compra"
-                style="text-align: right"
-                required
-              />
+              <input type="text" class="form-control" id="precio_compra" placeholder="99999999" name="precio_compra"
+                style="text-align: right" required />
               <span class="input-group-text">G</span>
             </div>
           </div>
@@ -126,39 +89,21 @@
           <div class="col-md-2">
             <label for="precio_venta" class="form-label">Precio venta</label>
             <div class="input-group mb-3">
-              <input
-                type="text"
-                class="form-control"
-                id="precio_venta"
-                placeholder="99999999"
-                name="precio_venta"
-                style="text-align: right"
-                required
-              />
+              <input type="text" class="form-control" id="precio_venta" placeholder="99999999" name="precio_venta"
+                style="text-align: right" required />
               <span class="input-group-text">G</span>
             </div>
           </div>
           <div class="col-md-2">
             <label for="tipo_factura" class="form-label">Tipo IVA</label>
-            <select
-              id="tipo_factura"
-              class="form-select"
-              name="tipo_factura"
-              disabled
-            >
+            <select id="tipo_factura" class="form-select" name="tipo_factura" disabled>
               <option value="0.1">IVA 10%</option>
               <option value="0.05">IVA 5%</option>
             </select>
           </div>
           <div class="col-md-1">
             <label for="cant_product" class="form-label">Catidad</label>
-            <input
-              type="int"
-              class="form-control"
-              id="cant_product"
-              name="cantidad_producto"
-              required
-            />
+            <input type="int" class="form-control" id="cant_product" name="cantidad_producto" required />
           </div>
 
           <div class="col-12">
@@ -171,8 +116,7 @@
           {% for message in messages %}
           <li
             class="{% if message.tags == 'error' %}alert alert-danger {% elif message.tags == 'success' %}alert alert-success{% endif %}"
-            role="alert"
-          >
+            role="alert">
             {{ message }}
           </li>
           {% endfor %}
@@ -182,7 +126,7 @@
     </div>
   </div>
 
-  <script src="{% static 'js/modals/modals.js' %}"></script>
+  <script src="{% static 'js/select2.js' %}"></script>
 
   {% endblock %}
 </body>
