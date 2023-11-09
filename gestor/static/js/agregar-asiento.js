@@ -209,6 +209,29 @@ document.addEventListener("DOMContentLoaded", function () {
       eliminarBtn.textContent = "Eliminar";
       eliminarBtn.addEventListener("click", function () {
         tablaDatos.deleteRow(newRow.rowIndex);
+
+        const conceptosHidden = document.getElementById("concepto-hidden");
+        const cuentasHidden = document.getElementById("cuenta-hidden");
+        const debesHidden = document.getElementById("debe-hidden");
+        const haberesHidden = document.getElementById("haber-hidden");
+
+        const conceptosArray = conceptosHidden.value.split(",");
+        const cuentasArray = cuentasHidden.value.split(",");
+        const debesArray = debesHidden.value.split(",");
+        const haberesArray = haberesHidden.value.split(",");
+
+        const index = newRow.rowIndex - 1;
+
+        conceptosArray.splice(index, 1);
+        cuentasArray.splice(index, 1);
+        debesArray.splice(index, 1);
+        haberesArray.splice(index, 1);
+
+        conceptosHidden.value = conceptosArray.join(",");
+        cuentasHidden.value = cuentasArray.join(",");
+        debesHidden.value = debesArray.join(",");
+        haberesHidden.value = haberesArray.join(",");
+
         totales();
       });
       cellOption.appendChild(eliminarBtn);

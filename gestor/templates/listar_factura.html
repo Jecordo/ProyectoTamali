@@ -6,7 +6,7 @@
   {% block content %}
 
   <div class="container">
-    <div class="col-md-12">
+    <div class="col-md-10 offset-md-1">
       <h1 class="display-6">Facturas</h1>
 
       <div class="card card-body bg-secondary">
@@ -14,10 +14,13 @@
           <form action="{% url 'listar_factura' %}" method="post">
             {% csrf_token %}
             <div class="row mb-3">
-              
-
               <div class="col-md-3">
-                <select id="tipo_factura" class="form-select" name="tipo_factura" readonly>
+                <select
+                  id="tipo_factura"
+                  class="form-select"
+                  name="tipo_factura"
+                  readonly
+                >
                   {% for tipo in tipos_facturas %}
                   <option value="{{ tipo.id }}">{{ tipo.estado }}</option>
                   {% empty %}
@@ -44,12 +47,12 @@
           >
             <thead>
               <tr>
-                <th scope="col" style="width: 6%" class="bg-light">
+                <th scope="col" style="width: 10%" class="bg-light">
                   N° Fact.
                 </th>
-                <th scope="col" style="width: 20%" class="bg-light">Cliente</th>
-                <th scope="col" style="width: 20%" class="bg-light">Fecha</th>
-                <th scope="col" style="width: 12%" class="bg-light">
+                <th scope="col" style="width: 30%" class="bg-light">Cliente</th>
+                <th scope="col" style="width: 10%" class="bg-light">Fecha</th>
+                <th scope="col" style="width: 10%" class="bg-light">
                   Total venta
                 </th>
                 <th scope="col" style="width: 6%" class="bg-light">Opt.</th>
@@ -60,33 +63,33 @@
               <tr>
                 <td>{{factu.num_factura}}</td>
                 <td>{{factu.cliente.razon_social}}</td>
-                <td>{{factu.fecha}}</td>
+                <td>{{ factu.fecha|date:"d/m/Y" }}</td>
                 <td>{{factu.total_venta}}</td>
                 <td>
                   <div class="btn-group">
                     <form
-                      action="{% url 'modificar_user' %}"
+                      action="{% url 'imprimir_factura' %}"
                       method="POST"
                       autocomplete="off"
                     >
                       {% csrf_token %}
                       <button
                         class="btn btn-sm btn-primary"
-                        name="id_usuario"
-                        value="{{user.id}}"
+                        name="id_factura"
+                        value="{{factu.id}}"
                       >
-                        <i class="fa fa-solid fa-pencil"></i>
+                        <i class="fa-solid fa-print"></i>
                       </button>
                     </form>
 
-                    <form action="{% url 'eliminar_user' %}" method="post">
+                    <form action="#" method="post">
                       {% csrf_token %}
                       <button
                         class="btn btn-sm btn-danger"
-                        name="id_usuario"
-                        value="{{user.id}}"
+                        name="id_factura"
+                        value="{{factu.id}}"
                       >
-                        <i class="fa fa-solid fa-trash"></i>
+                        <i class="fa-solid fa-ban"></i>
                       </button>
                     </form>
                   </div>
@@ -107,7 +110,9 @@
                 <a class="page-link" href="?page=1">&laquo; first</a>
               </li>
               <li class="page-item">
-                <a class="page-link" href="?page={{facturas.previous_page_number}}"
+                <a
+                  class="page-link"
+                  href="?page={{facturas.previous_page_number}}"
                   >previous</a
                 >
               </li>
@@ -122,7 +127,9 @@
 
               {% if facturas.has_next %}
               <li class="page-item">
-                <a class="page-link" href="?page={{ facturas.next_page_number }}"
+                <a
+                  class="page-link"
+                  href="?page={{ facturas.next_page_number }}"
                   >next</a
                 >
               </li>

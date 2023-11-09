@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Factura</title>
+</head>
+<body>
+    <h1>Factura #{{ factura.id }}</h1>
+    <p>Fecha: {{ factura.fecha }}</p>
+    <!-- Agrega más detalles de la factura según tu modelo -->
+
+    <h2>Detalles de la factura:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Código de Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Total Precio</th>
+                <th>Impuesto</th>
+                <th>Descuento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in factura.facturadetalle_set.all %}
+            <tr>
+                <td>{{ detalle.cod_producto }}</td>
+                <td>{{ detalle.cantidad }}</td>
+                <td>{{ detalle.precio_unitario }}</td>
+                <td>{{ detalle.total_precio }}</td>
+                <td>{{ detalle.impuesto }}</td>
+                <td>{{ detalle.descuento }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

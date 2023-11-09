@@ -2,6 +2,8 @@ from audioop import reverse
 from datetime import date
 import json
 from random import randrange
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 from django.views.generic import ListView
 from pyexpat.errors import messages
 import re
@@ -351,6 +353,7 @@ def facturar(request):
         num_factura = int(ultimoa_factura.num_factura[-7:]) + 1
         num_factura = f"{num_factura:07d}"
     else:
+        timbrado = 9999999
         num_factura = 1
         num_factura = f"{num_factura:07d}"
 
@@ -417,6 +420,39 @@ def create_factura(request):
     request.session['factura_cabecera_id'] = factura_cabecera_id
 
     return redirect(menu_factura_detalle)
+
+#------------------------------------imprimir facturas-----------------------------------------------
+def imprimir_factura(request):
+    id_factura = request.POST['id_factura']
+    facturas = get_object_or_404(factura, pk=id_factura)  # Recupera la factura por su ID o cualquier otro criterio
+    detalles_factura = factura_detalle.objects.filter(num_factura=facturas)
+
+    # Crear el objeto PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="factura.pdf"'
+    p = canvas.Canvas(response, pagesize=letter)
+
+    # Agregar contenido al PDF
+    p.drawString(450, 750, f'{facturas.num_factura}')
+    p.drawString(450, 730, f'{facturas.fecha.strftime("%d/%m/%Y")}')
+    p.drawString(450, 710, f'{facturas.cliente}')
+    p.drawString(50, 690, 'Detalles de la factura:')
+    y = 670  # Posición vertical para los detalles
+
+    for detalle in detalles_factura:
+        p.drawString(50, y, f'{detalle.cod_producto}')
+        p.drawString(100, y, f'{detalle.cod_producto.descripcion}')
+        p.drawString(300, y, f'{detalle.cantidad}')
+        p.drawString(350, y, f'{detalle.descuento}%')
+        p.drawString(380, y, f'{detalle.cod_producto.precio_venta}')
+        p.drawString(430, y, f'{detalle.total_precio}')       
+    p.drawString(480, 480, f'{detalle.total_precio}')
+
+    # Cierra el PDF y envía la respuesta
+    p.showPage()
+    p.save()
+    return response
+
 
 # -----------------------------------Detalle de la factura----------------------------------------------
 
