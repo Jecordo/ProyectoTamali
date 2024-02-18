@@ -62,7 +62,7 @@ def menu_principal(request):
     return render(request, 'dashboard.html', {'user': user})
 
 
-@never_cache
+
 def get_chart(request):
     produc = producto.objects.all()
 
@@ -158,7 +158,7 @@ def get_chart2(request):
             fecha_labels.append(l.fecha.strftime('%Y-%m-%d'))
             fecha_labels_aux.append(l.fecha.strftime('%Y-%m-%d'))
             current_stock += l.debe
-            current_stock -= l.haber
+            current_stock += l.haber
             stock_accumulative.append(current_stock)
 
         random_color = colors[idx % len(colors)]
@@ -183,12 +183,12 @@ def get_chart2(request):
 @login_required
 @admin_required
 def crear_user(request):
-    user = request.user
+    user_actua = request.user
     rol = Role.objects.all()
 
-    if user.is_authenticated:
+    if user_actua.is_authenticated:
         try:
-            custom_user = CustomUser.objects.get(user=user)
+            custom_user = CustomUser.objects.get(user=user_actua)
             user_role = custom_user.role.name
         except CustomUser.DoesNotExist:
             user_role = "Sin rol asignado"
@@ -196,7 +196,7 @@ def crear_user(request):
         user_role = "Usuario no autenticado"
 
     if request.method == 'GET':
-        return render(request, 'crear_user.html', {'user_role': user_role, 'user': user, 'rols': rol})
+        return render(request, 'crear_user.html', {'user_role': user_role, 'user': user_actua, 'rols': rol})
 
     elif request.method == 'POST':
         username = request.POST['username']
@@ -353,7 +353,7 @@ def facturar(request):
         num_factura = int(ultimoa_factura.num_factura[-7:]) + 1
         num_factura = f"{num_factura:07d}"
     else:
-        timbrado = 9999999
+        timbrado = 00000000
         num_factura = 1
         num_factura = f"{num_factura:07d}"
 
@@ -566,7 +566,7 @@ def finalizar_factura(request):
             total_precios = total_precios + pro.total_precio
 
             inv = inventario(fecha=fecha_hoy, cod_producto=pro.cod_producto, descripcion='Venta',
-                             tipo_movimiento=False, cantidad=cantidad)
+                             tipo_movimiento=False, cantidad=cantidad, referencia=factu.num_factura)
             inv.save()
 
             i += 1

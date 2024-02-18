@@ -1,6 +1,6 @@
 const getOptionChart = async () => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/gestor/get_chart/");
+    const response = await fetch("http://127.0.0.1:8000/get_chart/");
     return await response.json();
   } catch (ex) {
     alert(ex);
@@ -9,7 +9,7 @@ const getOptionChart = async () => {
 
 const getOptionChart1 = async () => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/gestor/get_chart2/");
+    const response = await fetch("http://127.0.0.1:8000/get_chart2/");
     return await response.json();
   } catch (ex) {
     alert(ex);
