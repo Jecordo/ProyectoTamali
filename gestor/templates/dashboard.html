@@ -1,31 +1,27 @@
-{% extends "Base.html" %} {% load static %}
+{% extends 'Base.html' %}
+{% load static %}
 
-<html lang="en">
-  <head>
-    <title>{% block title %} Menu principal {% endblock %}</title>
-  </head>
-  <body>
-    {% block content %}
-    <div class="container ">
-      <div class="row my-4">
-        <div class="col-sm-6  mb-2 mx-auto">
-          <div class="card card-body bg-light">
-            <label for="chart" style="color: rgb(0, 0, 0);">Movimeinto de los productos</label>
-            <div id="chart" class="chart"></div>
-          </div>
-        </div>
-        <div class="col-sm-6 mx-auto">
-          <div class="card card-body bg-light">
-            <label for="chart1" style="color: rgb(0, 0, 0);">Movimeinto de las cuentas </label>
-            <div id="chart1" class="chart"></div>
-          </div>
-        </div>
+{% block title %}Menu principal{% endblock %}
+
+{% block content %}
+<div class="container ">
+  <div class="row my-4">
+    <div class="col-sm-6  mb-2 mx-auto">
+      <div class="card card-body bg-light">
+        <label for="chart" style="color: rgb(0, 0, 0);">Movimiento de los productos</label>
+        <div id="chart" class="chart"></div>
       </div>
     </div>
-    <!-- Apache ECharts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.1/echarts.min.js"></script>
-    <script src="{% static 'js/reportes.js' %}"></script>
+    <div class="col-sm-6 mx-auto">
+      <div class="card card-body bg-light">
+        <label for="chart1" style="color: rgb(0, 0, 0);">Movimiento de las cuentas</label>
+        <div id="chart1" class="chart"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Apache ECharts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.1/echarts.min.js"></script>
+<script src="{% static 'js/reportes.js' %}"></script>
+{% endblock %}
 
-    {% endblock %}
-  </body>
-</html>

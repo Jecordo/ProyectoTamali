@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from .models import Role, CustomUser
+from gestor.apps.usuario.models import Role, CustomUser
 from . import views
 
 
