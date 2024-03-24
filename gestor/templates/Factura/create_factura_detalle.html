@@ -30,12 +30,12 @@
               <div class="col-md-2">
                 <label for="fecha_emision" class="form-label">Fecha:</label>
                 <input
-                  type="date"
-                  class="form-control"
-                  id="fecha_emision"
-                  name="fecha_emision"
-                  value="{{factura_cabecera.fecha}}"
-                  readonly/>
+                type="text"
+                class="form-control"
+                id="fecha_emision"
+                name="fecha_emision"
+                value="{{ factura_cabecera.fecha|date:'Y-m-d' }}"
+                readonly/>
               </div>
               <div class="col-md-2">
                 <label for="tipo_factura" class="form-label"
@@ -79,7 +79,7 @@
                     class="form-control"
                     id="num_factura"
                     name="num_factura"
-                    value="{{factura_cabecera.num_factura}}"
+                    value="001-001-{{factura_cabecera.num_factura}}"
                     readonly
                   />
                 </div>
@@ -248,7 +248,7 @@
                           form="eliminar_producto_{{factu.id}}"
                           value="{{factu.id}}"
                         >
-                          <i class="fa fa-solid fa-trash-o"></i>
+                          <i class="fa-solid fa-trash-can"></i>
                         </button>
                       </form>
                     </td>
@@ -261,11 +261,11 @@
             <table class="table table-striped bordered-dark table-secondary table-bordered">
               <tbody>
                 <tr>
-                  <td style="text-align: right; width: 1050px">Total de IVA%</td>
+                  <td style="text-align: right; width: 1035px">Total de IVA%</td>
                   <td>
                     <input type="int" id="total_iva" value="{{total_iva}}" size="5"/>
                   </td>
-                  <td style="width: 55px"></td>
+                  <td style="width: 60px"></td>
                 </tr>
                 <tr>
                   <td style="text-align: right">Total de compra</td>
@@ -314,7 +314,10 @@
     </div>
   </div>
 
+  <script src="{% static 'js/select2-producto.js' %}"></script>
+
   <script>
+
     var fechaEmisionInput = document.getElementById("fecha_emision");
   
     var fechaActual = fechaEmisionInput.value;
@@ -323,9 +326,8 @@
     var fechaFormateada = partesFecha[2] + '-' + partesFecha[1] + '-' + partesFecha[0]; 
   
     fechaEmisionInput.value = fechaFormateada;
-  </script>
 
-  <script src="{% static 'js/select2-producto.js' %}"></script>
+  </script>
 
   {% endblock %}
 </body>

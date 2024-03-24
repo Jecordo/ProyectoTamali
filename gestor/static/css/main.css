@@ -80,3 +80,7 @@ td.centro {
   width: 100% !important;
   min-height: 400px !important;
 }
+
+.fila-roja {
+  background-color: #ffcccc !important; /* Color de fondo rojo */
+}

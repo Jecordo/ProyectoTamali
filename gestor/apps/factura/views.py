@@ -65,9 +65,9 @@ def facturar(request):
 @login_required
 @vendedor_required
 def create_factura(request):
-    prod = producto.objects.all()
-    existe = factura.objects.filter(
-        num_factura=request.POST['num_factura']).exists()
+    num_factura = request.POST['num_factura']
+    ultimo_numero_factura = num_factura.split('-')[-1]
+    existe = factura.objects.filter(num_factura=ultimo_numero_factura).exists()
 
     if existe:
         messages.error(request, 'Numero de factura ya registrado')
@@ -102,8 +102,11 @@ def create_factura(request):
     client = get_object_or_404(cliente, RUC=request.POST['ruc_cliente'])
     factura_tipo = get_object_or_404(
         tipo_factura, pk=request.POST['tipo_factura'])
+    
+    num_factura = request.POST['num_factura']
+    ultimo_numero_factura = num_factura.split('-')[-1]
 
-    factura_cabecera = factura(fecha=request.POST['fecha_emision'], num_factura=request.POST['num_factura'], cliente=client, tipo_factura=factura_tipo,
+    factura_cabecera = factura(fecha=request.POST['fecha_emision'], num_factura=ultimo_numero_factura, cliente=client, tipo_factura=factura_tipo,
                                metodo_de_pago=ment_pag, estado=est, timbrado=request.POST['timbrado_factura'])
     factura_cabecera.save()
 
@@ -155,7 +158,7 @@ def menu_factura_detalle(request):
     factura_cabecera_id = request.session.get('factura_cabecera_id')
     user = request.user
 
-    productos = stock.objects.exclude(cantidad=0)
+    productos = stock.objects.exclude(cantidad='0')
     factura_cabecera = get_object_or_404(factura, pk=factura_cabecera_id)
 
     factu_detalle = detalle_temp.objects.filter(
@@ -184,7 +187,11 @@ def menu_factura_detalle(request):
 @login_required
 @vendedor_required
 def cargar_factura_detalle(request):
-    factu = get_object_or_404(factura, num_factura=request.POST['num_factura'])
+
+    num_factura = request.POST['num_factura']
+    ultimo_numero_factura = num_factura.split('-')[-1]
+
+    factu = get_object_or_404(factura, num_factura=ultimo_numero_factura)
     produc = get_object_or_404(
         producto, pk=int(request.POST['cod_producto_id']))
 
@@ -216,7 +223,8 @@ def finalizar_factura(request):
     descuento_str = request.POST.get('desc_prod', '')
     iva_str = request.POST.get('iva_prod', '')
 
-    cantidad_lista = cantidad_str.split(",")
+    cantidad_lista = cantidad_str.split(",") 
+    print(cantidad_lista)
     descuento_lista = descuento_str.split(",")
     iva_lista = iva_str.split(",")
 
@@ -228,8 +236,13 @@ def finalizar_factura(request):
         total_iva = 0
         total_precios = 0
         i = 1
+
         for pro in (factu_detall):
-            cantidad = int(cantidad_lista[i])
+            if cantidad_lista[i] == "":
+                cantidad = 0
+            else:
+                cantidad = int(cantidad_lista[i])
+
             iva = float(iva_lista[i])
             descuento = int(descuento_lista[i])
 
@@ -240,6 +253,13 @@ def finalizar_factura(request):
 
                 messages.error(
                     request, 'El producto '+str(pro.cod_producto.cod_producto)+' supera la cantidad de stock, se cuenta con '+str(stocks.cantidad))
+                return redirect(menu_factura_detalle)
+            elif str(cantidad) == '0':
+                print('entro en nulo')
+                request.session['factura_cabecera_id'] = factura_cabecera_id
+
+                messages.error(
+                    request, 'El producto '+str(pro.cod_producto.cod_producto)+' no puede tener cantidad nula o valor 0')
                 return redirect(menu_factura_detalle)
             else:
                 print('no entrro')
@@ -271,7 +291,7 @@ def finalizar_factura(request):
         factu.save()
 
         factura_cabecera_id = int(factu.id)
-        return redirect(facturar)
+        return redirect(listar_factura)
     else:
         factu.delete()
 
@@ -283,15 +303,19 @@ def finalizar_factura(request):
 @login_required
 @vendedor_required
 def listar_factura(request):
-    factu = factura.objects.all()
+    factu = factura.objects.all().order_by('num_factura')
     user = request.user
+    print(user)
+
 
     if user.is_authenticated:
         try:
             custom_user = CustomUser.objects.get(user=user)
             user_role = custom_user.role.name
+            print(user_role)
         except CustomUser.DoesNotExist:
             user_role = "Sin rol asignado"
+            print(user_role)
     else:
         user_role = "Usuario no autenticado"
 
@@ -312,13 +336,13 @@ def listar_factura(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'listar_factura.html', {"facturas": page_obj, "user_role": user_role, 'user': user,
+    return render(request, 'Factura/listar_factura.html', {"facturas": page_obj, "user_role": user_role, 'user': user,
                                                "tipos_facturas": tipo})
 
 @login_required
 @vendedor_required
 def delete_factura(request):
-    prod = stock.objects.all()
+    prod = stock.objects.exclude(cantidad=0)
     for p in prod:
         print(p.producto, p.cantidad)
     factu_detalle = get_object_or_404(
@@ -349,3 +373,25 @@ def cancelar_factura(request, factura_cabecera_id):
     factura_cabecera.delete()
 
     return redirect(facturar)
+
+
+# ------------------------------------ Anular factura ---------------------------------------
+
+@login_required
+@vendedor_required
+def anular_factura(request, factura_id):
+    # Obtener la factura
+    factura_obj = get_object_or_404(factura, id=factura_id)
+    
+    # Verificar si la factura ya está anulada
+    if factura_obj.estado == 'Anulada':
+        # Si la factura ya está anulada, redirigir a alguna página de error o a la lista de facturas
+        return redirect(listar_factura)
+    
+    # Cambiar el estado de la factura a "Anulada"
+    estado_asignado = get_object_or_404(Estados, id=2)
+    factura_obj.estado = estado_asignado
+    factura_obj.save()
+    
+    # Redirigir a alguna página de confirmación o a la lista de facturas
+    return redirect(listar_factura)

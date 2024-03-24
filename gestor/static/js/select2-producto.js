@@ -1,4 +1,4 @@
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function() {
   var cantidades_productos = document.querySelectorAll(".cantidad");
   var total_precio_producto = document.querySelectorAll(".total_producto");
   var precios_unitarios = document.querySelectorAll(".precio_unit");
@@ -100,6 +100,16 @@ $(document).ready(function () {
 
   $("#cod_producto_id").select2({
     templateResult: function (option) {
+
+      var table = document.getElementById("tabla_id");
+      var rowCount = table.rows.length;
+      console.log("rowCount");
+      console.log(rowCount);
+
+      for (var i = 0; i < rowCount; i++) {
+        actualizarValoresdelista(i);
+      }
+
       return $('<span style="color: black;">' + option.text + "</span>");
     },
   });
@@ -127,14 +137,4 @@ $(document).ready(function () {
   $("#finalizar_factura").attr("disabled", false).removeClass("disabled");
   $("#cancelar_factura").attr("disabled", false).removeClass("disabled");
 
-  window.onload = function () {
-    var table = document.getElementById("tabla_id");
-    var rowCount = table.rows.length;
-    console.log("rowCount");
-    console.log(rowCount);
-
-    for (var i = 0; i < rowCount; i++) {
-      actualizarValoresdelista(i);
-    }
-  };
 });

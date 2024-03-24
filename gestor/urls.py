@@ -27,6 +27,7 @@ urlpatterns = [
     path('facturar/', factura.facturar, name='facturas'),
     path('generar_factura/', factura.create_factura, name='Create_factura'),
     path('delete_factura/', factura.delete_factura, name='delete_factura'),
+    path('anular_factura/<int:factura_id>/', factura.anular_factura, name='anular_factura'),
 
     path('carga_factura_detalle/', factura.cargar_factura_detalle, name='factura_detalle'),
     path('menu_factura_detalle/', factura.menu_factura_detalle,
