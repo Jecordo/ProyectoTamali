@@ -68,7 +68,7 @@ def cargar_inventario(request):
 @login_required
 @vendedor_required
 def StockListView(request):
-    stocks = stock.objects.all()
+    stocks = stock.objects.all().order_by('id')
     user = request.user
 
     if user.is_authenticated:

@@ -1,0 +1,388 @@
+{% extends "Base.html" %} {% load static %}
+
+<head>
+  <title>{% block title %} Producto {% endblock %}</title>
+</head>
+
+<body>
+  {% block content %}
+
+  <ul class="nav nav-tabs navbar-light bg-light justify-content-center">
+    <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="#">Producto</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'menu_iventario' %}">Inventario</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="">Modificar producto</a>
+    </li>
+  </ul>
+
+  <div class="container">
+    <div class="col-md-12">
+      <h1 class="display-6">Modulo producto</h1>
+
+      <div class="card card-body">
+
+        {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+          <li
+            class="{% if message.tags == 'error' %}alert alert-danger {% elif message.tags == 'success' %}alert alert-success{% endif %}"
+            role="alert">
+            {{ message }}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div class="card card-body bg-secondary">
+          <div class="col-12">
+            <form action="{% url 'listar_productos' %}" method="post">
+              {% csrf_token %}
+              <div class="row mb-3">
+                <div class="col-md-3">
+                  <select
+                    id="tipo_factura"
+                    class="form-select"
+                    name="tipo_factura"
+                    readonly
+                  >
+                    {% for tipo in categorias %}
+                    <option value="{{ tipo.id }}">{{ tipo.descripcion }}</option>
+                    {% empty %}
+                    <h4 class="text-center">No hay tipo</h4>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-2">
+                  <input
+                    type="text"
+                    name="nombre_filter"
+                    class="form-control"
+                    placeholder="Buscar por N° Factura"
+                  />
+                </div>
+                <div class="col-3">
+                  <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+                <div class="col-3">
+                  <button id="openModalBtn" class="btn btn-primary" type="button">Nuevo producto</button>
+                </div>
+              </div>
+            </form>
+  
+            <table class="table table-info table-bordered border-dark">
+              <thead>
+                  <tr>
+                      <th scope="col" style="width: 10%" class="bg-light">N° Fact.</th>
+                      <th scope="col" style="width: 30%" class="bg-light">Cliente</th>
+                      <th scope="col" style="width: 10%" class="bg-light">Fecha</th>
+                      <th scope="col" style="width: 10%" class="bg-light">Total venta</th>
+                      <th scope="col" style="width: 6%" class="bg-light">Opt.</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for producto in productos %}
+                    {% if producto.estado.estado == 'Inactivo' %}
+                      <tr>
+                        <td style="background-color: #ffcccc;">{{producto.cod_producto}}</td>
+                        <td style="background-color: #ffcccc;">{{producto.descripcion}}</td>
+                        <td style="background-color: #ffcccc;">{{producto.precio_venta}}</td>
+                        <td style="background-color: #ffcccc;">{{producto.proveedor}}</td>
+                        <td style="background-color: #ffcccc;">
+                    {% else %}
+                      <tr>
+                        <td>{{producto.cod_producto}}</td>
+                        <td>{{producto.descripcion}}</td>
+                        <td>{{ producto.precio_venta }}</td>
+                        <td>{{producto.proveedor}}</td>
+                        <td>
+                    {% endif %}
+                          <div class="btn-group">
+
+                            <button id="openModalBtn_mod" class="btn btn-primary" type="button">
+                              <i class="fa-solid fa-print"></i>
+                            </button>
+
+                            <form id="anular_producto_form_{{ producto.id }}" action="{% url 'anular_producto' producto_id=producto.id %}" method="post">
+                              {% csrf_token %}
+                              <button class="btn btn-sm btn-danger" name="id_factura" value="{{ producto.id }}" onclick="return confirmarAnulacion('{{producto.id}}')" {% if producto.estado.estado == 'Inactivo' %}disabled{% endif %}>
+                                <i class="fa-solid fa-ban"></i>
+                              </button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="6">
+                        <h3 class="text-center">No hay productos cargados</h3>
+                      </td>
+                    </tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+          
+  
+            <nav aria-label="Page navigation example">
+              <ul class="pagination justify-content-center">
+                {% if productos.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1">&laquo; first</a>
+                </li>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page={{productos.previous_page_number}}"
+                    >previous</a
+                  >
+                </li>
+                {% endif %}
+  
+                <li class="page-item disabled">
+                  <span class="page-link"
+                    >Page {{ productos.number }} of
+                    {{productos.paginator.num_pages}}</span
+                  >
+                </li>
+  
+                {% if productos.has_next %}
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page={{ productos.next_page_number }}"
+                    >next</a
+                  >
+                </li>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page={{ productos.paginator.num_pages }}"
+                    >last &raquo;</a
+                  >
+                </li>
+                {% endif %}
+              </ul>
+            </nav>
+
+            <!--     nuevo producto     -->
+            <div id="myModal" class="modal">
+              <div class="modal-content">
+
+                <span class="close">&times;</span>
+
+                <form action="{% url 'cargar_roducto' %}" class="row g-3 mb-2" method="POST">
+                  {% csrf_token %}
+        
+                  <div class="col-ms-12">
+                    <label for="desc_producto" class="form-label">Cod. Producto:</label>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="text" class="form-control" id="codigoproduct" placeholder="Cod. Producto" name="cod_producto"
+                      required />
+                  </div>
+        
+                  <div class="col-md-3">
+                    <select id="marca_producto" class="form-select" name="marca_producto" required>
+                      <option selected>Selecciona la marca</option>
+                      {% for marca in marcas %}
+                      <option value="{{marca.id}}">{{marca.descripcion}}</option>
+                      {% empty %}
+                      <h4 class="text-center">No hay marcas</h4>
+                      {% endfor %}
+                    </select>
+                  </div>
+        
+        
+                  <div class="col-md-3">
+                    <select id="categoria_producto" class="form-select" name="cod_cateoria" required>
+                      <option selected>Seleccione la categoria</option>
+                      {% for categoria in categorias %}
+                      <option value="{{categoria.id}}">
+                        {{categoria.descripcion}}
+                      </option>
+                      {% empty %}
+                      <h4 class="text-center">No hay categoria</h4>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <select id="prov_producto" class="form-select" name="prov_producto" required>
+                      <option selected>Elige proveedor...</option>
+                      {% for proveedor in proveedores %}
+                      <option value="{{proveedor.id}}">
+                        {{proveedor.razon_social}}
+                      </option>
+                      {% empty %}
+                      <h4 class="text-center">No hay proveedor</h4>
+                      {% endfor %}
+                    </select>
+                  </div>
+        
+                  <div class="col-md-5">
+                    <label for="desc_producto" class="form-label">Detalle del producto</label>
+                    <input type="text" class="form-control" id="desc_producto" placeholder="Describir el producto"
+                      name="desc_producto" required />
+                  </div>
+                  <div class="col-md-2">
+                    <label for="precio_compra" class="form-label">Precio compra</label>
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" id="precio_compra" placeholder="99999999" name="precio_compra"
+                        style="text-align: right" required />
+                      <span class="input-group-text">G</span>
+                    </div>
+                  </div>
+        
+                  <div class="col-md-2">
+                    <label for="precio_venta" class="form-label">Precio venta</label>
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" id="precio_venta" placeholder="99999999" name="precio_venta"
+                        style="text-align: right" required />
+                      <span class="input-group-text">G</span>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <label for="tipo_factura" class="form-label">Tipo IVA</label>
+                    <select id="tipo_factura" class="form-select" name="tipo_factura" disabled>
+                      <option value="0.1">IVA 10%</option>
+                      <option value="0.05">IVA 5%</option>
+                    </select>
+                  </div>
+                  <div class="col-md-1">
+                    <label for="cant_product" class="form-label">Catidad</label>
+                    <input type="int" class="form-control" id="cant_product" name="cantidad_producto" required />
+                  </div>
+        
+                  <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                  </div>
+                </form>
+                
+              </div>
+            </div>
+
+  
+            <!--     nuevo producto     -->
+
+            <div id="myModal_mod" class="modal">
+              <div class="modal-content">
+
+                <span id="close" class="close">&times;</span>
+
+                <form action="{% url 'modificar_producto' %}" class="row g-3 mb-2" method="POST">
+                  {% csrf_token %}
+        
+                  <div class="col-ms-12">
+                    <label for="desc_producto" class="form-label">Cod. Producto:</label>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="text" class="form-control" id="codigoproduct" placeholder="Cod. Producto" name="cod_producto"
+                      required />
+                  </div>
+        
+                  <div class="col-md-3">
+                    <select id="marca_producto" class="form-select" name="marca_producto" required>
+                      <option selected>Selecciona la marca</option>
+                      {% for marca in marcas %}
+                      <option value="{{marca.id}}">{{marca.descripcion}}</option>
+                      {% empty %}
+                      <h4 class="text-center">No hay marcas</h4>
+                      {% endfor %}
+                    </select>
+                  </div>
+        
+        
+                  <div class="col-md-3">
+                    <select id="categoria_producto" class="form-select" name="cod_cateoria" required>
+                      <option selected>Seleccione la categoria</option>
+                      {% for categoria in categorias %}
+                      <option value="{{categoria.id}}">
+                        {{categoria.descripcion}}
+                      </option>
+                      {% empty %}
+                      <h4 class="text-center">No hay categoria</h4>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <select id="prov_producto" class="form-select" name="prov_producto" required>
+                      <option selected>Elige proveedor...</option>
+                      {% for proveedor in proveedores %}
+                      <option value="{{proveedor.id}}">
+                        {{proveedor.razon_social}}
+                      </option>
+                      {% empty %}
+                      <h4 class="text-center">No hay proveedor</h4>
+                      {% endfor %}
+                    </select>
+                  </div>
+        
+                  <div class="col-md-5">
+                    <label for="desc_producto" class="form-label">Detalle del producto</label>
+                    <input type="text" class="form-control" id="desc_producto" placeholder="Describir el producto"
+                      name="desc_producto" required />
+                  </div>
+                  <div class="col-md-2">
+                    <label for="precio_compra" class="form-label">Precio compra</label>
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" id="precio_compra" placeholder="99999999" name="precio_compra"
+                        style="text-align: right" required />
+                      <span class="input-group-text">G</span>
+                    </div>
+                  </div>
+        
+                  <div class="col-md-2">
+                    <label for="precio_venta" class="form-label">Precio venta</label>
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" id="precio_venta" placeholder="99999999" name="precio_venta"
+                        style="text-align: right" required />
+                      <span class="input-group-text">G</span>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <label for="tipo_factura" class="form-label">Tipo IVA</label>
+                    <select id="tipo_factura" class="form-select" name="tipo_factura" disabled>
+                      <option value="0.1">IVA 10%</option>
+                      <option value="0.05">IVA 5%</option>
+                    </select>
+                  </div>
+                  <div class="col-md-1">
+                    <label for="cant_product" class="form-label">Catidad</label>
+                    <input type="int" class="form-control" id="cant_product" name="cantidad_producto" required />
+                  </div>
+        
+                  <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                  </div>
+                </form>
+                
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/script.js' %}"></script>
+
+  <script src="{% static 'js/select2.js' %}"></script>
+
+  <script>
+    // Función para mostrar un mensaje de confirmación al intentar anular una factura
+    function confirmarAnulacion(idproducto) {
+      if (confirm("¿Estás seguro de que deseas anular este producto?")) {
+        // Si el usuario hace clic en "Aceptar", envía el formulario
+        document.getElementById("anular_producto_form_" + idproducto).submit();
+      } else {
+        // Si el usuario hace clic en "Cancelar", no hagas nada
+        return false;
+      }
+    }
+  </script>
+
+  {% endblock %}
+</body>

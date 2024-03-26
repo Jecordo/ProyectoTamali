@@ -103,7 +103,7 @@
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'menu_producto' %}">Producto</a>
+              <a class="nav-link" href="{% url 'listar_productos' %}">Producto</a>
             </li>
             {% endif %} {% if user_role == 'contador' or user_role == 'admin' or request.session.rol == 'contador' or request.session.rol == 'admin' %}
             <li class="nav-item dropdown">

@@ -42,95 +42,59 @@
             </div>
           </form>
 
-          <table
-            class="table table-info table-striped table-bordered border-dark"
-          >
+          <table class="table table-info table-bordered border-dark">
             <thead>
-              <tr>
-                <th scope="col" style="width: 10%" class="bg-light">
-                  N° Fact.
-                </th>
-                <th scope="col" style="width: 30%" class="bg-light">Cliente</th>
-                <th scope="col" style="width: 10%" class="bg-light">Fecha</th>
-                <th scope="col" style="width: 10%" class="bg-light">
-                  Total venta
-                </th>
-                <th scope="col" style="width: 6%" class="bg-light">Opt.</th>
-              </tr>
+                <tr>
+                    <th scope="col" style="width: 10%" class="bg-light">N° Fact.</th>
+                    <th scope="col" style="width: 30%" class="bg-light">Cliente</th>
+                    <th scope="col" style="width: 10%" class="bg-light">Fecha</th>
+                    <th scope="col" style="width: 10%" class="bg-light">Total venta</th>
+                    <th scope="col" style="width: 6%" class="bg-light">Opt.</th>
+                </tr>
             </thead>
             <tbody>
-              {% for factu in facturas %}
-                {% if factu.estado.estado == 'Inactivo' %}
-                  <tr class="fila-roja">
-                    <td>{{factu.num_factura}}</td>
-                    <td>{{factu.cliente.razon_social}}</td>
-                    <td>{{ factu.fecha|date:"d/m/Y" }}</td>
-                    <td>{{factu.estado}}</td>
-                    <td>
-                      <div class="btn-group">
-                        <form
-                          action="{% url 'imprimir_factura' %}"
-                          method="POST"
-                          autocomplete="off"
-                        >
-                          {% csrf_token %}
-                          <button class="btn btn-sm btn-primary" name="id_factura" value="{{factu.id}}" disabled>
-                            <i class="fa-solid fa-print"></i>
-                          </button>
-                        </form>
-
-                        <form id="anular_factura_form_{{ factu.id }}" action="{% url 'anular_factura' factura_id=factu.id %}" method="post">
-                          {% csrf_token %}
-                          <button class="btn btn-sm btn-danger" name="id_factura" value="{{ factu.id }}" onclick="return confirmarAnulacion('{{factu.id}}')" disabled>
-                            <i class="fa-solid fa-ban"></i>
-                          </button>
-                        </form>
-                      
-                      </div>
-                    </td>
-                  </tr>
-                {% else %}
+                {% for factu in facturas %}
+                  {% if factu.estado.estado == 'Inactivo' %}
+                    <tr>
+                      <td style="background-color: #ffcccc;">001-001-{{factu.num_factura}}</td>
+                      <td style="background-color: #ffcccc;">{{factu.cliente.razon_social}}</td>
+                      <td style="background-color: #ffcccc;">{{ factu.fecha|date:"d/m/Y" }}</td>
+                      <td style="background-color: #ffcccc;">{{factu.total_venta}}</td>
+                      <td style="background-color: #ffcccc;">
+                  {% else %}
+                    <tr>
+                      <td>001-001-{{factu.num_factura}}</td>
+                      <td>{{factu.cliente.razon_social}}</td>
+                      <td>{{ factu.fecha|date:"d/m/Y" }}</td>
+                      <td>{{factu.total_venta}}</td>
+                      <td>
+                  {% endif %}
+                        <div class="btn-group">
+                          <form action="{% url 'imprimir_factura' %}" method="POST" autocomplete="off">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-primary" name="id_factura" value="{{factu.id}}">
+                              <i class="fa-solid fa-print"></i>
+                            </button>
+                          </form>
+                          <form id="anular_factura_form_{{ factu.id }}" action="{% url 'anular_factura' factura_id=factu.id %}" method="post">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-danger" name="id_factura" value="{{ factu.id }}" onclick="return confirmarAnulacion('{{factu.id}}')" {% if factu.estado.estado == 'Inactivo' %}disabled{% endif %}>
+                              <i class="fa-solid fa-ban"></i>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                {% empty %}
                   <tr>
-                    <td>{{factu.num_factura}}</td>
-                    <td>{{factu.cliente.razon_social}}</td>
-                    <td>{{ factu.fecha|date:"d/m/Y" }}</td>
-                    <td>{{factu.estado}}</td>
-                    <td>
-                      <div class="btn-group">
-                        <form
-                          action="{% url 'imprimir_factura' %}"
-                          method="POST"
-                          autocomplete="off"
-                        >
-                          {% csrf_token %}
-                          <button
-                            class="btn btn-sm btn-primary"
-                            name="id_factura"
-                            value="{{factu.id}}"
-                          >
-                            <i class="fa-solid fa-print"></i>
-                          </button>
-                        </form>
-
-                        <form id="anular_factura_form_{{ factu.id }}" action="{% url 'anular_factura' factura_id=factu.id %}" method="post">
-                          {% csrf_token %}
-                          <button class="btn btn-sm btn-danger" name="id_factura" value="{{ factu.id }}" onclick="return confirmarAnulacion('{{factu.id}}')">
-                            <i class="fa-solid fa-ban"></i>
-                          </button>
-                        </form>
-                      
-                      </div>
+                    <td colspan="6">
+                      <h3 class="text-center">No hay productos cargados</h3>
                     </td>
                   </tr>
-                {% endif %}
-
-              {% empty %}
-              <td colspan="6">
-                <h3 class="text-center">No hay producto cargados</h3>
-              </td>
-              {% endfor %}
+                {% endfor %}
             </tbody>
-          </table>
+        </table>
+        
 
           <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-center">

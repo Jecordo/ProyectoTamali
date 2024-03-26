@@ -127,6 +127,12 @@ def imprimir_factura(request):
     response['Content-Disposition'] = 'attachment; filename="factura.pdf"'
     p = canvas.Canvas(response, pagesize=letter)
 
+    # Datos del cliente
+    p.drawString(100, 750, f'{facturas.cliente.razon_social}')
+    p.drawString(100, 735, f'{facturas.cliente.RUC}')
+    p.drawString(100, 720, f'{facturas.cliente.direccion}')
+    p.drawString(100, 705, f'{facturas.cliente.num_telefono}')
+
     # Agregar contenido al PDF
     p.drawString(450, 750, f'{facturas.num_factura}')
     p.drawString(450, 730, f'{facturas.fecha.strftime("%d/%m/%Y")}')
@@ -134,14 +140,61 @@ def imprimir_factura(request):
     p.drawString(50, 690, 'Detalles de la factura:')
     y = 670  # Posición vertical para los detalles
 
-    for detalle in detalles_factura:
-        p.drawString(50, y, f'{detalle.cod_producto}')
-        p.drawString(100, y, f'{detalle.cod_producto.descripcion}')
-        p.drawString(300, y, f'{detalle.cantidad}')
-        p.drawString(350, y, f'{detalle.descuento}%')
-        p.drawString(380, y, f'{detalle.cod_producto.precio_venta}')
-        p.drawString(430, y, f'{detalle.total_precio}')       
-    p.drawString(480, 480, f'{detalle.total_precio}')
+    aux = 0
+
+    if not detalles_factura:
+        print('No entro')
+    else:
+        for detalle in detalles_factura:
+            p.drawString(50, y+aux, f'{detalle.cod_producto}')
+            p.drawString(100, y+aux, f'{detalle.cod_producto.descripcion}')
+            p.drawString(300, y+aux, f'{detalle.cantidad}')
+            p.drawString(350, y+aux, f'{detalle.descuento}%')
+            p.drawString(380, y+aux, f'{detalle.cod_producto.precio_venta}')
+            p.drawString(430, y+aux, f'{detalle.total_precio}')
+            aux -= 10       
+        p.drawString(440, 490, f'{detalle.impuesto}')
+        p.drawString(440, 480, f'{detalle.total_precio}')
+
+    # --------------------------- Copia de la factura ------------------------------------------------------
+
+    p.drawString(100, 400, f'{facturas.cliente.razon_social}')
+    p.drawString(100, 375, f'{facturas.cliente.RUC}')
+    p.drawString(100, 360, f'{facturas.cliente.direccion}')
+    p.drawString(100, 345, f'{facturas.cliente.num_telefono}')
+
+    # Agregar contenido al PDF
+    p.drawString(450, 400, f'{facturas.num_factura}')
+    p.drawString(450, 380, f'{facturas.fecha.strftime("%d/%m/%Y")}')
+    p.drawString(450, 360, f'{facturas.cliente}')
+    p.drawString(50, 340, 'Detalles de la factura:')
+    y = 320  # Posición vertical para los detalles
+
+    aux = 0
+
+    if not detalles_factura:
+        print('No entro')
+    else:
+        for detalle in detalles_factura:
+            p.drawString(50, y+aux, f'{detalle.cod_producto}')
+            p.drawString(100, y+aux, f'{detalle.cod_producto.descripcion}')
+            p.drawString(300, y+aux, f'{detalle.cantidad}')
+            p.drawString(350, y+aux, f'{detalle.descuento}%')
+            p.drawString(380, y+aux, f'{detalle.cod_producto.precio_venta}')
+            p.drawString(430, y+aux, f'{detalle.total_precio}')
+            aux -= 10       
+        p.drawString(440, 140, f'{detalle.impuesto}')
+        p.drawString(440, 150, f'{detalle.total_precio}')
+
+    # --------------- Anulacion de factura ----------------------
+
+    if facturas.estado.estado == 'Inactivo':
+        p.rotate(35)
+        p.setFont("Helvetica-Bold", 60)  # Tamaño de fuente grande y negrita
+        p.setFillColorRGB(1, 0, 0)
+        p.drawString(450, 300, "ANULADO")
+        p.drawString(250, 10, "ANULADO")
+        p.rotate(-35)
 
     # Cierra el PDF y envía la respuesta
     p.showPage()
@@ -380,18 +433,13 @@ def cancelar_factura(request, factura_cabecera_id):
 @login_required
 @vendedor_required
 def anular_factura(request, factura_id):
-    # Obtener la factura
     factura_obj = get_object_or_404(factura, id=factura_id)
     
-    # Verificar si la factura ya está anulada
     if factura_obj.estado == 'Anulada':
-        # Si la factura ya está anulada, redirigir a alguna página de error o a la lista de facturas
         return redirect(listar_factura)
     
-    # Cambiar el estado de la factura a "Anulada"
     estado_asignado = get_object_or_404(Estados, id=2)
     factura_obj.estado = estado_asignado
     factura_obj.save()
     
-    # Redirigir a alguna página de confirmación o a la lista de facturas
     return redirect(listar_factura)

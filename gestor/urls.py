@@ -51,7 +51,9 @@ urlpatterns = [
 
     path('menproduc/', producto.menu_producto, name='menu_producto'),
     path('producto/', producto.create_product, name='cargar_roducto'),
-    #path('busc_produc/', producto.buscar_producto, name='buscar_producto'),
+    path('listar_productos/', producto.listar_productos, name='listar_productos'),
+    path('anular_producto/<int:producto_id>/', producto.anular_producto, name='anular_producto'),
+    path('modificar_producto/', producto.modificar_producto, name='modificar_producto'),
 
     path('stock/', inventario.StockListView, name='stock_list'),
     path('menu_iventario/', inventario.menu_iventario, name='menu_iventario'),

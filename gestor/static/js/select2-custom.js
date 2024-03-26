@@ -1,6 +1,5 @@
 $(document).ready(function () {
   $("#id_label_multiple").select2({
-    tags: true,
     templateResult: function (option) {
       return $('<span style="color: black;">' + option.text + "</span>");
     },
