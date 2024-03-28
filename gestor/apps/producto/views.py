@@ -44,10 +44,6 @@ def menu_producto(request):
 @vendedor_required
 def create_product(request):
     fecha_hoy = date.today()
-    marcas = marca.objects.all()
-    catgedorias = categoria.objects.all()
-    proveedores = proveedor.objects.all()
-    estados = Estados.objects.all()
 
     existe = producto.objects.filter(
         cod_producto=request.POST['cod_producto']).exists()
@@ -68,10 +64,6 @@ def create_product(request):
 
         product = get_object_or_404(
             producto, cod_producto=request.POST['cod_producto'])
-
-        inv = inventario(fecha=fecha_hoy, cod_producto=product, descripcion='Primera carga de stock',
-                         tipo_movimiento=True, cantidad=request.POST['cantidad_producto'])
-        inv.save()
 
         mensaje_error = "Producto guardado!!"
         return redirect(listar_productos)
@@ -125,7 +117,7 @@ def modificar_producto(request):
 @login_required
 @vendedor_required
 def listar_productos(request):
-    produc = producto.objects.all()
+    produc = producto.objects.all().order_by('cod_producto')
     user = request.user
 
     marc = marca.objects.all()
@@ -170,12 +162,16 @@ def listar_productos(request):
 @vendedor_required
 def anular_producto(request, producto_id):
     factura_obj = get_object_or_404(producto, id=producto_id)
+    est = get_object_or_404(Estados, id=2)
     
-    if factura_obj.estado == 'Anulada':
-        return redirect(listar_productos)
+    if factura_obj.estado == est:
+        estado_activo = get_object_or_404(Estados, id=1)
+        factura_obj.estado = estado_activo
+        factura_obj.save()
     
-    estado_asignado = get_object_or_404(Estados, id=2)
-    factura_obj.estado = estado_asignado
-    factura_obj.save()
+    else:
+        estado_inactivo = get_object_or_404(Estados, id=2)
+        factura_obj.estado = estado_inactivo
+        factura_obj.save()
     
     return redirect(listar_productos)

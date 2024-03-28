@@ -102,18 +102,117 @@
                     {% endif %}
                           <div class="btn-group">
 
-                            <button id="openModalBtn_mod" class="btn btn-primary" type="button">
-                              <i class="fa-solid fa-print"></i>
+                            <button id="openModalBtn_mod_{{ producto.id }}" class="btn btn-sm btn-primary" type="button" data-id="{{ producto.id }}" 
+                            data-descripcion="{{ producto.cod_producto }}, {{ producto.descripcion }}, {{ producto.precio_venta }}, {{ producto.precio_costo }}, 
+                            {{ producto.cod_proveedor.id }}, {{ producto.cod_categoria.id }}, {{ producto.cod_marca.id }}">
+                              <i class="fa-sharp fa-regular fa-pen-to-square"></i>
                             </button>
+                            
+                            <!-- Modal de modificación -->
+                            <div id="myModal_mod_{{ producto.id }}" class="modal">
+                              <div class="modal-content" style="width: 50%; height: 35%;">
+
+                                <span id="close_{{ producto.id }}" data-id="{{ producto.id }}" class="close">&times;</span>
+
+                                <form action="{% url 'modificar_producto' %}" class="row g-3 mb-2" method="POST">
+                                  {% csrf_token %}
+                        
+                                  <div class="col-ms-12">
+                                    <label for="desc_producto" class="form-label">Cod. Producto:</label>
+                                  </div>
+                                  <div class="col-md-3">
+                                    <input type="text" class="form-control" id="cod_producto_mod_{{ producto.id }}" placeholder="Cod. Producto" name="cod_producto"
+                                      required />
+                                  </div>
+                        
+                                  <div class="col-md-3">
+                                    <select id="marca_producto_mod_{{ producto.id }}" class="form-select" name="marca_producto" required>
+                                      <option selected>Selecciona la marca</option>
+                                      {% for marca in marcas %}
+                                      <option value="{{marca.id}}_{{ producto.id }}">{{marca.descripcion}}</option>
+                                      {% empty %}
+                                      <h4 class="text-center">No hay marcas</h4>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                        
+                        
+                                  <div class="col-md-3">
+                                    <select id="categoria_producto_mod_{{ producto.id }}" class="form-select" name="cod_cateoria" required>
+                                      <option selected>Seleccione la categoria</option>
+                                      {% for categoria in categorias %}
+                                      <option value="{{categoria.id}}">
+                                        {{categoria.descripcion}}
+                                      </option>
+                                      {% empty %}
+                                      <h4 class="text-center">No hay categoria</h4>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                                  <div class="col-md-3">
+                                    <select id="prov_producto_mod_{{ producto.id }}" class="form-select" name="prov_producto" required>
+                                      <option selected>Elige proveedor...</option>
+                                      {% for proveedor in proveedores %}
+                                      <option value="{{proveedor.id}}">
+                                        {{proveedor.razon_social}}
+                                      </option>
+                                      {% empty %}
+                                      <h4 class="text-center">No hay proveedor</h4>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                        
+                                  <div class="col-md-5">
+                                    <label for="desc_producto" class="form-label">Detalle del producto</label>
+                                    <input type="text" class="form-control" id="desc_producto_mod_{{ producto.id }}" placeholder="Describir el producto"
+                                      name="desc_producto" required />
+                                  </div>
+                                  <div class="col-md-2">
+                                    <label for="precio_compra" class="form-label">Precio compra</label>
+                                    <div class="input-group mb-3">
+                                      <input type="text" class="form-control" id="precio_compra_mod_{{ producto.id }}" placeholder="99999999" name="precio_compra"
+                                        style="text-align: right" required />
+                                      <span class="input-group-text">G</span>
+                                    </div>
+                                  </div>
+                        
+                                  <div class="col-md-2">
+                                    <label for="precio_venta" class="form-label">Precio venta</label>
+                                    <div class="input-group mb-3">
+                                      <input type="text" class="form-control" id="precio_venta_mod_{{ producto.id }}" placeholder="99999999" name="precio_venta"
+                                        style="text-align: right" required />
+                                      <span class="input-group-text">G</span>
+                                    </div>
+                                  </div>
+                                  <div class="col-md-2">
+                                    <label for="tipo_factura" class="form-label">Tipo IVA</label>
+                                    <select id="tipo_factura_mod_{{ producto.id }}" class="form-select" name="tipo_factura" disabled>
+                                      <option value="0.1">IVA 10%</option>
+                                      <option value="0.05">IVA 5%</option>
+                                    </select>
+                                  </div>
+                        
+                                  <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">Guardar</button>
+                                  </div>
+                                </form>
+                                
+                              </div>
+                            </div>
 
                             <form id="anular_producto_form_{{ producto.id }}" action="{% url 'anular_producto' producto_id=producto.id %}" method="post">
                               {% csrf_token %}
-                              <button class="btn btn-sm btn-danger" name="id_factura" value="{{ producto.id }}" onclick="return confirmarAnulacion('{{producto.id}}')" {% if producto.estado.estado == 'Inactivo' %}disabled{% endif %}>
-                                <i class="fa-solid fa-ban"></i>
+                                {% if producto.estado.estado == 'Inactivo' %}
+                                  <button class="btn btn-sm btn-success" name="id_factura" value="{{ producto.id }}" onclick="return confirmarAnulacion('{{producto.id}}')">
+                                  <i class="fa-regular fa-circle-check"></i>
+                                {% else %}
+                                  <button class="btn btn-sm btn-danger" name="id_factura" value="{{ producto.id }}" onclick="return confirmarAnulacion('{{producto.id}}')">
+                                  <i class="fa-solid fa-ban"></i>
+                                {% endif %}
                               </button>
                             </form>
                           </div>
-                        </td>
+                        </td>  
                       </tr>
                   {% empty %}
                     <tr>
@@ -169,7 +268,7 @@
 
             <!--     nuevo producto     -->
             <div id="myModal" class="modal">
-              <div class="modal-content">
+              <div class="modal-content" style="width: 50%; height: 35%;">
 
                 <span class="close">&times;</span>
 
@@ -250,10 +349,6 @@
                       <option value="0.05">IVA 5%</option>
                     </select>
                   </div>
-                  <div class="col-md-1">
-                    <label for="cant_product" class="form-label">Catidad</label>
-                    <input type="int" class="form-control" id="cant_product" name="cantidad_producto" required />
-                  </div>
         
                   <div class="col-12">
                     <button type="submit" class="btn btn-primary">Guardar</button>
@@ -264,102 +359,7 @@
             </div>
 
   
-            <!--     nuevo producto     -->
-
-            <div id="myModal_mod" class="modal">
-              <div class="modal-content">
-
-                <span id="close" class="close">&times;</span>
-
-                <form action="{% url 'modificar_producto' %}" class="row g-3 mb-2" method="POST">
-                  {% csrf_token %}
-        
-                  <div class="col-ms-12">
-                    <label for="desc_producto" class="form-label">Cod. Producto:</label>
-                  </div>
-                  <div class="col-md-3">
-                    <input type="text" class="form-control" id="codigoproduct" placeholder="Cod. Producto" name="cod_producto"
-                      required />
-                  </div>
-        
-                  <div class="col-md-3">
-                    <select id="marca_producto" class="form-select" name="marca_producto" required>
-                      <option selected>Selecciona la marca</option>
-                      {% for marca in marcas %}
-                      <option value="{{marca.id}}">{{marca.descripcion}}</option>
-                      {% empty %}
-                      <h4 class="text-center">No hay marcas</h4>
-                      {% endfor %}
-                    </select>
-                  </div>
-        
-        
-                  <div class="col-md-3">
-                    <select id="categoria_producto" class="form-select" name="cod_cateoria" required>
-                      <option selected>Seleccione la categoria</option>
-                      {% for categoria in categorias %}
-                      <option value="{{categoria.id}}">
-                        {{categoria.descripcion}}
-                      </option>
-                      {% empty %}
-                      <h4 class="text-center">No hay categoria</h4>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <select id="prov_producto" class="form-select" name="prov_producto" required>
-                      <option selected>Elige proveedor...</option>
-                      {% for proveedor in proveedores %}
-                      <option value="{{proveedor.id}}">
-                        {{proveedor.razon_social}}
-                      </option>
-                      {% empty %}
-                      <h4 class="text-center">No hay proveedor</h4>
-                      {% endfor %}
-                    </select>
-                  </div>
-        
-                  <div class="col-md-5">
-                    <label for="desc_producto" class="form-label">Detalle del producto</label>
-                    <input type="text" class="form-control" id="desc_producto" placeholder="Describir el producto"
-                      name="desc_producto" required />
-                  </div>
-                  <div class="col-md-2">
-                    <label for="precio_compra" class="form-label">Precio compra</label>
-                    <div class="input-group mb-3">
-                      <input type="text" class="form-control" id="precio_compra" placeholder="99999999" name="precio_compra"
-                        style="text-align: right" required />
-                      <span class="input-group-text">G</span>
-                    </div>
-                  </div>
-        
-                  <div class="col-md-2">
-                    <label for="precio_venta" class="form-label">Precio venta</label>
-                    <div class="input-group mb-3">
-                      <input type="text" class="form-control" id="precio_venta" placeholder="99999999" name="precio_venta"
-                        style="text-align: right" required />
-                      <span class="input-group-text">G</span>
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    <label for="tipo_factura" class="form-label">Tipo IVA</label>
-                    <select id="tipo_factura" class="form-select" name="tipo_factura" disabled>
-                      <option value="0.1">IVA 10%</option>
-                      <option value="0.05">IVA 5%</option>
-                    </select>
-                  </div>
-                  <div class="col-md-1">
-                    <label for="cant_product" class="form-label">Catidad</label>
-                    <input type="int" class="form-control" id="cant_product" name="cantidad_producto" required />
-                  </div>
-        
-                  <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                  </div>
-                </form>
-                
-              </div>
-            </div>
+            
 
           </div>
         </div>
@@ -374,7 +374,7 @@
   <script>
     // Función para mostrar un mensaje de confirmación al intentar anular una factura
     function confirmarAnulacion(idproducto) {
-      if (confirm("¿Estás seguro de que deseas anular este producto?")) {
+      if (confirm("¿Estás seguro de que deseas cambiar el estado de este producto?")) {
         // Si el usuario hace clic en "Aceptar", envía el formulario
         document.getElementById("anular_producto_form_" + idproducto).submit();
       } else {
